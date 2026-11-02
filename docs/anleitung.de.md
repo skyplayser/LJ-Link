@@ -35,12 +35,36 @@ Lade die Datei für deinen Computer von der [Releases-Seite](../../../releases):
 | Mac mit Intel-Prozessor | `LJ-Link-PRO-macos-intel.dmg` |
 | Windows | `LJ-Link-PRO-windows.exe` |
 
-**Mac:** `.dmg` öffnen und *LJ-Link-PRO* in den Ordner *Programme* ziehen. Beim ersten Start mit **Rechtsklick auf das
-Programm → Öffnen** starten (das Programm ist noch nicht von Apple geprüft). Wenn macOS nach dem **lokalen Netzwerk** fragt:
-*Erlauben*.
+Die Installer sind noch nicht bei Apple bzw. Microsoft signiert. Deshalb warnen beide Systeme **einmal** beim ersten Start.
+Das sagt nichts über die Sicherheit aus. So geht es weiter:
 
-**Windows:** `.exe` ausführen. Meldet SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen* (der Installer ist
-noch nicht signiert). Die Frage der Firewall für **private Netzwerke** mit *Zugriff zulassen* bestätigen.
+### Mac: „LJ-Link-PRO“ nicht geöffnet
+
+Meldung: *Apple konnte nicht überprüfen, ob „LJ-Link-PRO“ frei von Schadsoftware ist …*
+
+1. `.dmg` öffnen und *LJ-Link-PRO* in den Ordner **Programme** ziehen.
+2. LJ-Link-PRO einmal starten. Die Warnung erscheint: **Fertig** klicken (nicht *In den Papierkorb legen*).
+3. **Systemeinstellungen** öffnen → **Datenschutz & Sicherheit** → ganz nach unten scrollen.
+4. Bei *„LJ-Link-PRO“ wurde blockiert …* auf **Dennoch öffnen** klicken und mit Passwort oder Touch ID bestätigen.
+5. Im nächsten Fenster noch einmal **Öffnen** wählen.
+6. Fragt macOS nach dem **lokalen Netzwerk**: **Erlauben**. Ohne das findet LJ-Link-PRO keine Player.
+
+Bis macOS 14 reicht auch: Rechtsklick auf die App → *Öffnen* → *Öffnen*. Für Profis per Terminal (danach keine Warnung mehr):
+
+```bash
+xattr -dr com.apple.quarantine /Applications/LJ-Link-PRO.app
+```
+
+### Windows: „Der Computer wurde durch Windows geschützt“
+
+1. `LJ-Link-PRO-windows.exe` starten.
+2. Im blauen SmartScreen-Fenster auf **Weitere Informationen** klicken.
+3. **Trotzdem ausführen** klicken und den Installer durchklicken.
+4. Beim ersten Start fragt die Firewall: **Private Netzwerke** anhaken und **Zugriff zulassen**. Ohne das findet LJ-Link-PRO keine
+   Player.
+
+Firewall-Frage verpasst? *Windows-Sicherheit → Firewall- & Netzwerkschutz → App durch die Firewall zulassen* → LJ-Link-PRO für
+*Privat* anhaken.
 
 ## Netzwerk aufbauen
 

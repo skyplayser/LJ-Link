@@ -81,9 +81,16 @@ Java is included.
 | macOS, Intel | `LJ-Link-PRO-macos-intel.dmg` |
 | Windows | `LJ-Link-PRO-windows.exe` |
 
-The installers are not signed yet. On a Mac, drag the app to *Applications*, then right-click it and choose *Open* the first
-time, and allow *Local Network* access when asked. On Windows, choose *More info* and *Run anyway* if SmartScreen warns, and
-allow the firewall prompt for private networks.
+The installers are not signed yet, so both systems warn once on the first start:
+
+- **macOS** (“LJ-Link-PRO” Not Opened): drag the app to *Applications* and start it once, click *Done*. Open *System Settings →
+  Privacy & Security*, scroll down, click **Open Anyway** next to LJ-Link-PRO and confirm with your password, then *Open*. Allow
+  *Local Network* access when asked. On macOS 14 and older, right-click the app → *Open* also works. Terminal alternative:
+  `xattr -dr com.apple.quarantine /Applications/LJ-Link-PRO.app`.
+- **Windows** (“Windows protected your PC”): click **More info**, then **Run anyway**. When the firewall asks, tick *Private
+  networks* and allow access.
+
+The [website](https://skyplayser.github.io/LJ-Link-PRO/#install) shows the steps in detail.
 
 After the start you get an icon in the menu bar (macOS) or next to the clock (Windows). Click it to open the web interface,
 switch privacy mode or quit.
