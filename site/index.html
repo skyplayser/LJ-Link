@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de" data-lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LJ-Link-PRO – Show your LJ what the sound does</title>
+<meta name="description" content="LJ-Link-PRO zeigt dem Lichtjockey live Waveforms, Position, Cues und Loops aller DJ-Player (Pro DJ Link).">
+<link rel="icon" href="images/logo.png" type="image/png">
+<style>
+  :root {
+    --bg: #07090c; --panel: #12161c; --line: #232a35; --text: #eef2f7; --muted: #9aa6b6;
+    --accent: #3b82f6; --live: #ef4444; --orange: #ff8a00;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: #7fb0ff; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header.top { display: flex; align-items: center; gap: 14px; padding: 16px 0; }
+  header.top img { width: 36px; height: 36px; border-radius: 9px; }
+  header.top b { font-size: 18px; }
+  header.top nav { margin-left: auto; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  header.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+  header.top nav a:hover { color: var(--text); }
+  .lang { background: transparent; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 14px; cursor: pointer; }
+  .hero { text-align: center; padding: 48px 0 24px; }
+  .hero img.logo { width: 132px; height: 132px; border-radius: 30px; box-shadow: 0 10px 40px rgba(59,130,246,.25); }
+  h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.1; margin: 22px 0 10px; letter-spacing: -.02em; }
+  .tag { color: var(--muted); font-size: clamp(18px, 2.4vw, 22px); max-width: 680px; margin: 0 auto 28px; }
+  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn { display: inline-block; padding: 14px 24px; border-radius: 12px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .shot { margin: 36px auto 0; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0,0,0,.6); width: 100%; height: auto; display: block; }
+  section { padding: 56px 0 8px; }
+  h2 { font-size: clamp(26px, 4vw, 36px); margin: 0 0 8px; letter-spacing: -.01em; }
+  .lead { color: var(--muted); margin: 0 0 28px; max-width: 720px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 16px; }
+  .steps { counter-reset: s; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); padding: 0; list-style: none; }
+  .steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px 20px 20px 64px; position: relative; }
+  .steps li::before { content: counter(s); position: absolute; left: 18px; top: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; }
+  .two { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); }
+  @media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
+  .two img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; }
+  .two figcaption { color: var(--muted); font-size: 15px; margin-top: 8px; }
+  figure { margin: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  td, th { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .ok { color: #34d399; } .part { color: #fbbf24; } .plan { color: var(--muted); }
+  .note { border: 1px solid #5c4a14; background: #1e1a0c; color: #f3dc9a; border-radius: 12px; padding: 14px 16px; margin-top: 18px; font-size: 16px; }
+  footer { margin-top: 64px; padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  .live-demo { position: relative; display: inline-block; }
+  .live-demo::after { content: "LIVE"; position: absolute; top: 14px; left: 18px; background: var(--live); color: #fff; font-weight: 800; letter-spacing: .12em; font-size: 12px; padding: 2px 12px; border-radius: 999px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img src="images/logo.png" alt="">
+    <b>LJ-Link-PRO</b>
+    <nav>
+      <a href="#features" data-en="Features">Funktionen</a>
+      <a href="#start" data-en="Quick start">Los geht's</a>
+      <a href="#download" data-en="Download">Download</a>
+      <a href="https://github.com/skyplayser/LJ-Link-PRO">GitHub</a>
+      <button class="lang" id="lang" aria-label="Language">EN</button>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <img class="logo" src="images/logo.png" alt="LJ-Link-PRO logo">
+    <h1>LJ-Link-PRO</h1>
+    <p class="tag" data-en="Show your LJ what the sound does. Live waveforms, positions, cues and loops of every DJ player.">Show your LJ what the sound does. Live Waveforms, Positionen, Cues und Loops aller DJ-Player.</p>
+    <div class="cta">
+      <a class="btn primary" href="#download" data-en="Download">Herunterladen</a>
+      <a class="btn" href="#start" data-en="How it works">So funktioniert's</a>
+    </div>
+    <img class="shot" src="images/waveform.png" alt="LJ-Link-PRO mit drei Playern und Waveforms">
+  </div>
+
+  <section id="features">
+    <h2 data-en="Built for the lighting jockey">Gebaut für den Lichtjockey</h2>
+    <p class="lead" data-en="See at a glance what the DJ loads and where each track is, to time drops and transitions." >Auf einen Blick sehen, was der DJ lädt und wo jeder Track steht, um Drops und Übergänge zu timen.</p>
+    <div class="grid">
+      <div class="card"><h3 data-en="All players at once">Alle Player gleichzeitig</h3><p data-en="Stacked like the CDJ-3000 display: cover, title, time with milliseconds, tempo, BPM and key." >Untereinander im Stil des CDJ-3000-Displays: Cover, Titel, Zeit mit Millisekunden, Tempo, BPM und Key.</p></div>
+      <div class="card"><h3 data-en="Live waveforms">Live-Waveforms</h3><p data-en="Scrolling detail waveform and whole-track overview with hot cues, memory cues, orange loops and the beat grid.">Scrollende Detail-Waveform und Track-Übersicht mit Hot Cues, Memory-Cues, orangen Loops und Beat-Raster.</p></div>
+      <div class="card"><h3 data-en="LIVE frame">LIVE-Rahmen</h3><p data-en="The deck that is on air gets a red LIVE frame, so you never light the wrong track.">Der Player, der auf Sendung ist, bekommt einen roten LIVE-Rahmen. So leuchtest du nie den falschen Track an.</p></div>
+      <div class="card"><h3 data-en="Everything the player reports">Alles, was der Player meldet</h3><p data-en="Click a player to see device, status, tempo, loop, media, track, position, cues and the raw packet.">Klick auf einen Player zeigt Gerät, Status, Tempo, Loop, Medium, Track, Position, Cues und das rohe Datenpaket.</p></div>
+      <div class="card"><h3 data-en="Light desk link">Lichtpult-Link</h3><p data-en="Sends the tempo as OSC to GrandMA (2 / 3 / onPC) or Daslight, so effects run in time.">Sendet das Tempo per OSC an GrandMA (2 / 3 / onPC) oder Daslight, damit Effekte im Takt laufen.</p></div>
+      <div class="card"><h3 data-en="Mixer tab">Reiter Mixer</h3><p data-en="Channel strips with ON AIR, fader and EQ where the source provides them. Pro DJ Link only reports on air.">Kanäle des Mixers mit ON AIR, Fader und EQ, soweit die Quelle sie liefert. Pro DJ Link meldet nur ON AIR.</p></div>
+      <div class="card"><h3 data-en="Tablet and day mode">Tablet und Tag-Modus</h3><p data-en="Open the same page on a tablet in the network. Zoom, RGB or blue waveforms, day and night mode.">Dieselbe Seite auf dem Tablet im Netzwerk öffnen. Zoom, RGB oder Blau, Tag- und Nacht-Modus.</p></div>
+      <div class="card"><h3 data-en="Simple for everyone">Einfach für alle</h3><p data-en="Automatic search and a guided check that explains what to change in the network. Demo mode without hardware.">Automatische Suche und eine geführte Prüfung, die erklärt, was im Netzwerk zu ändern ist. Demo-Modus ohne Hardware.</p></div>
+      <div class="card"><h3 data-en="Passive and private">Passiv und privat</h3><p data-en="Only listens. Never sends sync, master, tempo or fader commands. No telemetry, no cloud.">Hört nur zu. Sendet nie Sync-, Master-, Tempo- oder Fader-Befehle. Keine Telemetrie, keine Cloud.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="two">
+      <figure><img src="images/player-details.png" alt=""><figcaption data-en="Player details: everything the interface reports.">Player-Details: alles, was die Schnittstelle meldet.</figcaption></figure>
+      <figure><img src="images/waveform-day.png" alt=""><figcaption data-en="Day mode for bright rooms.">Tag-Modus für helle Räume.</figcaption></figure>
+      <figure><img src="images/mixer.png" alt=""><figcaption data-en="Mixer tab (simulated values in demo mode).">Reiter Mixer (im Demo-Modus mit simulierten Werten).</figcaption></figure>
+      <figure><img src="images/settings.png" alt=""><figcaption data-en="Settings and light desk link.">Einstellungen und Lichtpult-Link.</figcaption></figure>
+      <figure><img src="images/tablet.png" alt=""><figcaption data-en="The same view on a tablet.">Dieselbe Ansicht auf dem Tablet.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="start">
+    <h2 data-en="Quick start">Los geht's</h2>
+    <ol class="steps">
+      <li><b data-en="Connect">Verbinden</b><br><span data-en="Computer, players and mixer to the same switch with network cables. Turn Wi-Fi off on the computer.">Computer, Player und Mixer per Netzwerkkabel an denselben Switch. WLAN am Computer ausschalten.</span></li>
+      <li><b data-en="Install and start">Installieren und starten</b><br><span data-en="Install LJ-Link-PRO. An icon appears in the menu bar or next to the clock.">LJ-Link-PRO installieren. Ein Symbol erscheint in der Menüleiste oder neben der Uhr.</span></li>
+      <li><b data-en="Search">Suchen</b><br><span data-en="Click “Automatisch suchen”. Nothing found? “Manuell einrichten” explains what to fix.">„Automatisch suchen“ klicken. Nichts gefunden? „Manuell einrichten“ erklärt, was zu tun ist.</span></li>
+    </ol>
+    <p><a href="https://github.com/skyplayser/LJ-Link-PRO/blob/main/docs/anleitung.de.md" data-en="Read the full guide (German)">Zur ausführlichen Anleitung</a></p>
+  </section>
+
+  <section id="download">
+    <h2 data-en="Download">Download</h2>
+    <p class="lead" data-en="Installers for macOS and Windows. Everything is included, no Java installation needed.">Installer für macOS und Windows. Alles ist enthalten, Java muss nicht installiert werden.</p>
+    <div class="grid">
+      <div class="card"><h3>macOS</h3><p>Apple Silicon (M1+) · Intel<br><a class="btn primary" style="margin-top:12px" href="https://github.com/skyplayser/LJ-Link-PRO/releases" data-en="Releases (.dmg)">Releases (.dmg)</a></p></div>
+      <div class="card"><h3>Windows</h3><p>Windows 10 / 11<br><a class="btn primary" style="margin-top:12px" href="https://github.com/skyplayser/LJ-Link-PRO/releases" data-en="Releases (.exe)">Releases (.exe)</a></p></div>
+    </div>
+    <div class="note" data-en="The installers are not signed yet. macOS: right-click the app, then Open. Windows SmartScreen: More info, then Run anyway.">Die Installer sind noch nicht signiert. macOS: Rechtsklick auf das Programm, dann „Öffnen“. Windows SmartScreen: „Weitere Informationen“, dann „Trotzdem ausführen“.</div>
+  </section>
+
+  <section>
+    <h2 data-en="Compatibility">Kompatibilität</h2>
+    <table>
+      <tr><th data-en="Device">Gerät</th><th>Status</th></tr>
+      <tr><td>CDJ-3000</td><td class="ok" data-en="tested">getestet</td></tr>
+      <tr><td>CDJ-2000NXS2</td><td class="ok" data-en="tested">getestet</td></tr>
+      <tr><td>DJM-2000NXS</td><td class="part" data-en="detected, ON AIR depends on the mixer">erkannt, ON AIR abhängig vom Mixer</td></tr>
+      <tr><td>CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-A9, DJM-V10</td><td class="plan" data-en="expected to work, not tested">sollte funktionieren, nicht getestet</td></tr>
+      <tr><td>Denon Prime 4+ (StageLinQ)</td><td class="part" data-en="tested: title, tempo, position, faders; waveforms follow">getestet: Titel, Tempo, Position, Fader; Waveforms folgen</td></tr>
+    </table>
+    <p class="lead" style="margin-top:14px" data-en="Tracks must be analysed and exported with rekordbox. Streaming tracks have no waveform data.">Tracks müssen mit rekordbox analysiert und exportiert sein. Streaming-Tracks haben keine Waveform-Daten.</p>
+  </section>
+
+  <footer>
+    <p data-en="Built on beat-link by Deep Symmetry. LJ-Link-PRO is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight. All product names are trademarks of their owners.">Gebaut auf beat-link von Deep Symmetry. LJ-Link-PRO ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting oder Daslight. Alle Produktnamen sind Marken ihrer Inhaber.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link-PRO">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link-PRO/blob/main/THIRD_PARTY_NOTICES.md">Third party notices</a></p>
+  </footer>
+</div>
+<script>
+  // German is the default; the button switches every element that has a data-en text.
+  (function () {
+    var nodes = document.querySelectorAll("[data-en]");
+    nodes.forEach(function (n) { n.setAttribute("data-de", n.textContent); });
+    function setLang(l) {
+      document.documentElement.setAttribute("data-lang", l);
+      document.documentElement.lang = l;
+      nodes.forEach(function (n) { n.textContent = n.getAttribute(l === "en" ? "data-en" : "data-de"); });
+      document.getElementById("lang").textContent = l === "en" ? "DE" : "EN";
+      try { localStorage.setItem("lj-lang", l); } catch (e) { /* ignore */ }
+    }
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* ignore */ }
+    var start = saved || ((navigator.language || "de").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (start === "en") setLang("en");
+    document.getElementById("lang").onclick = function () {
+      setLang(document.documentElement.getAttribute("data-lang") === "en" ? "de" : "en");
+    };
+  })();
+</script>
+</body>
+</html>

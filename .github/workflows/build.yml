@@ -1,0 +1,80 @@
+name: Build installers
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  installer:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (Apple Silicon)
+            os: macos-14
+            suffix: macos-arm64
+            ext: dmg
+          - name: macOS (Intel)
+            os: macos-15-intel
+            suffix: macos-intel
+            ext: dmg
+          - name: Windows
+            os: windows-latest
+            suffix: windows
+            ext: exe
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # jpackage needs WiX 3 to build .exe installers.
+      - name: Install WiX (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command candle.exe -ErrorAction SilentlyContinue)) {
+            choco install wixtoolset --no-progress -y
+            "C:\Program Files (x86)\WiX Toolset v3.14\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          }
+
+      - name: Build and test
+        run: ./gradlew --no-daemon build
+
+      - name: Package installer
+        run: ./gradlew --no-daemon packageApp
+
+      - name: Name installer
+        shell: bash
+        run: |
+          f=$(ls build/installers/*.${{ matrix.ext }})
+          mv "$f" "build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LJ-Link-PRO-${{ matrix.suffix }}
+          path: build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}
+
+  release:
+    name: Publish release
+    needs: installer
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --generate-notes

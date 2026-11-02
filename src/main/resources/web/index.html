@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LJ-Link-PRO</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <img class="logo" src="logo.svg" alt="">
+  <div class="brand">LJ-Link-PRO</div>
+  <nav class="tabs">
+    <button class="tab active" id="tab-waveform">WAVEFORM</button>
+    <button class="tab" id="tab-mixer">MIXER</button>
+    <button class="tab" id="tab-link">LINK</button>
+    <button class="tab" id="tab-bpm">SEND BPM</button>
+  </nav>
+  <div id="status" class="status"><span class="dot"></span><span id="status-text">Connecting …</span></div>
+  <span id="privacy-badge" class="privacy-badge hidden" title="Title, artist, album and cover are hidden">PRIVACY</span>
+  <div class="spacer"></div>
+  <button id="btn-fullscreen" class="ghost" title="Full screen">Full screen</button>
+  <button id="btn-settings" class="ghost menu" aria-haspopup="dialog" aria-label="Settings">&#9776;</button>
+</header>
+
+<div id="toolbar" class="hidden">
+  <div class="spacer"></div>
+  <div class="zoom-ctl">
+    <button id="zoom-out" class="tool" aria-label="Zoom out">&minus;</button>
+    <span class="zoom-text">ZOOM <span id="zoom-value"></span></span>
+    <button id="zoom-in" class="tool" aria-label="Zoom in">+</button>
+  </div>
+  <button id="btn-view" class="tool wide">VIEW <span id="view-value"></span></button>
+</div>
+
+<main>
+  <!-- Start -->
+  <section id="view-welcome" class="view">
+    <img class="hero-logo" src="logo.svg" alt="LJ-Link-PRO">
+    <h1>What are the DJs playing right now?</h1>
+    <p class="lead">LJ-Link-PRO shows live which track is playing on every player and where it is.</p>
+    <div id="remote-note" class="note hidden">
+      This view is read-only. To start, open LJ-Link-PRO on the computer itself.
+    </div>
+    <div id="controls">
+      <button id="btn-auto" class="primary big">Search automatically</button>
+      <p class="hint">Computer and DJ devices must be connected to the same network switch.</p>
+      <div class="row">
+        <button id="btn-manual" class="secondary">Not working? Set up manually</button>
+        <button id="btn-demo" class="link">Watch demo (without devices)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section id="view-search" class="view hidden">
+    <div class="spinner" aria-hidden="true"></div>
+    <h1 id="search-title">Searching …</h1>
+    <p class="lead" id="search-message"></p>
+    <ul id="found-list" class="found"></ul>
+    <div id="search-help" class="note hidden">
+      <strong>Nothing found yet?</strong>
+      Check: are the players switched on? Is the network cable plugged into the player and the switch? Is Wi-Fi turned off on the computer?
+      <div class="row"><button id="btn-help-manual" class="secondary">Set up manually</button></div>
+    </div>
+    <div class="row"><button id="btn-cancel" class="secondary">Cancel</button></div>
+  </section>
+
+  <!-- Manual -->
+  <section id="view-manual" class="view hidden">
+    <h1>Set up manually</h1>
+    <p class="lead">We check step by step why the search finds nothing.</p>
+
+    <div class="card">
+      <h2><span class="step">1</span> Which device do you have?</h2>
+      <select id="model">
+        <option value="cdj3000">Pioneer CDJ-3000</option>
+        <option value="nxs2">Pioneer CDJ-2000NXS2 / NXS</option>
+        <option value="xdj1000">Pioneer XDJ-1000MK2 / XDJ-XZ</option>
+        <option value="djm">Pioneer DJM mixer (900/2000/V10/A9)</option>
+        <option value="denon">Denon Prime 4+, SC6000, Prime Go (StageLinQ)</option>
+      </select>
+      <p id="model-note" class="hint"></p>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span> IP address of the device</h2>
+      <p class="hint">On the player: Menu → Utility → Link Info (or Network). The IP address is shown there, e.g. 192.168.1.20.</p>
+      <div class="ip-row">
+        <input id="ip" inputmode="decimal" placeholder="192.168.1.20" autocomplete="off">
+        <button id="btn-check" class="primary">Check connection</button>
+      </div>
+      <ul id="check-result" class="checks"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span> This computer</h2>
+      <ul id="adapters" class="adapters"></ul>
+    </div>
+
+    <div class="row">
+      <button id="btn-retry-auto" class="primary">Search automatically again</button>
+      <button id="btn-manual-back" class="secondary">Back</button>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <section id="view-error" class="view hidden">
+    <h1>That did not work</h1>
+    <p class="lead" id="error-message"></p>
+    <div class="row">
+      <button id="btn-error-retry" class="primary">Try again</button>
+      <button id="btn-error-manual" class="secondary">Set up manually</button>
+    </div>
+  </section>
+
+  <!-- Monitor -->
+  <section id="view-monitor" class="view wide hidden">
+    <div id="lan" class="hint"></div>
+    <div id="decks"></div>
+    <div id="mixer-view" class="hidden">
+      <div id="mixer-list"></div>
+    </div>
+    <p id="no-decks" class="hint hidden">Waiting for player data …</p>
+  </section>
+</main>
+<div id="settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="sheet">
+    <h2 id="settings-title">Settings</h2>
+
+    <div class="setting">
+      <label for="zoom">Zoom <span id="zoom-label" class="muted"></span></label>
+      <input id="zoom" type="range" min="4" max="40" step="1">
+      <div class="hint">Seconds of the detail waveform that are visible. Smaller value = closer.</div>
+    </div>
+
+    <div class="setting">
+      <div class="label">Waveform colors</div>
+      <div class="seg" id="seg-mode">
+        <button data-value="rgb">RGB</button>
+        <button data-value="blue">Blue</button>
+      </div>
+      <div class="hint">RGB shows the colors of the player (bass, mids, highs). Blue is the classic look.</div>
+    </div>
+
+    <div class="setting">
+      <div class="label">Display</div>
+      <div class="seg" id="seg-theme">
+        <button data-value="day">Day</button>
+        <button data-value="night">Night</button>
+      </div>
+    </div>
+
+    <div class="setting hidden" id="devices-setting">
+      <div class="label">Devices</div>
+      <div id="device-list"></div>
+      <div class="hint">Everything that is found is shown. Untick a device to hide its players, for example when several floors are in the network. A new device that appears later is added automatically.</div>
+    </div>
+
+    <div class="setting">
+      <label for="lang-select">Language</label>
+      <select id="lang-select">
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div>
+
+    <div class="setting" id="privacy-setting">
+      <div class="label">Privacy mode</div>
+      <label class="check"><input type="checkbox" id="privacy-box" disabled> <span id="privacy-text"></span></label>
+      <div class="hint">Hides title, artist, album and cover. It can only be changed with the program icon: menu bar (Mac) or taskbar next to the clock (Windows) → click the icon → tick “Privacy mode”. It cannot be changed in the web interface, not even from a tablet.</div>
+    </div>
+
+    <div class="setting" id="link-setting">
+      <label for="link-target">Light desk link (send tempo)</label>
+      <select id="link-target">
+        <option value="off">Off</option>
+        <option value="grandma">GrandMA (2 / 3 / onPC)</option>
+        <option value="daslight">Daslight</option>
+        <option value="osc">Custom OSC target</option>
+      </select>
+      <div id="link-fields" class="hidden">
+        <div class="ip-row">
+          <input id="link-host" placeholder="IP address of the desk, e.g. 192.168.1.50" inputmode="decimal" autocomplete="off">
+          <input id="link-port" placeholder="Port" inputmode="numeric" style="max-width:110px" autocomplete="off">
+        </div>
+        <div class="row" id="link-scan-row">
+          <button id="link-scan" class="secondary">Search for the desk</button>
+        </div>
+        <div id="link-found" class="hint"></div>
+        <input id="link-text" autocomplete="off" style="margin-top:8px">
+        <div class="hint" id="link-hint"></div>
+        <div class="row">
+          <button id="link-save" class="primary">Save</button>
+          <button id="link-test" class="secondary">Send test (120 BPM)</button>
+        </div>
+        <div class="hint" id="link-status"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="btn-settings-close" class="primary">Done</button>
+      <button id="btn-stop" class="secondary hidden">Disconnect</button>
+    </div>
+  </div>
+</div>
+<div id="bpm" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="bpm-title">
+  <div class="sheet">
+    <h2 id="bpm-title">Send BPM</h2>
+    <div id="bpm-state" class="note"></div>
+    <div id="bpm-list" class="bpm-list"></div>
+    <div class="hint">Auto takes the tempo master; without a master the deck that is on air and playing. Manual always takes the chosen deck, even when another one is live.</div>
+    <div class="row">
+      <button id="bpm-close" class="primary">Done</button>
+      <button id="bpm-setup" class="secondary">Light desk settings</button>
+    </div>
+  </div>
+</div>
+<div id="info" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="info-title">
+  <div class="sheet info-sheet">
+    <div class="info-head">
+      <h2 id="info-title">Player</h2>
+      <span id="info-live" class="muted"></span>
+      <div class="spacer"></div>
+      <button id="info-close" class="secondary">Close</button>
+    </div>
+    <div id="info-body"></div>
+  </div>
+</div>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

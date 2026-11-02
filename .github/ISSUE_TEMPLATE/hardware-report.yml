@@ -1,0 +1,46 @@
+name: Hardware report
+description: Tell us which devices you tested and what worked
+title: "Hardware: <models>"
+labels: ["hardware"]
+body:
+  - type: input
+    id: devices
+    attributes:
+      label: Players and mixers
+      description: Models and firmware versions, for example "CDJ-3000 fw 3.22, CDJ-2000NXS2 fw 1.85, DJM-2000NXS"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Overall result
+      options:
+        - Works fully
+        - Works partly
+        - Devices found, no data
+        - Devices not found
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What worked
+      options:
+        - label: Devices found by the automatic search
+        - label: Title, artist and cover
+        - label: Waveform (overview)
+        - label: Detail waveform scrolls with the track
+        - label: Hot cues and memory cues
+        - label: Loops
+        - label: ON AIR frame follows the mixer
+        - label: Position follows scratching
+  - type: input
+    id: system
+    attributes:
+      label: Computer
+      description: macOS or Windows version, and the LJ-Link-PRO version
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: What did not work, error messages, how the network is built. Please do not post private data.

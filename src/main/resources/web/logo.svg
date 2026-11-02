@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LJ-Link-PRO">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18202d"/>
+      <stop offset="1" stop-color="#06080c"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffe26e" stop-opacity="1"/>
+      <stop offset="1" stop-color="#ffe26e" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cb7ff"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- light beams fanning out of the waveform -->
+  <g fill="url(#beam)" opacity=".88">
+    <polygon points="76,350 116,350 92,70 28,70"/>
+    <polygon points="136,290 176,290 164,70 106,70"/>
+    <polygon points="196,210 236,210 226,70 186,70"/>
+    <polygon points="256,270 296,270 280,70 232,70"/>
+    <polygon points="316,170 356,170 356,70 310,70"/>
+    <polygon points="376,310 416,310 424,70 360,70"/>
+    <polygon points="436,360 476,360 490,70 420,70"/>
+  </g>
+  <!-- waveform bars -->
+  <g fill="url(#bar)">
+    <rect x="76" y="350" width="40" height="70" rx="14"/>
+    <rect x="136" y="290" width="40" height="130" rx="14"/>
+    <rect x="196" y="210" width="40" height="210" rx="14"/>
+    <rect x="256" y="270" width="40" height="150" rx="14"/>
+    <rect x="316" y="170" width="40" height="250" rx="14"/>
+    <rect x="376" y="310" width="40" height="110" rx="14"/>
+    <rect x="436" y="360" width="40" height="60" rx="14"/>
+  </g>
+</svg>

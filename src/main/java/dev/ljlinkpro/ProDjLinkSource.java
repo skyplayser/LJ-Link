@@ -1,0 +1,317 @@
+package dev.ljlinkpro;
+
+import org.deepsymmetry.beatlink.CdjStatus;
+import org.deepsymmetry.beatlink.DeviceAnnouncement;
+import org.deepsymmetry.beatlink.DeviceAnnouncementListener;
+import org.deepsymmetry.beatlink.DeviceFinder;
+import org.deepsymmetry.beatlink.DeviceUpdate;
+import org.deepsymmetry.beatlink.VirtualCdj;
+import org.deepsymmetry.beatlink.data.ArtFinder;
+import org.deepsymmetry.beatlink.data.BeatGridFinder;
+import org.deepsymmetry.beatlink.data.CrateDigger;
+import org.deepsymmetry.beatlink.data.MetadataFinder;
+import org.deepsymmetry.beatlink.data.TimeFinder;
+import org.deepsymmetry.beatlink.data.TrackMetadata;
+import org.deepsymmetry.beatlink.data.WaveformFinder;
+import org.deepsymmetry.beatlink.data.WaveformListener;
+import org.deepsymmetry.beatlink.data.WaveformDetailUpdate;
+import org.deepsymmetry.beatlink.data.WaveformPreviewUpdate;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Passive Pro DJ Link source built on beat-link. First only listens for device announcements
+ * (so searching never blocks), then joins as a virtual CDJ once something was found.
+ * Sends no sync, master, tempo or fader commands.
+ */
+final class ProDjLinkSource implements DeckSource {
+    private static final int NORMAL_PITCH = 0x100000;
+
+    private final Hub.Scope hub;
+    private volatile boolean stopped;
+    private Thread thread;
+    private ScheduledExecutorService positions;
+    private boolean virtualCdjStarted;
+
+    private final DeviceAnnouncementListener announcementListener = new DeviceAnnouncementListener() {
+        @Override
+        public void deviceFound(DeviceAnnouncement a) {
+            publishDevices();
+        }
+
+        @Override
+        public void deviceLost(DeviceAnnouncement a) {
+            if (a.getDeviceNumber() >= 1 && a.getDeviceNumber() <= 6) {
+                hub.removeDeck(a.getDeviceNumber()); // the player was switched off or unplugged
+            }
+            publishDevices();
+        }
+    };
+
+    ProDjLinkSource(Hub.Scope hub) {
+        this.hub = hub;
+        hub.setSource(this);
+    }
+
+    @Override
+    public void start() {
+        thread = new Thread(this::run, "prodjlink-search");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void publishDevices() {
+        if (stopped) {
+            return;
+        }
+        try {
+            List<Hub.DeviceInfo> list = DeviceFinder.getInstance().getCurrentDevices().stream()
+                    .sorted(Comparator.comparingInt(DeviceAnnouncement::getDeviceNumber))
+                    .map(a -> new Hub.DeviceInfo(a.getDeviceNumber(), a.getDeviceName(), a.getAddress().getHostAddress()))
+                    .toList();
+            hub.setDevices(list);
+        } catch (IllegalStateException e) {
+            // DeviceFinder was stopped while an announcement was still being delivered.
+        }
+    }
+
+    private void run() {
+        try {
+            hub.setState("searching", "live", "Searching for DJ devices on the network …");
+            DeviceFinder finder = DeviceFinder.getInstance();
+            finder.addDeviceAnnouncementListener(announcementListener);
+            finder.start();
+
+            while (!stopped && finder.getCurrentDevices().isEmpty()) {
+                Thread.sleep(500);
+            }
+            if (stopped) {
+                return;
+            }
+            // Give the remaining devices a moment to announce themselves before we join the network.
+            hub.setMessage("Device found – connecting …");
+            Thread.sleep(2500);
+            if (stopped) {
+                return;
+            }
+
+            VirtualCdj vcdj = VirtualCdj.getInstance();
+            vcdj.setUseStandardPlayerNumber(false);
+            vcdj.addUpdateListener(this::onUpdate);
+            if (!vcdj.start()) {
+                hub.setState("error", "live", "Connection to the DJ network failed. Please try again.");
+                return;
+            }
+            virtualCdjStarted = true;
+
+            MetadataFinder.getInstance().addTrackMetadataListener(u -> onMetadata(u.player, u.metadata));
+            MetadataFinder.getInstance().start();
+            CrateDigger.getInstance().start();
+            ArtFinder.getInstance().addAlbumArtListener(u -> {
+                java.nio.ByteBuffer raw = u.art == null ? null : u.art.getRawBytes();
+                byte[] bytes = null;
+                if (raw != null) {
+                    bytes = new byte[raw.remaining()];
+                    raw.get(bytes);
+                }
+                hub.deck(u.player).setArt(bytes);
+            });
+            ArtFinder.getInstance().start();
+            BeatGridFinder.getInstance().addBeatGridListener(u -> {
+                var grid = u.beatGrid;
+                if (grid == null) {
+                    hub.deck(u.player).setBeats(null, null);
+                    return;
+                }
+                int[] times = new int[grid.beatCount];
+                byte[] bars = new byte[grid.beatCount];
+                for (int i = 0; i < grid.beatCount; i++) {
+                    times[i] = (int) grid.getTimeWithinTrack(i + 1);
+                    bars[i] = (byte) grid.getBeatWithinBar(i + 1);
+                }
+                hub.deck(u.player).setBeats(times, bars);
+            });
+            BeatGridFinder.getInstance().start();
+            WaveformFinder wf = WaveformFinder.getInstance();
+            wf.setFindDetails(true);
+            wf.setPreferredStyle(WaveformFinder.WaveformStyle.RGB);
+            wf.addWaveformListener(new WaveformListener() {
+                @Override
+                public void previewChanged(WaveformPreviewUpdate u) {
+                    Deck dk = hub.deck(u.player);
+                    if (u.preview != null) {
+                        dk.previewStyle = WaveformEncoder.styleName(u.preview.style);
+                    }
+                    dk.setWaveform(u.preview == null ? null : WaveformEncoder.encodePreview(u.preview));
+                }
+
+                @Override
+                public void detailChanged(WaveformDetailUpdate u) {
+                    Deck dk = hub.deck(u.player);
+                    if (u.detail != null) {
+                        dk.detailStyle = WaveformEncoder.styleName(u.detail.style);
+                    }
+                    dk.setDetail(u.detail == null ? null : WaveformEncoder.encodeDetail(u.detail));
+                }
+            });
+            wf.start();
+            TimeFinder.getInstance().start();
+
+            positions = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "prodjlink-positions");
+                t.setDaemon(true);
+                return t;
+            });
+            positions.scheduleAtFixedRate(this::pollPositions, 20, 20, TimeUnit.MILLISECONDS);
+
+            hub.setState("monitoring", "live", "Connected");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            if (!stopped) {
+                hub.setState("error", "live", "Error: " + e.getMessage());
+            }
+        }
+    }
+
+    private void onUpdate(DeviceUpdate update) {
+        if (update instanceof org.deepsymmetry.beatlink.MixerStatus m) {
+            hub.setMixer(java.util.Map.of("present", true, "name", m.getDeviceName(), "number", m.getDeviceNumber(),
+                    "address", m.getAddress().getHostAddress(), "bpm", m.getBpm() / 100.0, "master", m.isTempoMaster(),
+                    "simulated", false, "levels", false));
+            return;
+        }
+        if (!(update instanceof CdjStatus s)) {
+            return;
+        }
+        Deck d = hub.deck(s.getDeviceNumber());
+        d.name = s.getDeviceName();
+        boolean loaded = s.getTrackType() != CdjStatus.TrackType.NO_TRACK && s.getRekordboxId() != 0;
+        if (!loaded && d.hasTrack) {
+            d.clearTrack();
+        }
+        d.hasTrack = loaded;
+        d.playing = s.isPlaying();
+        d.onAir = s.isOnAir();
+        d.master = s.isTempoMaster();
+        d.synced = s.isSynced();
+        // An empty player reports the placeholder 655.35 BPM; show nothing instead of that.
+        boolean bpmKnown = loaded && s.getBpm() > 0 && s.getBpm() != 0xFFFF;
+        d.effectiveBpm = bpmKnown ? s.getEffectiveTempo() : 0;
+        d.speed = s.getPitch() / (double) NORMAL_PITCH;
+        // Only the CDJ-3000 sends its exact position several times per second; older players are interpolated between beats.
+        d.coarsePosition = d.name == null || !d.name.contains("3000");
+        d.pitchPercent = loaded ? (s.getPitch() - NORMAL_PITCH) * 100.0 / NORMAL_PITCH : 0;
+        d.trackNumber = s.getTrackNumber();
+        d.loopBeats = s.isLooping() ? s.getActiveLoopBeats() : 0;
+        d.loop = s.isLooping() && s.getLoopEnd() > s.getLoopStart() ? new long[] {s.getLoopStart(), s.getLoopEnd()} : null;
+    }
+
+    private void onMetadata(int player, TrackMetadata md) {
+        Deck d = hub.deck(player);
+        if (md == null) {
+            d.clearTrack();
+            return;
+        }
+        d.title = md.getTitle();
+        d.artist = md.getArtist() == null ? null : md.getArtist().label;
+        d.key = md.getKey() == null ? null : md.getKey().label;
+        d.trackBpm = md.getTempo() / 100.0;
+        d.durationMs = md.getDuration() * 1000L;
+        d.cues = cuesOf(md);
+    }
+
+    /** Hot cues (A-H, hot &gt; 0) and memory points (hot == 0) with their time in ms and an optional color. */
+    private static List<java.util.Map<String, Object>> cuesOf(TrackMetadata md) {
+        List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        if (md.getCueList() == null) {
+            return out;
+        }
+        for (var e : md.getCueList().entries) {
+            java.awt.Color c = e.embeddedColor != null ? e.embeddedColor : e.rekordboxColor;
+            java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("t", e.cueTime);
+            m.put("hot", e.hotCueNumber);
+            m.put("loop", e.isLoop);
+            m.put("loopEnd", e.isLoop ? e.loopTime : 0);
+            m.put("color", c == null ? null : String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue()));
+            out.add(m);
+        }
+        return out;
+    }
+
+    /** Paused players send no moving position; the last reported beat number and the beat grid still give it. */
+    private static long positionFromBeatGrid(int player) {
+        DeviceUpdate u = VirtualCdj.getInstance().getLatestStatusFor(player);
+        if (u instanceof CdjStatus s && BeatGridFinder.getInstance().isRunning()) {
+            var grid = BeatGridFinder.getInstance().getLatestBeatGridFor(player);
+            int beat = s.getBeatNumber();
+            if (grid != null && beat > 0 && beat <= grid.beatCount) {
+                return grid.getTimeWithinTrack(beat);
+            }
+        }
+        return -1;
+    }
+
+    private void pollPositions() {
+        try {
+            for (DeviceAnnouncement a : DeviceFinder.getInstance().getCurrentDevices()) {
+                int n = a.getDeviceNumber();
+                if (n < 1 || n > 6) {
+                    continue; // mixers and other non-player devices
+                }
+                Deck d = hub.deck(n);
+                d.address = a.getAddress().getHostAddress();
+                if (d.name.isEmpty()) {
+                    d.name = a.getDeviceName();
+                }
+                long t = TimeFinder.getInstance().isRunning() ? TimeFinder.getInstance().getTimeFor(n) : -1;
+                if (t < 0) {
+                    t = positionFromBeatGrid(n);
+                }
+                d.samplePosition(t);
+            }
+        } catch (RuntimeException e) {
+            // Position polling must never take the monitor down.
+        }
+    }
+
+    @Override
+    public java.util.List<java.util.Map<String, Object>> info(int deck) {
+        return DeckInspector.sections(deck);
+    }
+
+    @Override
+    public void stop() {
+        stopped = true;
+        if (thread != null) {
+            thread.interrupt();
+        }
+        if (positions != null) {
+            positions.shutdownNow();
+        }
+        stopQuietly(() -> TimeFinder.getInstance().stop());
+        stopQuietly(() -> WaveformFinder.getInstance().stop());
+        stopQuietly(() -> BeatGridFinder.getInstance().stop());
+        stopQuietly(() -> ArtFinder.getInstance().stop());
+        stopQuietly(() -> CrateDigger.getInstance().stop());
+        stopQuietly(() -> MetadataFinder.getInstance().stop());
+        if (virtualCdjStarted) {
+            stopQuietly(() -> VirtualCdj.getInstance().stop());
+        }
+        stopQuietly(() -> DeviceFinder.getInstance().removeDeviceAnnouncementListener(announcementListener));
+        stopQuietly(() -> DeviceFinder.getInstance().stop());
+    }
+
+    private static void stopQuietly(Runnable r) {
+        try {
+            r.run();
+        } catch (RuntimeException e) {
+            System.err.println("Stop step failed: " + e);
+        }
+    }
+}
