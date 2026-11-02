@@ -12,8 +12,8 @@
   <img class="logo" src="logo.svg" alt="">
   <div class="brand">LJ-Link-PRO</div>
   <nav class="tabs">
-    <button class="tab active" id="tab-waveform">WAVEFORM</button>
-    <button class="tab" id="tab-mixer">MIXER</button>
+    <button class="tab active hidden" id="tab-waveform">WAVEFORM</button>
+    <button class="tab hidden" id="tab-mixer">MIXER</button>
     <button class="tab" id="tab-link">LINK</button>
     <button class="tab" id="tab-bpm">SEND BPM</button>
   </nav>
@@ -45,12 +45,30 @@
     </div>
     <div id="controls">
       <button id="btn-auto" class="primary big">Search automatically</button>
-      <p class="hint">Computer and DJ devices must be connected to the same network switch.</p>
+      <p class="hint">Finds Pioneer and Denon devices at the same time. Devices that are switched on later are added by themselves.</p>
       <div class="row">
         <button id="btn-manual" class="secondary">Not working? Set up manually</button>
         <button id="btn-demo" class="link">Watch demo (without devices)</button>
       </div>
     </div>
+
+    <ol class="steps">
+      <li><b>Connect</b><span>Computer, players and mixer on the same network switch, with cables.</span></li>
+      <li><b>Search</b><span>One button finds every player, from any maker.</span></li>
+      <li><b>Watch</b><span>Here or on a tablet in the same network: every deck, every waveform, live.</span></li>
+    </ol>
+
+    <div class="works">
+      <div class="works-title">Works with</div>
+      <div class="works-list">
+        <span class="works-item"><b>Pioneer DJ</b><small>Pro DJ Link · CDJ, XDJ, DJM</small></span>
+        <span class="works-item"><b>Denon DJ</b><small>StageLinQ · Prime, SC6000</small></span>
+        <span class="works-item"><b>Light desks</b><small>Tempo to grandMA, Daslight</small></span>
+      </div>
+      <div class="works-soon">Serato and Traktor are planned.</div>
+    </div>
+
+    <p id="version-line" class="version-line"></p>
   </section>
 
   <!-- Search -->
@@ -77,7 +95,7 @@
       <select id="model">
         <option value="cdj3000">Pioneer CDJ-3000</option>
         <option value="nxs2">Pioneer CDJ-2000NXS2 / NXS</option>
-        <option value="xdj1000">Pioneer XDJ-1000MK2 / XDJ-XZ</option>
+        <option value="xdj1000">Pioneer XDJ-1000MK2 / XDJ-XZ / XDJ-AZ</option>
         <option value="djm">Pioneer DJM mixer (900/2000/V10/A9)</option>
         <option value="denon">Denon Prime 4+, SC6000, Prime Go (StageLinQ)</option>
       </select>
@@ -118,6 +136,7 @@
   <!-- Monitor -->
   <section id="view-monitor" class="view wide hidden">
     <div id="lan" class="hint"></div>
+    <div id="warnings" class="note warn hidden"></div>
     <div id="decks"></div>
     <div id="mixer-view" class="hidden">
       <div id="mixer-list"></div>

@@ -40,7 +40,7 @@ application {
     applicationName = "ljlinkpro"
 }
 
-version = "1.2.0"
+version = "1.2.1"
 
 // Builds a native installer with a bundled Java runtime: .dmg on macOS, .exe on Windows.
 // jpackage can only build installers for the OS it runs on, so each OS is built on its own (see CI).

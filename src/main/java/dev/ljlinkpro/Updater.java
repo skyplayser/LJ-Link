@@ -32,6 +32,23 @@ final class Updater {
 
     record Release(String version, String downloadUrl, String assetName, long size, String page) {}
 
+    private static volatile Release cached;
+    private static volatile long cachedAt;
+
+    /** The newest release, asked from GitHub at most once an hour; null if unknown (offline, development build). */
+    static synchronized Release latestCached() {
+        long now = System.currentTimeMillis();
+        if (now - cachedAt > 3_600_000L) {
+            cachedAt = now;
+            try {
+                cached = latest();
+            } catch (Exception e) {
+                cached = null;
+            }
+        }
+        return cached;
+    }
+
     /** The version of this program, from the jar manifest; "dev" when started from the sources. */
     static String currentVersion() {
         String v = Updater.class.getPackage().getImplementationVersion();

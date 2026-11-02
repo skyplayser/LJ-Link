@@ -71,6 +71,14 @@ public final class Main {
 
         final int[] boundPort = {port};
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
+        app.get("/api/version", ctx -> {
+            Updater.Release r = Updater.latestCached();
+            String current = Updater.currentVersion();
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("current", current);
+            m.put("update", r != null && Updater.isNewer(r.version(), current) ? r.version() : null);
+            ctx.json(m);
+        });
         app.get("/api/info", ctx -> ctx.json(Map.of(
                 "controller", isLocal(ctx),
                 "urls", NetworkCheck.lanUrls(boundPort[0]),

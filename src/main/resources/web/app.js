@@ -72,7 +72,12 @@ function testCover(n) {
 function render() {
   const st = ui.state;
   $("btn-stop").classList.toggle("hidden", st.phase === "idle" || !ui.controller);
+  $("tab-waveform").classList.toggle("hidden", st.phase !== "monitoring");
+  $("tab-mixer").classList.toggle("hidden", st.phase !== "monitoring");
 
+  const warn = $("warnings");
+  warn.textContent = (st.warnings || []).map(w => t(w)).join(" · ");
+  warn.classList.toggle("hidden", !(st.warnings || []).length || st.phase !== "monitoring");
   if (st.phase === "monitoring") {
     show("monitor");
     applyTab();
@@ -397,7 +402,7 @@ function applyGroups() {
     const text = d.data ? names(d) : "";
     if (d.shown.dev !== text) { d.shown.dev = text; label.textContent = text; }
   }
-  $("devices-setting").classList.toggle("hidden", groups.length < 2 && hiddenGroups.size === 0);
+  $("devices-setting").classList.toggle("hidden", groups.length < 2 && !groups.some(g => hiddenGroups.has(g.id)));
   const list = $("device-list");
   const key = groups.map(g => g.id + "|" + g.name).join(";");
   if (list.dataset.key === key) {
@@ -951,6 +956,9 @@ function applyTab() {
   $("mixer-view").classList.toggle("hidden", !mixer);
   $("toolbar").classList.toggle("hidden", !monitoring || mixer);
   $("tab-waveform").classList.toggle("active", !mixer);
+  // Without devices there is nothing to show in these two tabs.
+  $("tab-waveform").classList.toggle("hidden", !monitoring);
+  $("tab-mixer").classList.toggle("hidden", !monitoring);
   $("tab-mixer").classList.toggle("active", mixer);
   if (mixer) renderMixer();
 }
@@ -1132,6 +1140,7 @@ function setLanguage(l, remember = true) {
   if (remember) { try { localStorage.setItem("ljlinkpro.lang", lang); } catch (e) { /* ignore */ } }
   $("lang-select").value = lang;
   translateStatic();
+  if (typeof loadVersion === "function") loadVersion();
   applySettings();
   applyPrivacy();
   updateModelNote();
@@ -1157,7 +1166,23 @@ $("btn-demo").onclick = () => { ui.manualOpen = false; post("/api/demo/start"); 
 $("btn-manual").onclick = openManual;
 $("btn-help-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-cancel").onclick = () => post("/api/stop");
-$("btn-stop").onclick = () => post("/api/stop");
+/** Version under the start page, with a hint when a newer one exists. */
+async function loadVersion() {
+  try {
+    const v = await (await fetch("/api/version")).json();
+    const line = $("version-line");
+    line.textContent = v.current === "dev" ? "" : t("Version {v}", { v: v.current });
+    if (v.update) {
+      const u = document.createElement("span");
+      u.className = "update";
+      u.textContent = " · " + t("Version {v} is available – install it from the program icon (menu bar or next to the clock).", { v: v.update });
+      line.append(u);
+    }
+  } catch (e) { /* offline: no version line */ }
+}
+loadVersion();
+
+$("btn-stop").onclick = () => { $("settings").classList.add("hidden"); post("/api/stop"); };
 $("btn-retry-auto").onclick = startSearch;
 $("btn-manual-back").onclick = () => { ui.manualOpen = false; render(); };
 $("btn-error-retry").onclick = startSearch;

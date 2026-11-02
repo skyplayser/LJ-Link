@@ -159,7 +159,15 @@ final class ProDjLinkSource implements DeckSource {
                 }
             });
             wf.start();
-            TimeFinder.getInstance().start();
+            String note = "Connected";
+            try {
+                TimeFinder.getInstance().start();
+            } catch (Exception e) {
+                // Usually UDP port 50001 is taken (another program listens for beats). Positions then come from the
+                // beat grid and the beat number in the player status, which is coarser but keeps everything else working.
+                System.err.println("Beat packets unavailable, positions are estimated: " + e);
+                note = "Beat port 50001 is in use by another program; positions are estimated.";
+            }
 
             positions = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "prodjlink-positions");
@@ -168,12 +176,13 @@ final class ProDjLinkSource implements DeckSource {
             });
             positions.scheduleAtFixedRate(this::pollPositions, 20, 20, TimeUnit.MILLISECONDS);
 
-            hub.setState("monitoring", "live", "Connected");
+            hub.setState("monitoring", "live", note);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             if (!stopped) {
-                hub.setState("error", "live", "Error: " + e.getMessage());
+                System.err.println("Pro DJ Link failed: " + e);
+                hub.setState("error", "live", "Pro DJ Link: " + e.getMessage());
             }
         }
     }
@@ -247,6 +256,7 @@ final class ProDjLinkSource implements DeckSource {
     /** Paused players send no moving position; the last reported beat number and the beat grid still give it. */
     private static long positionFromBeatGrid(int player) {
         DeviceUpdate u = VirtualCdj.getInstance().getLatestStatusFor(player);
+
         if (u instanceof CdjStatus s && BeatGridFinder.getInstance().isRunning()) {
             var grid = BeatGridFinder.getInstance().getLatestBeatGridFor(player);
             int beat = s.getBeatNumber();
@@ -277,6 +287,7 @@ final class ProDjLinkSource implements DeckSource {
             }
         } catch (RuntimeException e) {
             // Position polling must never take the monitor down.
+
         }
     }
 

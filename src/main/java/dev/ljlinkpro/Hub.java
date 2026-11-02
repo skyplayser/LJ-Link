@@ -319,6 +319,15 @@ final class Hub {
         m.put("message", message);
         m.put("privacy", Privacy.enabled());
         m.put("devices", list);
+        // Problems of one source while another one works (for example Pioneer fails while a Denon is shown).
+        List<String> warnings = new ArrayList<>();
+        for (Scope sc : sortedScopes()) {
+            boolean problem = "error".equals(sc.phase) || "monitoring".equals(sc.phase) && sc.message.startsWith("Beat port");
+            if (problem && !sc.message.isBlank()) {
+                warnings.add(sc.message);
+            }
+        }
+        m.put("warnings", warnings);
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);

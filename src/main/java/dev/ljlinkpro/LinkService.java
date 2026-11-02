@@ -192,7 +192,12 @@ final class LinkService {
                 }
                 return;
             }
-            if (error != null && error.startsWith("The chosen deck")) {
+            if (lead.scope != null && "demo".equals(lead.scope.kind)) {
+                // Simulated tempos must never reach a real desk.
+                error = "Demo mode: nothing is sent to the desk.";
+                return;
+            }
+            if (error != null && (error.startsWith("The chosen deck") || error.startsWith("Demo mode"))) {
                 error = null;
             }
             double bpm = lead.effectiveBpm;
