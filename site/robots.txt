@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://skyplayser.github.io/LJ-Link-PRO/sitemap.xml

@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://skyplayser.github.io/LJ-Link-PRO/">Website</a> &nbsp;·&nbsp;
   <a href="https://github.com/skyplayser/LJ-Link-PRO/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
@@ -53,7 +54,11 @@ connection outside your network is the update check (GitHub, only when you ask o
 <table>
   <tr>
     <td width="50%"><img src="docs/images/mixer.png" alt="Mixer tab"><br><sub><b>Mixer tab.</b> Which channel is on air.</sub></td>
-    <td width="50%"><img src="docs/images/player-details.png" alt="Player details"><br><sub><b>Player details.</b> Everything the interface reports.</sub></td>
+    <td width="50%"><img src="docs/images/send-bpm.png" alt="SEND BPM"><br><sub><b>SEND BPM.</b> Which deck gives the tempo to the light desk.</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/player-details.png" alt="Player details"><br><sub><b>Player details.</b> Everything the interface reports.</sub></td>
+    <td><img src="docs/images/settings.png" alt="Settings"><br><sub><b>Settings</b> with the light desk link.</sub></td>
   </tr>
   <tr>
     <td><img src="docs/images/waveform-detail.png" alt="Detail view"><br><sub><b>Detail view.</b> Only the scrolling waveform.</sub></td>
