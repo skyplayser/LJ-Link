@@ -40,7 +40,7 @@ connection outside your network is the update check (GitHub, only when you ask o
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
 - **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-AZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
 - **Denon / Engine DJ** (Prime 4, Prime 4+, Prime Go, SC6000) over StageLinQ: title, artist, tempo and pitch, play state, master, exact position, the real **fader positions** of the mixer, and the waveform with beat grid, bar starts, hot cues and loops read from the device's library. Passive: it never changes anything on the device.
-- **Light desk link:** sends the tempo to GrandMA (2, 3 or onPC) and Daslight as OSC. *Search for the desk* finds a grandMA2
+- **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC), Daslight and any OSC program. *Search for the desk* finds a grandMA2
   (onPC or console) in the network; otherwise enter its IP address by hand.
 - **SEND BPM:** a tab next to LINK chooses which deck gives the tempo, *Auto* (the deck that is master and/or live) or one deck by
   hand, and a green *SEND BPM* mark shows on that deck in every view, tablets included.
@@ -113,9 +113,18 @@ even from the computer's own browser. `--privacy` starts the program in this mod
 
 ## Light desk link
 
-*Settings → Light desk link* (or the **LINK** tab). Choose **GrandMA (2 / 3 / onPC)** or **Daslight**, press *Search for the
-desk* or enter its address (`127.0.0.1` if onPC runs on the same computer) and the port, and press *Send test*. LJ-Link-PRO then
-sends the tempo as OSC over UDP. On the desk, switch the OSC input on (grandMA2: Setup, In & Out, OSC).
+*Settings → Light desk link* (or the **LINK** tab). Pick your desk, press *Search for the desk* or enter its address
+(`127.0.0.1` if onPC runs on the same computer), and press *Send test*.
+
+| Desk | How the tempo gets there | On the desk |
+|---|---|---|
+| grandMA2, grandMA2 onPC | command line over **Telnet** (TCP 30000), `SpecialMaster 3.16 At {bpm}` (Speed 16 = BPM; Speed 1–15 selectable), whole BPM | Setup → Console → Global Settings → Telnet: *Login Enabled*; a user of the show to log in |
+| grandMA3, grandMA3 onPC | command line over **OSC** `/cmd`, `Master 3.1 At BPM {bpm}` | Menu → In & Out → OSC: UDP, port, *Receive Command: Yes*, *Enable Input* |
+| Daslight, Resolume, QLC+ … | the tempo as an **OSC number** to an address | map the address in the program's OSC mapping |
+| dot2 | not possible: the dot2 takes no Telnet or OSC from the network | tap tempo or sound-to-light |
+
+The step-by-step guide for every desk (German) is in [docs/lichtpult.de.md](docs/lichtpult.de.md). The grandMA2 has no OSC input,
+so earlier versions could not reach it; use the grandMA2 (Telnet) choice from 1.3 on.
 
 The search looks for the grandMA2 command line port (TCP 30000) in your networks, so it also finds a console whose remote command
 line is switched off. A grandMA3 is not found automatically yet; enter it by hand.
@@ -127,8 +136,8 @@ The **SEND BPM** tab decides where the tempo comes from:
 | Auto | the tempo master; with two systems (CDJs and a Denon) the master that is also live and playing; without a master the deck that is on air and playing |
 | A deck | always that deck, even when another one is live; nothing is sent while it has no track |
 
-The default GrandMA command (`SpecialMaster 3.1 At {bpm}`), the ports and the Daslight mapping have **not been verified on real
-consoles yet**. Edit the command to match your show file.
+The commands come from the MA manuals; the grandMA2 command and the Daslight mapping are **not yet confirmed on a real desk**.
+Type the command into the desk's command line by hand first, and edit it in LJ-Link-PRO to match your show.
 
 ## Compatibility
 
@@ -149,7 +158,8 @@ Please tell us what you tested with the *Hardware report* issue template.
 |---|---|
 | Pioneer Pro DJ Link | done |
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
-| GrandMA2 onPC / GrandMA3 and Daslight (tempo over OSC) | working; grandMA2 found automatically |
+| grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC), Daslight (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
+| dot2, MIDI clock out | planned |
 | Serato DJ | planned |
 | Traktor | planned |
 

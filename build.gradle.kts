@@ -40,7 +40,7 @@ application {
     applicationName = "ljlinkpro"
 }
 
-version = "1.2.1"
+version = "1.3.0"
 
 // Builds a native installer with a bundled Java runtime: .dmg on macOS, .exe on Windows.
 // jpackage can only build installers for the OS it runs on, so each OS is built on its own (see CI).
@@ -71,7 +71,8 @@ tasks.register<Exec>("packageApp") {
         "--main-jar", "ljlinkpro-${project.version}.jar",
         "--main-class", "dev.ljlinkpro.Main",
         "--dest", outDir.absolutePath,
-        "--add-modules", "java.base,java.desktop,java.logging,java.management,java.naming,java.net.http,java.sql,java.xml,jdk.unsupported",
+        // jdk.crypto.ec: HTTPS to GitHub (update check) needs elliptic curve TLS; without it the handshake fails.
+        "--add-modules", "java.base,java.desktop,java.logging,java.management,java.naming,java.net.http,java.sql,java.xml,jdk.unsupported,jdk.crypto.ec,jdk.charsets,jdk.localedata",
     )
     val icon = File(projectDir, "packaging/LJ-Link-PRO." + if (os.isMacOsX) "icns" else if (os.isWindows) "ico" else "png")
     if (icon.exists()) {

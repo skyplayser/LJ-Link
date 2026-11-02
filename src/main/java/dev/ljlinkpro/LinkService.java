@@ -14,16 +14,30 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends the tempo of the leading deck to a lighting desk or software as OSC over UDP.
- * Output only: LJ-Link-PRO never receives from or controls the DJ gear through this.
+ * Sends the tempo of the leading deck to a lighting desk or software: to a grandMA2 as a command line over Telnet, to a
+ * grandMA3 as a command line over OSC, to anything else as an OSC number. Output only: LJ-Link-PRO never receives from
+ * or controls the DJ gear through this.
  */
 final class LinkService {
-    /** {@code type}: "off", "ma" (GrandMA2/3/onPC command line via OSC) or "osc" (plain OSC float). */
-    record Config(String type, String host, int port, String address, String command) {
+    /**
+     * {@code type}: "off", "ma2" (grandMA2 / onPC command line over Telnet, with {@code user} and {@code password}),
+     * "ma" (grandMA3 / onPC command line over OSC {@code /cmd}) or "osc" (the tempo as an OSC number to {@code address}).
+     */
+    record Config(String type, String host, int port, String address, String command, String user, String password) {
         static Config off() {
-            return new Config("off", "127.0.0.1", 8000, "/ljlinkpro/bpm", "SpecialMaster 3.1 At {bpm}");
+            return new Config("off", "127.0.0.1", 8000, "/ljlinkpro/bpm", MA3_COMMAND, "", "");
         }
     }
+
+    static final String MA2_COMMAND = "SpecialMaster 3.16 At {bpm}";
+    /** Every grandMA2 show has these users: "Administrator" with the password "admin", and "Guest". */
+    static final String MA2_DEFAULT_USER = "administrator";
+    static final String MA2_DEFAULT_PASSWORD = "admin";
+    static final String MA3_COMMAND = "Master 3.1 At BPM {bpm}";
+    /** The command line of a grandMA2 is not flooded: unchanged tempos are repeated only this often. */
+    private static final long MA2_KEEPALIVE_MS = 15_000;
+
+    private final Ma2Telnet telnet = new Ma2Telnet();
 
     record Status(Double bpm, int sentCount, String error, String source, String sendingDeck) {}
 
@@ -49,6 +63,7 @@ final class LinkService {
     /** "auto" (master, else the deck on air) or the key of one deck, see {@link Deck#key()}. */
     private volatile String source = loadSource();
     private volatile String sendingDeck;
+    private volatile long retryAt;
 
     LinkService(Hub hub) {
         this(hub, true);
@@ -71,12 +86,18 @@ final class LinkService {
     }
 
     void setConfig(Config c) throws IOException {
+        String type = java.util.List.of("off", "ma2", "ma", "osc").contains(c.type()) ? c.type() : "off";
         Config clean = new Config(
-                java.util.List.of("off", "ma", "osc").contains(c.type()) ? c.type() : "off",
+                type,
                 c.host() == null ? "127.0.0.1" : c.host().trim(),
-                c.port() < 1 || c.port() > 65535 ? 8000 : c.port(),
+                c.port() < 1 || c.port() > 65535 ? ("ma2".equals(type) ? Ma2Telnet.PORT : 8000) : c.port(),
                 c.address() == null || c.address().isBlank() ? "/ljlinkpro/bpm" : c.address().trim(),
-                c.command() == null || c.command().isBlank() ? "SpecialMaster 3.1 At {bpm}" : c.command().trim());
+                c.command() == null || c.command().isBlank() ? ("ma2".equals(type) ? MA2_COMMAND : MA3_COMMAND) : c.command().trim(),
+                "ma2".equals(type) && (c.user() == null || c.user().isBlank()) ? MA2_DEFAULT_USER : c.user() == null ? "" : c.user().trim(),
+                "ma2".equals(type) && (c.user() == null || c.user().isBlank()) && (c.password() == null || c.password().isEmpty())
+                        ? MA2_DEFAULT_PASSWORD : c.password() == null ? "" : c.password());
+        telnet.close();
+        retryAt = 0;
         config = clean;
         error = null;
         lastBpm = null;
@@ -201,12 +222,22 @@ final class LinkService {
                 error = null;
             }
             double bpm = lead.effectiveBpm;
+            if (c.type().equals("ma2")) {
+                // The grandMA2 command line takes no fractional values ("At 174.0" does nothing), so whole BPM only.
+                bpm = Math.round(bpm);
+            }
             long now = System.currentTimeMillis();
             boolean changed = lastBpm == null || Math.abs(bpm - lastBpm) >= 0.1;
-            if (changed || now - lastSentAt >= KEEPALIVE_MS) {
+            if (now < retryAt) {
+                return; // the last attempt failed; do not hammer the desk
+            }
+            long keepAlive = c.type().equals("ma2") ? MA2_KEEPALIVE_MS : KEEPALIVE_MS;
+            if (changed || now - lastSentAt >= keepAlive) {
                 if (send(c, bpm)) {
                     lastBpm = bpm;
                     lastSentAt = now;
+                } else {
+                    retryAt = now + 5000;
                 }
             }
         } catch (RuntimeException e) {
@@ -215,12 +246,18 @@ final class LinkService {
     }
 
     private boolean send(Config c, double bpm) {
-        String text = String.format(Locale.ROOT, "%.1f", bpm);
-        try (DatagramSocket socket = new DatagramSocket()) {
-            byte[] packet = c.type().equals("ma")
-                    ? osc("/cmd", c.command().replace("{bpm}", text))
-                    : osc(c.address(), (float) bpm);
-            socket.send(new DatagramPacket(packet, packet.length, InetAddress.getByName(c.host()), c.port()));
+        String text = c.type().equals("ma2") ? Long.toString(Math.round(bpm)) : String.format(Locale.ROOT, "%.1f", bpm);
+        try {
+            if (c.type().equals("ma2")) {
+                telnet.send(c.host(), c.port(), c.user(), c.password(), c.command().replace("{bpm}", text));
+            } else {
+                try (DatagramSocket socket = new DatagramSocket()) {
+                    byte[] packet = c.type().equals("ma")
+                            ? osc("/cmd", c.command().replace("{bpm}", text))
+                            : osc(c.address(), (float) bpm);
+                    socket.send(new DatagramPacket(packet, packet.length, InetAddress.getByName(c.host()), c.port()));
+                }
+            }
             sentCount++;
             error = null;
             return true;

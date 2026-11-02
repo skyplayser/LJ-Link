@@ -38,8 +38,9 @@ async function post(url) {
 
 /* ---------- Documentation screenshots (#shot): test names and generated covers instead of real tracks ---------- */
 
-const TEST_TITLES = ["Test Track One", "Test Track Two", "Test Track Three", "Test Track Four"];
-const TEST_ARTISTS = ["Test Artist", "Sample Artist", "Demo Band", "Example DJ"];
+const TEST_TITLES = ["Test Track One", "Test Track Two", "Test Track Three", "Test Track Four", "Test Track Five",
+  "Test Track Six", "Test Track Seven", "Test Track Eight", "Test Track Nine", "Test Track Ten"];
+const TEST_ARTISTS = ["Test Artist", "Sample Artist", "Demo Band", "Example DJ", "Placeholder Crew"];
 const isShot = () => document.body.classList.contains("shot") || document.documentElement.classList.contains("shot-early");
 const testTitle = (n) => TEST_TITLES[n % TEST_TITLES.length];
 const testArtist = (n) => TEST_ARTISTS[n % TEST_ARTISTS.length];
@@ -183,17 +184,41 @@ function applySettings() {
 // type "ma": command line sent as OSC /cmd; type "osc": plain OSC float at the given address.
 const LINK_PRESETS = {
   off:      { type: "off" },
-  grandma:  { type: "ma",  port: 8000, text: "SpecialMaster 3.1 At {bpm}", label: "Command on the desk",
-              hint: "Applies to GrandMA2, GrandMA3 and onPC (for onPC on this computer: 127.0.0.1). MA2: switch on the OSC input under Setup > Network > Remote Inputs. MA3: create an OSC entry under In & Out and enable receiving. {bpm} is replaced by the tempo." },
+  grandma2: { type: "ma2", port: 30000, text: "SpecialMaster 3.16 At {bpm}", speed: true, label: "Command on the desk", login: true,
+              user: "administrator", password: "admin",
+              hint: "grandMA2 console or onPC, over Telnet. On the desk: Setup, Console, Global Settings, Telnet: Login Enabled. Default user of every show: administrator, password admin (change it if your show uses another). {bpm} is replaced by the tempo. Step by step: see the light desk guide." },
+  grandma:  { type: "ma",  port: 8000, text: "Master 3.1 At BPM {bpm}", speed: true, label: "Command on the desk",
+              hint: "grandMA3 console or onPC, over OSC. On the desk: Menu, In & Out, OSC: a line with this port, Mode UDP, Receive Command Yes, then Enable Input. {bpm} is replaced by the tempo. Step by step: see the light desk guide." },
   daslight: { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
-              hint: "In Daslight, switch on the OSC input and assign this address to a fader or speed. The tempo is sent as a number." },
+              hint: "Daslight receives this address as a number over OSC; map it in Daslight's OSC mapping. Whether your Daslight version can set the BPM this way is not confirmed yet, see the light desk guide." },
   osc:      { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
               hint: "The tempo is sent as a number (float) to this address." },
 };
 
+/* Speed masters of the grandMA: 1 to 15, and 16, which is the BPM master. The choice is written into the command. */
+const SPEED_IN_COMMAND = /((?:SpecialMaster|Master)\s+3\.)(\d+)/i;
+
+function fillSpeedChoices() {
+  const sel = $("link-speed");
+  if (sel.options.length) return;
+  for (let i = 1; i <= 16; i++) {
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = i === 16 ? t("Speed 16 (BPM)") : t("Speed {n}", { n: i });
+    sel.append(o);
+  }
+}
+
+function syncSpeedFromCommand() {
+  fillSpeedChoices();
+  const m = $("link-text").value.match(SPEED_IN_COMMAND);
+  $("link-speed").value = m ? m[2] : "";
+}
+
 function linkPresetFromConfig(c) {
   if (c.type === "off") return "off";
   if (c.type === "osc") return ui.linkPreset === "daslight" ? "daslight" : "osc";
+  if (c.type === "ma2") return "grandma2";
   return "grandma";
 }
 
@@ -202,6 +227,9 @@ function showLinkFields(preset) {
   $("link-fields").classList.toggle("hidden", preset === "off");
   if (preset === "off") return;
   $("link-hint").textContent = t(p.hint);
+  $("link-login").classList.toggle("hidden", !p.login);
+  $("link-speed-row").classList.toggle("hidden", !p.speed);
+  syncSpeedFromCommand();
   $("link-text").placeholder = t(p.label);
 }
 
@@ -214,7 +242,9 @@ async function loadLink() {
     $("link-target").value = preset;
     $("link-host").value = c.host;
     $("link-port").value = c.port;
-    $("link-text").value = c.type === "ma" ? c.command : c.address;
+    $("link-text").value = c.type === "ma" || c.type === "ma2" ? c.command : c.address;
+    $("link-user").value = c.user || (c.type === "ma2" ? LINK_PRESETS.grandma2.user : "");
+    $("link-pass").value = c.password || (c.type === "ma2" && !c.user ? LINK_PRESETS.grandma2.password : "");
     showLinkFields(preset);
     const st = res.status;
     $("link-status").textContent = st.error ? t(st.error)
@@ -233,7 +263,9 @@ function linkBody() {
     host: $("link-host").value || "127.0.0.1",
     port: Number($("link-port").value) || 8000,
     address: p.type === "osc" ? text : "/ljlinkpro/bpm",
-    command: p.type === "ma" ? text : "SpecialMaster 3.1 At {bpm}",
+    command: p.type === "ma" || p.type === "ma2" ? text : "",
+    user: p.login ? $("link-user").value : "",
+    password: p.login ? $("link-pass").value : "",
   };
 }
 
@@ -245,6 +277,8 @@ $("link-target").onchange = () => {
   if (preset !== "off") {
     $("link-port").value = p.port;
     $("link-text").value = p.text;
+    // A new grandMA2 show always has the user "administrator" with the password "admin".
+    if (p.login && !$("link-user").value) { $("link-user").value = p.user; $("link-pass").value = p.password; }
     if (!$("link-host").value) $("link-host").value = "127.0.0.1";
   }
   showLinkFields(preset);
@@ -271,7 +305,12 @@ $("link-scan").onclick = async () => {
       const b = document.createElement("button");
       b.className = "secondary";
       b.textContent = f.name;
-      b.onclick = () => { $("link-host").value = f.host; out.textContent = t("Address entered. Press Save."); };
+      b.onclick = () => {
+        // The search finds a grandMA2 by its Telnet port, so it also chooses the grandMA2 connection.
+        if ($("link-target").value !== "grandma2") { $("link-target").value = "grandma2"; $("link-target").onchange(); }
+        $("link-host").value = f.host;
+        out.textContent = t("Address entered. Enter the user and press Save.");
+      };
       out.append(b, " ");
     }
   } catch (e) {
@@ -280,6 +319,12 @@ $("link-scan").onclick = async () => {
     $("link-scan").disabled = false;
   }
 };
+$("link-speed").onchange = () => {
+  const n = $("link-speed").value;
+  const cmd = $("link-text").value;
+  $("link-text").value = SPEED_IN_COMMAND.test(cmd) ? cmd.replace(SPEED_IN_COMMAND, "$1" + n) : cmd;
+};
+$("link-text").addEventListener("input", syncSpeedFromCommand);
 $("link-save").onclick = saveLink;
 $("link-test").onclick = async () => {
   await saveLink();
@@ -1341,6 +1386,7 @@ setTimeout(() => {
   if (h.includes("day")) { settings.theme = "day"; applySettings(); }
   if (h.includes("mixer")) { ui.tab = "mixer"; applyTab(); }
   if (h.includes("detail")) { settings.view = "detail"; applySettings(); }
+  if (h.includes("bpm")) openBpm();
   if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); }
   else if (h.includes("manual")) openManual();
   else { const m = h.match(/info-(\d+)/); if (m) openInfo(Number(m[1])); }

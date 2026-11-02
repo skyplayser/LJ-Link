@@ -356,3 +356,6 @@ label.check input { width: 20px; height: 20px; min-height: 0; accent-color: var(
 .version-line { color: var(--muted); font-size: 13px; margin-top: 28px; }
 .version-line .update { color: var(--accent); font-weight: 600; }
 @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
+
+/* Documentation screenshots: no local warnings */
+.shot #warnings, .shot-early #warnings { display: none !important; }

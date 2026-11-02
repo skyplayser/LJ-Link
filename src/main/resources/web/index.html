@@ -195,7 +195,8 @@
       <label for="link-target">Light desk link (send tempo)</label>
       <select id="link-target">
         <option value="off">Off</option>
-        <option value="grandma">GrandMA (2 / 3 / onPC)</option>
+        <option value="grandma2">grandMA2 / grandMA2 onPC (Telnet)</option>
+        <option value="grandma">grandMA3 / grandMA3 onPC (OSC)</option>
         <option value="daslight">Daslight</option>
         <option value="osc">Custom OSC target</option>
       </select>
@@ -208,6 +209,14 @@
           <button id="link-scan" class="secondary">Search for the desk</button>
         </div>
         <div id="link-found" class="hint"></div>
+        <div id="link-speed-row" class="hidden" style="margin-top:8px">
+          <label for="link-speed" class="muted">Send to speed master</label>
+          <select id="link-speed"></select>
+        </div>
+        <div id="link-login" class="ip-row hidden" style="margin-top:8px">
+          <input id="link-user" placeholder="User of the show, e.g. administrator" autocomplete="off">
+          <input id="link-pass" type="password" placeholder="Password" autocomplete="new-password">
+        </div>
         <input id="link-text" autocomplete="off" style="margin-top:8px">
         <div class="hint" id="link-hint"></div>
         <div class="row">

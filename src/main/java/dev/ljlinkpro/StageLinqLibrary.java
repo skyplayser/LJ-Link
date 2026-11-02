@@ -127,7 +127,7 @@ final class StageLinqLibrary implements AutoCloseable {
         if (d == null || d.length < 27) {
             return null;
         }
-        int n = (d.length - 24) / 3;
+        int n = entries(d);
         int max = 1;
         for (int i = 0; i < n * 3; i++) {
             max = Math.max(max, d[24 + i] & 0xFF);
@@ -144,13 +144,23 @@ final class StageLinqLibrary implements AutoCloseable {
         return out;
     }
 
+    /**
+     * Number of waveform entries: the header states it, the data holds one more entry at the end that is not part of the
+     * track (it showed up as a spike at the very end of the detail view).
+     */
+    private static int entries(byte[] d) {
+        int stored = (d.length - 24) / 3;
+        long declared = ByteBuffer.wrap(d).getLong();
+        return declared > 0 && declared < stored ? (int) declared : stored;
+    }
+
     /** The overview bands (low, mid, high) as 3 bytes per entry, scaled to the loudest value. */
     static byte[] bands(byte[] blob) {
         byte[] d = unpack(blob);
         if (d == null || d.length < 27) {
             return null;
         }
-        int n = (d.length - 24) / 3;
+        int n = entries(d);
         int max = 1;
         for (int i = 0; i < n * 3; i++) {
             max = Math.max(max, d[24 + i] & 0xFF);

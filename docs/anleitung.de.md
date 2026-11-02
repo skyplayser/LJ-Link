@@ -171,24 +171,14 @@ LJ-Link-PRO läuft.
 
 ## Lichtpult-Link
 
-LJ-Link-PRO kann das **Tempo** des führenden Players an dein Lichtpult senden, damit Effekte im Takt laufen.
+LJ-Link-PRO kann das **Tempo** an dein Lichtpult senden, damit Effekte im Takt laufen: an grandMA2 und grandMA2 onPC über
+Telnet, an grandMA3 und grandMA3 onPC über OSC, an Daslight und andere Programme als OSC-Zahl. Der dot2 lässt sich über das
+Netzwerk nicht ansteuern.
 
-1. Menü (☰) oder Reiter **LINK** öffnen.
-2. **GrandMA (2 / 3 / onPC)** oder **Daslight** wählen.
-3. **IP-Adresse des Pults** und **Port** eintragen. Bei GrandMA onPC auf demselben Computer: `127.0.0.1`.
-4. **Speichern**, dann **Test senden (120 BPM)** – am Pult sollte das Tempo ankommen.
+Kurz: Menü (☰) oder Reiter **LINK** → Pult wählen → **Pult suchen** (grandMA2) oder IP eintragen → bei grandMA2 Benutzer und
+Passwort → **Speichern** → **Test senden**. Welches Deck das Tempo liefert, legt der Reiter **SEND BPM** fest.
 
-Am Pult muss der **OSC-Eingang** eingeschaltet sein:
-
-- **GrandMA2:** Setup → Network → Remote Inputs, OSC aktivieren (Port 8000).
-- **GrandMA3:** In & Out → OSC-Eintrag anlegen, *Empfangen* aktivieren.
-- **Daslight:** OSC-Eingang aktivieren und die Adresse `/ljlinkpro/bpm` einem Regler zuordnen.
-
-> Der vorgegebene GrandMA-Befehl `SpecialMaster 3.1 At {bpm}`, die Ports und die Daslight-Zuordnung sind noch **nicht an echten
-> Pulten geprüft**. Passe den Befehl im Feld an deine Show an. `{bpm}` wird durch das Tempo ersetzt.
-
-Gesendet wird das Tempo des **Master-Players**, sonst des spielenden Players, der auf Sendung ist, sonst irgendeines spielenden
-Players.
+**Die ausführliche Schritt-für-Schritt-Anleitung für jedes Pult steht in [lichtpult.de.md](lichtpult.de.md).**
 
 ## Fehlerbehebung
 
