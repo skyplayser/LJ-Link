@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  */
 final class StageLinqSource implements DeckSource {
     private static final String SOFTWARE_NAME = "LJ-Link-PRO";
-    private static final String SOFTWARE_VERSION = "1.3.0";
+    private static final String SOFTWARE_VERSION = "1.3.1";
     private static final int DEFAULT_SAMPLE_RATE = 44_100;
     private static final Pattern DECK_VALUE = Pattern.compile("^/Engine/Deck(\\d)/(.+)$");
     private static final Pattern FADER = Pattern.compile("^/Mixer/CH(\\d)faderPosition$");

@@ -22,13 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class StageLinqDiscovery implements DeckSource {
     private static final String SOFTWARE_NAME = "LJ-Link-PRO";
-    private static final String SOFTWARE_VERSION = "1.3.0";
+    private static final String SOFTWARE_VERSION = "1.3.1";
     /** Helper services some Denon devices announce next to the real device; their "decks" are not players. */
     private static final java.util.Set<String> IGNORED_SOFTWARE = java.util.Set.of("offlineanalyzer");
     /** A device that has not announced itself for this long is gone. */
     private static final long GONE_AFTER_MS = 20_000;
     /** A connection that delivers nothing for this long is dropped and made again (the device may still hold an old one). */
-    private static final long CONNECT_TIMEOUT_MS = 15_000;
+    private static final long CONNECT_TIMEOUT_MS = 45_000;
+    /** After a connection ended the device needs a moment before it accepts a new one; reconnecting at once loops. */
+    private static final long RECONNECT_PAUSE_MS = 10_000;
 
     private record Known(StageLinqSource source, Hub.Scope scope, long[] lastSeen, long since) {}
 
@@ -36,6 +38,7 @@ final class StageLinqDiscovery implements DeckSource {
     private final Hub.Scope scope;
     private final byte[] token = new byte[16];
     private final Map<String, Known> devices = new ConcurrentHashMap<>();
+    private final Map<String, Long> pausedUntil = new ConcurrentHashMap<>();
     private volatile boolean stopped;
     private DatagramSocket socket;
     private Thread discoveryThread;
@@ -164,6 +167,10 @@ final class StageLinqDiscovery implements DeckSource {
             known.lastSeen()[0] = System.currentTimeMillis();
             return;
         }
+        Long pause = pausedUntil.get(key);
+        if (pause != null && System.currentTimeMillis() < pause) {
+            return;
+        }
         if (IGNORED_SOFTWARE.contains(d.softwareName().toLowerCase())) {
             return; // internal helper services of the device, they report decks that do not exist
         }
@@ -185,6 +192,7 @@ final class StageLinqDiscovery implements DeckSource {
     private void drop(String key) {
         Known known = devices.remove(key);
         if (known != null) {
+            pausedUntil.put(key, System.currentTimeMillis() + RECONNECT_PAUSE_MS);
             System.out.println("StageLinQ device left: " + known.scope().groupName);
             known.scope().close();
             known.source().stop();

@@ -208,6 +208,9 @@ final class LinkService {
             sendingDeck = lead == null ? null : lead.key();
             markSending(lead);
             if (lead == null) {
+                if (AUTO.equals(source) && error != null && error.startsWith("The chosen deck")) {
+                    error = null;
+                }
                 if (!AUTO.equals(source)) {
                     error = "The chosen deck has no tempo right now, nothing is sent.";
                 }
@@ -259,7 +262,9 @@ final class LinkService {
                 }
             }
             sentCount++;
-            error = null;
+            String refused = c.type().equals("ma2") ? telnet.deskError() : null;
+            error = refused == null ? null : "The desk refused the command: " + refused
+                    + (refused.contains("RIGHTS") ? " (give the user more rights on the desk, e.g. Admin)" : "");
             return true;
         } catch (IOException e) {
             error = "Sending to " + c.host() + ":" + c.port() + " failed: " + e.getMessage();

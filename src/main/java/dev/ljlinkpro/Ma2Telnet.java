@@ -19,6 +19,12 @@ final class Ma2Telnet {
     private OutputStream out;
     private String connectedTo;
     private volatile boolean closed = true;
+    /** The last error the desk answered with (for example missing user rights), or null. */
+    private volatile String deskError;
+
+    String deskError() {
+        return deskError;
+    }
 
     /** Sends one command line, connecting and logging in first when needed. */
     synchronized void send(String host, int port, String user, String password, String command) throws IOException {
@@ -67,6 +73,12 @@ final class Ma2Telnet {
                     String text = new String(buf, 0, n, StandardCharsets.ISO_8859_1).replaceAll("\u001B\\[[0-9;]*[A-Za-z]", "").trim();
                     if (!text.isEmpty()) {
                         System.out.println("grandMA2: " + text.replaceAll("\\s*[\r\n]+\\s*", " | "));
+                        java.util.regex.Matcher m = java.util.regex.Pattern.compile("Error #\\d+:[^\r\n|]*").matcher(text);
+                        if (m.find()) {
+                            deskError = m.group().trim();
+                        } else if (text.contains("Executing")) {
+                            deskError = null;
+                        }
                     }
                 }
             } catch (IOException e) {
