@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- English source of the site. The build (.github/scripts/build_site.py) makes de/index.html from the data-de*
      attributes, adds the WebP pictures and writes the structured data and the sitemap. -->
-<title data-de="LJ-Link-PRO – DJ-Waveforms und BPM ans grandMA für Lichtjockeys">LJ-Link-PRO – DJ deck waveforms and BPM for lighting jockeys</title>
-<meta name="description" content="Free tool for lighting jockeys in clubs and at events: see every DJ deck live (waveforms, cues, loops, BPM) from Pioneer CDJs and Denon Prime, and send the BPM to grandMA2, grandMA3 and Daslight. No more tap tempo." data-de-content="Kostenloses Tool für Lichtjockeys in Clubs und auf Veranstaltungen: alle DJ-Decks live sehen (Waveforms, Cues, Loops, BPM) von Pioneer CDJs und Denon Prime, BPM direkt ans grandMA2, grandMA3 und Daslight. Schluss mit Tap Tempo.">
+<title data-de="LJ-Link-PRO – CDJ- und Denon-Waveforms, Pioneer BPM ans grandMA für Lightjockeys">LJ-Link-PRO – CDJ and Denon waveforms, Pioneer BPM to grandMA for lightjockeys</title>
+<meta name="description" content="Free tool for lightjockeys in clubs and at events: see every DJ deck live (waveforms, cues, loops, BPM) from Pioneer CDJs – CDJ-3000 to CDJ-2000NXS2 – and Denon Prime, and send the BPM to grandMA2, grandMA3 and Daslight. No more tap tempo." data-de-content="Kostenloses Tool für Lightjockeys in Clubs und auf Veranstaltungen: alle DJ-Decks live sehen (Waveforms, Cues, Loops, BPM) von Pioneer CDJs – CDJ-3000 bis CDJ-2000NXS2 – und Denon Prime, BPM direkt ans grandMA2, grandMA3 und Daslight. Schluss mit Tap Tempo.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="SKYPLAYSER / NEXTPHILM">
 <link rel="canonical" href="https://skyplayser.github.io/LJ-Link-PRO/" data-de-href="https://skyplayser.github.io/LJ-Link-PRO/de/">
@@ -30,119 +30,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image:alt" content="LJ-Link-PRO showing live DJ waveforms for the lighting jockey" data-de-content="LJ-Link-PRO zeigt dem Lichtjockey die DJ-Waveforms live">
 <!-- structured-data -->
-<style>
-  :root {
-    --bg: #07090c; --panel: #11151b; --panel-2: #171c24; --line: #242b36; --text: #eef2f7; --muted: #9aa6b6;
-    --accent: #3b82f6; --accent-2: #60a5fa; --live: #ef4444; --orange: #ff8a00; --green: #22c55e; --radius: 14px;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-  a { color: var(--accent-2); }
-  img { max-width: 100%; }
-  picture { display: block; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
-
-  /* Top bar */
-  header.top { position: sticky; top: 0; z-index: 5; background: rgba(7, 9, 12, .86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-  header.top .wrap { display: flex; align-items: center; gap: 12px; height: 60px; }
-  header.top img { width: 32px; height: 32px; border-radius: 8px; }
-  header.top .brand { font-weight: 700; color: var(--text); text-decoration: none; }
-  header.top nav { margin-left: auto; display: flex; gap: 18px; align-items: center; }
-  header.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
-  header.top nav a:hover { color: var(--text); }
-  .lang { background: transparent; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 14px; cursor: pointer; }
-  .menu-btn { display: none; background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 4px 10px; font-size: 18px; }
-
-  /* Hero */
-  .hero { text-align: center; padding: 64px 0 24px; }
-  .hero .logo { width: 116px; height: 116px; border-radius: 28px; box-shadow: 0 12px 48px rgba(59, 130, 246, .28); }
-  h1 { font-size: clamp(36px, 6.2vw, 64px); line-height: 1.05; margin: 22px 0 14px; letter-spacing: -.025em; }
-  h1 .kicker { display: block; font-size: clamp(14px, 1.8vw, 16px); line-height: 1.4; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 14px; }
-  h1 .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa 45%, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .tag { color: var(--muted); font-size: clamp(18px, 2.3vw, 21px); max-width: 720px; margin: 0 auto 28px; }
-  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 12px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
-  .btn:hover { border-color: #3a4556; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.primary:hover { background: #2f74e6; }
-  .meta { color: var(--muted); font-size: 14px; margin-top: 12px; }
-  .shot { margin: 40px auto 0; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0, 0, 0, .65); width: 100%; height: auto; display: block; }
-
-  .makers { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 36px 0 0; }
-  .maker { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); font-size: 14px; color: var(--muted); }
-  .maker b { color: var(--text); font-weight: 600; }
-
-  /* Sections */
-  section { padding: 72px 0 8px; scroll-margin-top: 64px; }
-  .eyebrow { color: var(--accent-2); font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 8px; }
-  h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; letter-spacing: -.015em; }
-  .lead { color: var(--muted); margin: 0 0 30px; max-width: 760px; font-size: 18px; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-  .card h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-  .card p { margin: 0; color: var(--muted); font-size: 16px; }
-  .ico { width: 30px; height: 30px; border-radius: 8px; display: inline-grid; place-items: center; background: var(--panel-2); border: 1px solid var(--line); font-size: 16px; flex: 0 0 auto; }
-
-  .split { display: grid; gap: 28px; grid-template-columns: 1fr 1fr; align-items: center; }
-  .split img { width: 100%; border-radius: var(--radius); border: 1px solid var(--line); display: block; }
-  .split ul { margin: 0; padding-left: 20px; color: var(--muted); }
-  .split li { margin: 6px 0; }
-  .split li b { color: var(--text); }
-
-  .gallery { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-  figure { margin: 0; }
-  .gallery img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; cursor: zoom-in; }
-  figcaption { color: var(--muted); font-size: 15px; margin-top: 8px; }
-
-  .steps { counter-reset: s; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); padding: 0; list-style: none; margin: 0; }
-  .steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 20px 20px 64px; position: relative; color: var(--muted); }
-  .steps li b { color: var(--text); display: block; margin-bottom: 2px; }
-  .steps li::before { content: counter(s); position: absolute; left: 18px; top: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
-
-  table { width: 100%; border-collapse: collapse; font-size: 16px; }
-  .table { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
-  td, th { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  tr:last-child td { border-bottom: 0; }
-  th { color: var(--muted); font-weight: 600; font-size: 14px; }
-  .ok { color: #34d399; } .part { color: #fbbf24; } .plan { color: var(--muted); } .no { color: #f87171; }
-  code { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: .92em; }
-
-  .dl { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-  .dl .card { display: flex; flex-direction: column; gap: 10px; }
-  .dl .card .btn { justify-content: center; margin-top: auto; }
-  .dl .card.suggested { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
-  .howto { margin: 12px 0 10px; padding-left: 22px; }
-  .howto li { margin: 6px 0; color: var(--text); }
-  .small { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
-  .card details { background: var(--panel-2); margin: 12px 0 0; }
-  .note { border: 1px solid #5c4a14; background: #1e1a0c; color: #f3dc9a; border-radius: 12px; padding: 14px 16px; margin-top: 18px; font-size: 16px; }
-
-  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
-  summary { cursor: pointer; font-weight: 600; }
-  details p { color: var(--muted); margin: 10px 0 0; }
-
-  footer { margin-top: 80px; padding: 32px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
-  footer .wrap { display: grid; gap: 10px; }
-  .credit { text-align: center; margin-top: 18px; }
-
-  /* Picture viewer */
-  .viewer { position: fixed; inset: 0; background: rgba(0, 0, 0, .9); display: none; place-items: center; z-index: 20; padding: 16px; cursor: zoom-out; }
-  .viewer.open { display: grid; }
-  .viewer img { max-height: 92vh; border-radius: 10px; }
-
-  @media (max-width: 860px) {
-    .split { grid-template-columns: 1fr; }
-    header.top nav { display: none; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--line); flex-direction: column; align-items: flex-start; padding: 12px 20px 16px; gap: 12px; }
-    header.top nav.open { display: flex; }
-    .menu-btn { display: inline-block; margin-left: auto; }
-  }
-  @media (max-width: 520px) {
-    body { font-size: 16px; }
-    .gallery, .grid { grid-template-columns: 1fr; }
-    .hero { padding-top: 40px; }
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="top">
@@ -152,6 +40,7 @@
     <nav id="nav">
       <a href="#features" data-de="Funktionen">Features</a>
       <a href="#use" data-de="Für wen">Who it's for</a>
+      <a href="#guides" data-de="Anleitungen">Guides</a>
       <a href="#screens" data-de="Bilder">Screenshots</a>
       <a href="#lightdesk" data-de="Lichtpult">Light desk</a>
       <a href="#start" data-de="Los geht's">Get started</a>
@@ -167,7 +56,7 @@
 <main class="wrap">
   <div class="hero">
     <img class="logo" src="images/logo.png" alt="LJ-Link-PRO logo" width="116" height="116">
-    <h1><span class="kicker" data-de="LJ-Link-PRO · DJ-Waveforms und BPM für Lichtjockeys">LJ-Link-PRO · DJ waveforms and BPM for lighting jockeys</span><span data-de="Zeig deinem LJ,">Show your LJ</span><br><span class="grad" data-de="was der Sound macht.">what the sound does.</span></h1>
+    <h1><span class="kicker" data-de="LJ-Link-PRO · DJ-Waveforms und Pioneer BPM ans grandMA für Lightjockeys">LJ-Link-PRO · DJ waveforms and Pioneer BPM to grandMA for lightjockeys</span><span data-de="Zeig deinem LJ,">Show your LJ</span><br><span class="grad" data-de="was der Sound macht.">what the sound does.</span></h1>
     <p class="tag" data-de="Jedes Deck, jede Waveform, jeder Cue – live in einer Ansicht. Für Pioneer und Denon, mit dem Tempo direkt an grandMA und Daslight.">Every deck, every waveform, every cue – live in one view. For Pioneer and Denon, with the tempo sent straight to grandMA and Daslight.</p>
     <div class="cta">
       <a class="btn primary" id="hero-download" href="#download" data-de="Kostenlos herunterladen">Download for free</a>
@@ -188,7 +77,7 @@
 
   <section id="features">
     <p class="eyebrow" data-de="Funktionen">Features</p>
-    <h2 data-de="Gebaut für den Lichtjockey">Built for the lighting jockey</h2>
+    <h2 data-de="Gebaut für den Lightjockey">Built for the lightjockey</h2>
     <p class="lead" data-de="Auf einen Blick sehen, was der DJ lädt, wo jeder Track steht und wann der nächste Drop kommt – auch wenn zwei DJs mit verschiedenen Geräten spielen.">See at a glance what the DJ loads, where each track is and when the next drop comes – even when two DJs play on different gear.</p>
     <div class="grid">
       <div class="card"><h3><span class="ico">▤</span><span data-de="Alle Decks in einer Ansicht">All decks in one view</span></h3><p data-de="Untereinander wie auf dem CDJ-3000: Cover, Titel, Zeit auf die Millisekunde, Restzeit, Pitch, BPM, Tonart, Master, Sync und das Gerätemodell.">Stacked like the CDJ-3000 display: cover, title, time to the millisecond, remaining time, pitch, BPM, key, master, sync and the model of each player.</p></div>
@@ -234,7 +123,7 @@
 
   <section id="lightdesk">
     <p class="eyebrow" data-de="Lichtpult">Light desk</p>
-    <h2 data-de="Das Tempo vom DJ ans Pult">The DJ's tempo on your desk</h2>
+    <h2 data-de="Pioneer BPM ans grandMA – und Denon gleich mit">Pioneer BPM to grandMA – and Denon too</h2>
     <div class="split">
       <div>
         <p class="lead" data-de="LJ-Link-PRO schickt das BPM des führenden Decks an dein Pult, sodass Chaser und Effekte im Takt laufen. Ganz ohne Tap-Tempo.">LJ-Link-PRO sends the BPM of the leading deck to your desk, so chasers and effects run in time. No tap tempo needed.</p>
@@ -244,7 +133,7 @@
           <li><b>Daslight</b> <span data-de="und andere Programme – das Tempo als OSC-Zahl.">and other programs – the tempo as an OSC number.</span></li>
           <li><b>SEND BPM</b> <span data-de="– Auto (Master und/oder live) oder ein festes Deck; das sendende Deck trägt ein grünes SEND BPM.">– Auto (master and/or live) or one deck by hand; the sending deck shows a green SEND BPM mark.</span></li>
         </ul>
-        <p style="margin-top:18px"><a class="btn" href="https://github.com/skyplayser/LJ-Link-PRO/blob/main/docs/lichtpult.de.md" data-de="Schritt-für-Schritt-Anleitung für jedes Pult">Step-by-step guide for every desk (German)</a></p>
+        <p style="margin-top:18px"><a class="btn" href="pioneer-bpm-grandma.html" data-de="Schritt für Schritt: Pioneer BPM ans grandMA">Step by step: Pioneer BPM to grandMA</a></p>
       </div>
       <img src="images/send-bpm.png" alt="SEND BPM sends the BPM of the DJ deck to grandMA2, grandMA3 or Daslight" data-de-alt="SEND BPM schickt das BPM des DJ-Decks an grandMA2, grandMA3 oder Daslight" width="2800" height="1980" loading="lazy" decoding="async">
     </div>
@@ -321,7 +210,8 @@
 
   <section id="compat">
     <p class="eyebrow" data-de="Kompatibilität">Compatibility</p>
-    <h2 data-de="Getestete Geräte">Tested gear</h2>
+    <h2 data-de="Getestete Geräte – auch ältere CDJs und Mixer">Tested gear – older CDJs and mixers too</h2>
+    <p class="lead" data-de="Nicht nur CDJ-3000 und DJM-A9: Jeder Pioneer-Player mit LINK-Anschluss schickt sein Tempo über Pro DJ Link. Der CDJ-2000NXS2 und der DJM-2000NXS sind getestet.">Not only CDJ-3000 and DJM-A9: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. The CDJ-2000NXS2 and the DJM-2000NXS are tested.</p>
     <div class="table">
       <table>
         <tr><th data-de="Gerät">Device</th><th>Status</th></tr>
@@ -329,7 +219,7 @@
         <tr><td>CDJ-2000NXS2</td><td class="ok" data-de="getestet: Waveforms, Cues, Position (zwischen Beats geschätzt)">tested: waveforms, cues, position (estimated between beats)</td></tr>
         <tr><td>DJM-2000NXS</td><td class="ok" data-de="getestet als Mixer: ON AIR je Kanal">tested as mixer: ON AIR per channel</td></tr>
         <tr><td>Denon Prime 4+</td><td class="ok" data-de="getestet: Titel, Tempo, Position, Fader, Waveform, Beatgrid, Cues">tested: title, tempo, position, faders, waveform, beat grid, cues</td></tr>
-        <tr><td>CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, XDJ-AZ, DJM-900NXS2, DJM-A9, DJM-V10</td><td class="plan" data-de="sollte funktionieren, nicht getestet">expected to work, not tested</td></tr>
+        <tr><td>CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-1000MK2, XDJ-700, XDJ-XZ, XDJ-AZ, DJM-900NXS, DJM-900NXS2, DJM-A9, DJM-V10</td><td class="plan" data-de="sollte funktionieren, nicht getestet">expected to work, not tested</td></tr>
         <tr><td>Denon SC6000, Prime 4, Prime Go</td><td class="plan" data-de="sollte funktionieren (gleiches Protokoll), nicht getestet">expected to work (same protocol), not tested</td></tr>
         <tr><td>Serato DJ Pro</td><td class="part" data-de="am selben Rechner: Track, BPM, Tonart, Waveform-Übersicht, Beatgrid – ohne Abspielposition">on the same computer: track, BPM, key, waveform overview, beat grid – no play position</td></tr>
         <tr><td>Traktor</td><td class="plan" data-de="geplant">planned</td></tr>
@@ -337,10 +227,21 @@
     </div>
   </section>
 
+  <section id="guides" class="guides">
+    <p class="eyebrow" data-de="Anleitungen">Guides</p>
+    <h2 data-de="Schritt für Schritt">Step by step</h2>
+    <div class="grid">
+      <div class="card"><h3><a href="pioneer-bpm-grandma.html" data-de="Pioneer BPM ans grandMA">Pioneer BPM to grandMA</a></h3><p data-de="Das Tempo der CDJs auf einen Speedmaster am grandMA2 oder grandMA3 – auch mit älteren CDJs und Mixern.">The tempo of the CDJs on a speed master of your grandMA2 or grandMA3 – with older CDJs and mixers too.</p><a class="more" href="pioneer-bpm-grandma.html" data-de="Zur Anleitung →">Read the guide →</a></div>
+      <div class="card"><h3><a href="lightjockey-waveforms.html" data-de="Waveforms für den Lightjockey">Waveforms for the lightjockey</a></h3><p data-de="Jede CDJ- und Denon-Waveform live am FOH, auf Laptop oder Tablet.">Every CDJ and Denon waveform live at FOH, on a laptop or tablet.</p><a class="more" href="lightjockey-waveforms.html" data-de="Zur Anleitung →">Read the guide →</a></div>
+      <div class="card"><h3><a href="denon-stagelinq-lighting.html" data-de="Denon StageLinQ fürs Licht">Denon StageLinQ for lighting</a></h3><p data-de="Prime 4+, Prime 4, Prime Go und SC6000: Waveforms, Fader und BPM ans Pult.">Prime 4+, Prime 4, Prime Go and SC6000: waveforms, faders and BPM to the desk.</p><a class="more" href="denon-stagelinq-lighting.html" data-de="Zur Anleitung →">Read the guide →</a></div>
+    </div>
+  </section>
+
   <section id="faq">
     <p class="eyebrow">FAQ</p>
     <h2 data-de="Häufige Fragen">Questions</h2>
     <details><summary data-de="Was ist ein Lichtjockey (LJ)?">What is a lighting jockey (LJ)?</summary><p data-de="Ein Lichtjockey fährt die Lichtshow live zur Musik des DJs – im Club, auf Festivals und auf Veranstaltungen. Damit Licht und Musik zusammenpassen, muss der LJ wissen, was der DJ gerade spielt und wann der nächste Drop kommt. Genau das zeigt LJ-Link-PRO.">A lighting jockey runs the light show live to the DJ's music – in clubs, at festivals and at events. To match light and music, the LJ needs to know what the DJ is playing and when the next drop comes. That is exactly what LJ-Link-PRO shows.</p></details>
+    <details><summary data-de="Funktioniert es auch mit älteren CDJs und Mixern?">Does it work with older CDJs and mixers too?</summary><p data-de="Ja. Der CDJ-2000NXS2 und der DJM-2000NXS sind getestet. Andere Geräte mit Pro DJ Link wie CDJ-2000NXS, CDJ-900NXS, XDJ-1000 oder DJM-900NXS sollten funktionieren, sind aber noch nicht getestet.">Yes. The CDJ-2000NXS2 and the DJM-2000NXS are tested. Other Pro DJ Link gear like the CDJ-2000NXS, CDJ-900NXS, XDJ-1000 or DJM-900NXS is expected to work but not tested yet.</p></details>
     <details><summary data-de="Wie bekomme ich das BPM vom CDJ ins grandMA?">How do I get the BPM from the CDJs into my grandMA?</summary><p data-de="LJ-Link-PRO liest das Tempo über Pro DJ Link (Pioneer) bzw. StageLinQ (Denon) und schickt es per Telnet an grandMA2 oder per OSC an grandMA3 auf einen Speed Master. Chaser und Effekte laufen dann im Takt, ganz ohne Tap Tempo.">LJ-Link-PRO reads the tempo over Pro DJ Link (Pioneer) or StageLinQ (Denon) and sends it over Telnet to grandMA2 or over OSC to grandMA3, onto a speed master. Chasers and effects then run in time, without tap tempo.</p></details>
     <details><summary data-de="Kann ich die DJ-Waveform am Lichtpult auf einem Tablet sehen?">Can I see the DJ's waveform on a tablet at the light desk?</summary><p data-de="Ja. Jedes Gerät im selben Netzwerk – Tablet, Handy oder zweiter Bildschirm – öffnet dieselbe Ansicht im Browser, mit Tag- und Nachtmodus.">Yes. Any device in the same network – tablet, phone or second screen – opens the same view in the browser, with day and night mode.</p></details>
     <details><summary data-de="Braucht LJ-Link-PRO Internet?">Does LJ-Link-PRO need internet?</summary><p data-de="Nein. Für die Show reicht das lokale Netzwerk zwischen DJ-Geräten, Computer und Lichtpult. Keine Cloud, keine Telemetrie.">No. For the show it only needs the local network between DJ gear, computer and light desk. No cloud, no telemetry.</p></details>
@@ -356,7 +257,7 @@
 
 <footer>
   <div class="wrap">
-    <p data-de="Gebaut auf beat-link von Deep Symmetry. LJ-Link-PRO ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting oder Daslight. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Built on beat-link by Deep Symmetry. LJ-Link-PRO is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p data-de="Gebaut auf beat-link von Deep Symmetry. LJ-Link-PRO ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting oder Daslight und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Built on beat-link by Deep Symmetry. LJ-Link-PRO is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
     <p><a href="https://github.com/skyplayser/LJ-Link-PRO">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link-PRO/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link-PRO/issues">Issues</a> · <a href="https://github.com/skyplayser/LJ-Link-PRO/blob/main/THIRD_PARTY_NOTICES.md">Third party notices</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
     <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
   </div>

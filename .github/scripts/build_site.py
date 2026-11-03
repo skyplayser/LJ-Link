@@ -4,11 +4,13 @@
     python3 .github/scripts/build_site.py site docs/images
 
 - copies the screenshots (and the German ones to images/de/) and adds WebP versions in two sizes,
-- makes de/index.html from the English index.html: every data-de="…" replaces the element's text,
+- makes de/<page>.html from every English page with data-de attributes: every data-de="…" replaces the element's text,
   every data-de-<attr>="…" replaces that attribute, links get ../ and German screenshots are used,
 - wraps screenshots in <picture> with the WebP versions,
-- writes the structured data (SoftwareApplication, WebSite, FAQPage from the FAQ section),
-- writes sitemap.xml with both languages and the screenshots.
+- puts style.css inline,
+- writes the structured data (WebSite, SoftwareApplication on the home page, TechArticle and BreadcrumbList on
+  the guides, FAQPage from a FAQ section),
+- writes sitemap.xml with all pages in both languages and their screenshots.
 """
 import datetime
 import html
@@ -55,7 +57,7 @@ def to_german(page, site):
         return tag
     page = re.sub(r"<[^>]+>", attrs, page)
 
-    page = re.sub(r'((?:src|href)=")(images/|impressum\.html|datenschutz\.html)', r"\1../\2", page)
+    page = re.sub(r'((?:src|href)=")(images/|style\.css|impressum\.html|datenschutz\.html)', r"\1../\2", page)
     return re.sub(r'(src="\.\./images/)([\w-]+\.png")',
                   lambda m: m[1] + ("de/" if (site / "images" / "de" / m[2][:-1]).exists() else "") + m[2], page)
 
@@ -77,49 +79,61 @@ def text(fragment):
     return html.unescape(re.sub(r"<[^>]+>", "", fragment)).strip()
 
 
-def structured_data(page, lang, url):
+def structured_data(page, lang, url, home):
     meta = lambda prop: html.unescape(re.search(r'<meta (?:name|property)="%s" content="([^"]*)"' % prop, page)[1])
     shots = [BASE + p for p in dict.fromkeys(re.findall(r'<img [^>]*?src="(?:\.\./)?(images/[^"]+\.png)"', page))
              if not p.endswith("logo.png")]
-    features = [text(f) for f in re.findall(r'<div class="card"><h3><span class="ico"[^>]*>[^<]*</span>(.*?)</h3>',
-                                            page.split('id="features"')[1].split("</section>")[0])]
-    faq = page.split('id="faq"')[1].split("</section>")[0]
-    graph = [
-        {"@type": "WebSite", "@id": BASE + "#website", "name": "LJ-Link-PRO", "url": BASE, "inLanguage": ["en", "de"]},
-        {
-            "@type": "SoftwareApplication", "@id": BASE + "#app", "name": "LJ-Link-PRO", "url": url,
-            "description": meta("description"), "inLanguage": lang,
-            "applicationCategory": "MultimediaApplication", "applicationSubCategory": "DJ and lighting software",
-            "operatingSystem": "macOS 12+, Windows 10, Windows 11",
-            "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "isAccessibleForFree": True,
-            "downloadUrl": REPO + "/releases/latest", "installUrl": url + "#download",
+    author = {"@type": "Organization", "name": "NEXTPHILM", "url": "https://github.com/skyplayser"}
+    app = {"@type": "SoftwareApplication", "@id": BASE + "#app", "name": "LJ-Link-PRO", "url": BASE,
+           "applicationCategory": "MultimediaApplication", "operatingSystem": "macOS, Windows",
+           "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}
+    graph = [{"@type": "WebSite", "@id": BASE + "#website", "name": "LJ-Link-PRO", "url": BASE,
+              "inLanguage": ["en", "de"]}]
+    if 'id="features"' in page:  # the home page describes the app
+        features = [text(f) for f in re.findall(r'<div class="card"><h3><span class="ico"[^>]*>[^<]*</span>(.*?)</h3>',
+                                                page.split('id="features"')[1].split("</section>")[0])]
+        app.update({
+            "url": url, "description": meta("description"), "inLanguage": lang,
+            "applicationSubCategory": "DJ and lighting software", "operatingSystem": "macOS 12+, Windows 10, Windows 11",
+            "isAccessibleForFree": True, "downloadUrl": REPO + "/releases/latest", "installUrl": url + "#download",
             "image": BASE + "images/logo.png", "screenshot": shots, "featureList": features,
-            "keywords": "lighting jockey, LJ, Lichtjockey, DJ waveform, Pro DJ Link, StageLinQ, CDJ-3000, "
-                        "Denon Prime, grandMA2, grandMA3, Daslight, BPM, tap tempo, Veranstaltungstechnik",
-            "author": {"@type": "Organization", "name": "NEXTPHILM", "url": "https://github.com/skyplayser"},
-            "sameAs": [REPO],
-        },
-        {
-            "@type": "FAQPage", "@id": url + "#faq", "inLanguage": lang,
-            "mainEntity": [{"@type": "Question", "name": text(q),
-                            "acceptedAnswer": {"@type": "Answer", "text": text(a)}}
-                           for q, a in re.findall(r"<summary[^>]*>(.*?)</summary>(.*?)</details>", faq, re.S)],
-        },
-    ]
+            "keywords": "lightjockey, lighting jockey, LJ, Lichtjockey, DJ waveforms, Pro DJ Link, Pioneer CDJ, "
+                        "CDJ-3000, StageLinQ, Denon Prime, grandMA2, grandMA3, Daslight, BPM, tap tempo, "
+                        "Veranstaltungstechnik",
+            "author": author, "sameAs": [REPO]})
+        graph.append(app)
+    else:  # a guide: an article about the app, below the home page
+        headline = text(re.search(r"<h1>(.*?)</h1>", page, re.S)[1].split('class="kicker"')[-1].split("</span>", 1)[-1])
+        graph.append({"@type": "TechArticle", "@id": url + "#article", "headline": headline,
+                      "description": meta("description"), "url": url, "inLanguage": lang, "image": shots[:3],
+                      "author": author, "publisher": author, "about": app, "isPartOf": {"@id": BASE + "#website"},
+                      "dateModified": datetime.date.today().isoformat()})
+        graph.append({"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "LJ-Link-PRO", "item": home},
+            {"@type": "ListItem", "position": 2, "name": headline, "item": url}]})
+    if 'id="faq"' in page:
+        faq = page.split('id="faq"')[1].split("</section>")[0]
+        graph.append({"@type": "FAQPage", "@id": url + "#faq", "inLanguage": lang,
+                      "mainEntity": [{"@type": "Question", "name": text(q),
+                                      "acceptedAnswer": {"@type": "Answer", "text": text(a)}}
+                                     for q, a in re.findall(r"<summary[^>]*>(.*?)</summary>(.*?)</details>", faq, re.S)]})
     block = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False)
     return page.replace("<!-- structured-data -->", '<script type="application/ld+json">%s</script>' % block, 1)
 
 
-def sitemap(site, page):
+def sitemap(site, pages):
     today = datetime.date.today().isoformat()
-    alt = "".join('\n    <xhtml:link rel="alternate" hreflang="%s" href="%s"/>' % (l, BASE + p)
-                  for l, p in (("en", ""), ("de", "de/"), ("x-default", "")))
     urls = []
-    for path, sub in (("", ""), ("de/", "de/")):
-        imgs = "".join("\n    <image:image><image:loc>%simages/%s%s</image:loc></image:image>"
-                       % (BASE, sub if (site / "images" / sub / f).exists() else "", f)
-                       for f in dict.fromkeys(re.findall(r'src="images/([\w-]+\.png)"', page)) if f != "logo.png")
-        urls.append("  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>%s%s\n  </url>" % (BASE + path, today, alt, imgs))
+    for name, source in pages:
+        path = "" if name == "index.html" else name
+        alt = "".join('\n    <xhtml:link rel="alternate" hreflang="%s" href="%s"/>' % (l, BASE + p)
+                      for l, p in (("en", path), ("de", "de/" + path), ("x-default", path)))
+        for sub in ("", "de/"):
+            imgs = "".join("\n    <image:image><image:loc>%simages/%s%s</image:loc></image:image>"
+                           % (BASE, sub if (site / "images" / sub / f).exists() else "", f)
+                           for f in dict.fromkeys(re.findall(r'src="images/([\w-]+\.png)"', source)) if f != "logo.png")
+            urls.append("  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>%s%s\n  </url>"
+                        % (BASE + sub + path, today, alt, imgs))
     (site / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
         'xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
@@ -129,15 +143,20 @@ def sitemap(site, page):
 def main():
     site, images = Path(sys.argv[1]), Path(sys.argv[2])
     copy_images(site, images)
-    source = (site / "index.html").read_text(encoding="utf-8")
-    strip = lambda p: re.sub(r'\sdata-de(?:-[\w:-]+)?="[^"]*"', "", p)
-    en = structured_data(pictures(source, site), "en", BASE)
-    de = to_german(source, site)
-    de = structured_data(pictures(de, site), "de", BASE + "de/")
+    css = (site / "style.css").read_text(encoding="utf-8")
+    # The pages link style.css so they also work unbuilt; the build puts it inline (one request less).
+    finish = lambda p: re.sub(r'<link rel="stylesheet" href="(?:\.\./)?style\.css">', lambda m: "<style>\n%s</style>" % css,
+                              re.sub(r'\sdata-de(?:-[\w:-]+)?="[^"]*"', "", p))
+    pages = [(f.name, f.read_text(encoding="utf-8")) for f in sorted(site.glob("*.html"))]
+    pages = [(name, source) for name, source in pages if "data-de" in source]  # the bilingual pages
     (site / "de").mkdir(exist_ok=True)
-    (site / "index.html").write_text(strip(en), encoding="utf-8")
-    (site / "de" / "index.html").write_text(strip(de), encoding="utf-8")
-    sitemap(site, source)
+    for name, source in pages:
+        path = "" if name == "index.html" else name
+        en = structured_data(pictures(source, site), "en", BASE + path, BASE)
+        de = structured_data(pictures(to_german(source, site), site), "de", BASE + "de/" + path, BASE + "de/")
+        (site / name).write_text(finish(en), encoding="utf-8")
+        (site / "de" / name).write_text(finish(de), encoding="utf-8")
+    sitemap(site, pages)
 
 
 if __name__ == "__main__":
