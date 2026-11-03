@@ -1,0 +1,18 @@
+# LJ-Link-PRO
+
+> Free, open-source app for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2, grandMA3 and Daslight, so no tap tempo is needed. macOS and Windows.
+
+- Passive: it only listens and sends no commands to the DJ gear. No cloud, no telemetry.
+- Pioneer and Denon at the same time; devices are added and removed automatically.
+- Any tablet, phone or second screen in the network can open the same view.
+- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight is not confirmed yet. Serato DJ Pro works on the same computer without play position. Traktor is planned.
+- Not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight.
+
+## Links
+
+- [Website (English)](https://skyplayser.github.io/LJ-Link-PRO/)
+- [Website (Deutsch)](https://skyplayser.github.io/LJ-Link-PRO/de/)
+- [Download (latest release)](https://github.com/skyplayser/LJ-Link-PRO/releases/latest)
+- [README](https://github.com/skyplayser/LJ-Link-PRO#readme)
+- [Light desk guide (German)](https://github.com/skyplayser/LJ-Link-PRO/blob/main/docs/lichtpult.de.md)
+- [User guide (German)](https://github.com/skyplayser/LJ-Link-PRO/blob/main/docs/anleitung.de.md)

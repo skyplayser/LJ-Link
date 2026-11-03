@@ -1,23 +1,35 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LJ-Link-PRO – live waveforms of every DJ deck for the lighting jockey</title>
-<meta name="description" content="LJ-Link-PRO shows the lighting jockey every DJ deck live: waveforms, position, cues, loops and tempo from Pioneer Pro DJ Link and Denon StageLinQ, and sends the BPM to grandMA2, grandMA3 and Daslight. Free for macOS and Windows.">
-<link rel="canonical" href="https://skyplayser.github.io/LJ-Link-PRO/">
+<!-- English source of the site. The build (.github/scripts/build_site.py) makes de/index.html from the data-de*
+     attributes, adds the WebP pictures and writes the structured data and the sitemap. -->
+<title data-de="LJ-Link-PRO – DJ-Waveforms und BPM ans grandMA für Lichtjockeys">LJ-Link-PRO – DJ deck waveforms and BPM for lighting jockeys</title>
+<meta name="description" content="Free tool for lighting jockeys in clubs and at events: see every DJ deck live (waveforms, cues, loops, BPM) from Pioneer CDJs and Denon Prime, and send the BPM to grandMA2, grandMA3 and Daslight. No more tap tempo." data-de-content="Kostenloses Tool für Lichtjockeys in Clubs und auf Veranstaltungen: alle DJ-Decks live sehen (Waveforms, Cues, Loops, BPM) von Pioneer CDJs und Denon Prime, BPM direkt ans grandMA2, grandMA3 und Daslight. Schluss mit Tap Tempo.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link-PRO/" data-de-href="https://skyplayser.github.io/LJ-Link-PRO/de/">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link-PRO/">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link-PRO/de/">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link-PRO/">
 <link rel="icon" href="images/logo.png" type="image/png">
 <link rel="apple-touch-icon" href="images/logo.png">
 <meta name="theme-color" content="#07090c">
 <meta property="og:type" content="website">
-<meta property="og:title" content="LJ-Link-PRO – show your LJ what the sound does">
-<meta property="og:description" content="Every deck, every waveform, every cue, live in one view. Pioneer and Denon, BPM to grandMA and Daslight.">
+<meta property="og:site_name" content="LJ-Link-PRO">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ-Link-PRO – show your LJ what the sound does" data-de-content="LJ-Link-PRO – zeig deinem LJ, was der Sound macht">
+<meta property="og:description" content="The must-have for clubs and events: every DJ deck, every waveform, every cue live in one view. Pioneer and Denon, BPM straight to grandMA and Daslight. Free." data-de-content="Das Must-have für Clubs und Veranstaltungen: jedes DJ-Deck, jede Waveform, jeder Cue live in einer Ansicht. Pioneer und Denon, BPM direkt ans grandMA und Daslight. Kostenlos.">
 <meta property="og:image" content="https://skyplayser.github.io/LJ-Link-PRO/images/og.png">
-<meta property="og:url" content="https://skyplayser.github.io/LJ-Link-PRO/">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LJ-Link-PRO showing live DJ waveforms for the lighting jockey" data-de-content="LJ-Link-PRO zeigt dem Lichtjockey die DJ-Waveforms live">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link-PRO/" data-de-content="https://skyplayser.github.io/LJ-Link-PRO/de/">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"LJ-Link-PRO","operatingSystem":"macOS, Windows","applicationCategory":"MultimediaApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"url":"https://skyplayser.github.io/LJ-Link-PRO/","downloadUrl":"https://github.com/skyplayser/LJ-Link-PRO/releases/latest"}
-</script>
+<meta name="twitter:image:alt" content="LJ-Link-PRO showing live DJ waveforms for the lighting jockey" data-de-content="LJ-Link-PRO zeigt dem Lichtjockey die DJ-Waveforms live">
+<!-- structured-data -->
 <style>
   :root {
     --bg: #07090c; --panel: #11151b; --panel-2: #171c24; --line: #242b36; --text: #eef2f7; --muted: #9aa6b6;
@@ -28,6 +40,7 @@
   body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
   a { color: var(--accent-2); }
   img { max-width: 100%; }
+  picture { display: block; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
 
   /* Top bar */
@@ -45,6 +58,7 @@
   .hero { text-align: center; padding: 64px 0 24px; }
   .hero .logo { width: 116px; height: 116px; border-radius: 28px; box-shadow: 0 12px 48px rgba(59, 130, 246, .28); }
   h1 { font-size: clamp(36px, 6.2vw, 64px); line-height: 1.05; margin: 22px 0 14px; letter-spacing: -.025em; }
+  h1 .kicker { display: block; font-size: clamp(14px, 1.8vw, 16px); line-height: 1.4; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 14px; }
   h1 .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa 45%, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .tag { color: var(--muted); font-size: clamp(18px, 2.3vw, 21px); max-width: 720px; margin: 0 auto 28px; }
   .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
@@ -133,10 +147,11 @@
 <body>
 <header class="top">
   <div class="wrap">
-    <a href="#" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt=""><span>LJ-Link-PRO</span></a>
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ-Link-PRO</span></a>
     <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav id="nav">
       <a href="#features" data-de="Funktionen">Features</a>
+      <a href="#use" data-de="Für wen">Who it's for</a>
       <a href="#screens" data-de="Bilder">Screenshots</a>
       <a href="#lightdesk" data-de="Lichtpult">Light desk</a>
       <a href="#start" data-de="Los geht's">Get started</a>
@@ -144,22 +159,22 @@
       <a href="#install" data-de="Installieren">Install</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/skyplayser/LJ-Link-PRO">GitHub</a>
-      <button class="lang" id="lang" aria-label="Sprache / language">DE</button>
+      <a class="lang" id="lang" href="de/" hreflang="de" lang="de" title="Deutsch" data-de-href="../" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
   <div class="hero">
-    <img class="logo" src="images/logo.png" alt="LJ-Link-PRO logo">
-    <h1><span data-de="Zeig deinem LJ,">Show your LJ</span><br><span class="grad" data-de="was der Sound macht.">what the sound does.</span></h1>
+    <img class="logo" src="images/logo.png" alt="LJ-Link-PRO logo" width="116" height="116">
+    <h1><span class="kicker" data-de="LJ-Link-PRO · DJ-Waveforms und BPM für Lichtjockeys">LJ-Link-PRO · DJ waveforms and BPM for lighting jockeys</span><span data-de="Zeig deinem LJ,">Show your LJ</span><br><span class="grad" data-de="was der Sound macht.">what the sound does.</span></h1>
     <p class="tag" data-de="Jedes Deck, jede Waveform, jeder Cue – live in einer Ansicht. Für Pioneer und Denon, mit dem Tempo direkt an grandMA und Daslight.">Every deck, every waveform, every cue – live in one view. For Pioneer and Denon, with the tempo sent straight to grandMA and Daslight.</p>
     <div class="cta">
       <a class="btn primary" id="hero-download" href="#download" data-de="Kostenlos herunterladen">Download for free</a>
       <a class="btn" href="#start" data-de="So funktioniert's">How it works</a>
     </div>
     <p class="meta"><span id="hero-version"></span><span data-de="macOS und Windows · Java eingebaut · Open Source">macOS and Windows · Java included · open source</span></p>
-    <img class="shot" src="images/waveform.png" alt="LJ-Link-PRO showing CDJs and a Denon controller side by side" width="2800" height="1980">
+    <img class="shot" src="images/waveform.png" alt="LJ-Link-PRO showing live waveforms of Pioneer CDJs and a Denon Prime side by side, with cues, beat grid and BPM" data-de-alt="LJ-Link-PRO zeigt live die Waveforms von Pioneer CDJs und einem Denon Prime nebeneinander, mit Cues, Beatgrid und BPM" width="2800" height="1980" fetchpriority="high">
     <div class="makers">
       <span class="maker"><b>Pioneer DJ</b> · Pro DJ Link</span>
       <span class="maker"><b>Denon DJ</b> · StageLinQ</span>
@@ -191,17 +206,29 @@
     </div>
   </section>
 
+  <section id="use">
+    <p class="eyebrow" data-de="Für wen">Who it's for</p>
+    <h2 data-de="Das Must-have für Clubs und Veranstaltungen">The must-have for clubs and events</h2>
+    <p class="lead" data-de="Überall, wo ein DJ spielt und jemand das Licht fährt: LJ-Link-PRO bringt die Decks an den FOH-Platz – ohne Kabel zum DJ-Pult umzustecken und ohne etwas am DJ-Setup zu ändern.">Wherever a DJ plays and someone runs the lights: LJ-Link-PRO brings the decks to front of house – without re-patching the DJ booth and without touching the DJ setup.</p>
+    <div class="grid">
+      <div class="card"><h3><span class="ico">◉</span><span data-de="Clubs">Clubs</span></h3><p data-de="Der Resident-LJ sieht jeden Gast-DJ live, egal ob CDJ-3000 oder Denon Prime. Drops, Breaks und Track-Wechsel kommen nicht mehr überraschend.">The resident LJ sees every guest DJ live, whether on CDJ-3000 or Denon Prime. Drops, breaks and track changes no longer come as a surprise.</p></div>
+      <div class="card"><h3><span class="ico">▲</span><span data-de="Festivals und Open Airs">Festivals and open airs</span></h3><p data-de="Wechselnde DJs mit unterschiedlichem Equipment auf einer Bühne: Pioneer und Denon erscheinen automatisch nebeneinander. Tag-Modus für Sonne am FOH.">Changing DJs with different gear on one stage: Pioneer and Denon appear side by side automatically. Day mode for sunshine at FOH.</p></div>
+      <div class="card"><h3><span class="ico">★</span><span data-de="Events und Veranstaltungstechnik">Events and production companies</span></h3><p data-de="Firmenfeier, Hochzeit, Club-Night im Saal: Laptop an den Switch, Tablet ans Pult, BPM ins grandMA. In Minuten eingerichtet, kostenlos für jedes Projekt.">Corporate party, wedding, club night in a hall: laptop on the switch, tablet at the desk, BPM into the grandMA. Set up in minutes, free for every job.</p></div>
+      <div class="card"><h3><span class="ico">◎</span><span data-de="Streams und Livestreams">Streams and live streams</span></h3><p data-de="Der Privatsphäre-Modus blendet Titel, Artist und Cover aus, damit nichts davon im Stream oder auf geteilten Bildschirmen landet.">Privacy mode hides title, artist and cover, so none of it ends up in the stream or on shared screens.</p></div>
+    </div>
+  </section>
+
   <section id="screens">
     <p class="eyebrow" data-de="Bilder">Screenshots</p>
     <h2 data-de="So sieht es aus">What it looks like</h2>
     <p class="lead" data-de="Alle Bilder stammen aus dem echten Programm mit echten Geräten; nur Titel und Cover sind durch Testnamen ersetzt.">All pictures come from the real program with real gear; only titles and covers are replaced by test names.</p>
     <div class="gallery">
-      <figure><img src="images/mixer.png" alt="" loading="lazy"><figcaption data-de="Reiter Mixer: ein Block pro Mixer, Pioneer und Denon.">Mixer tab: one block per mixer, Pioneer and Denon.</figcaption></figure>
-      <figure><img src="images/send-bpm.png" alt="" loading="lazy"><figcaption data-de="SEND BPM: welches Deck das Tempo ans Pult gibt.">SEND BPM: which deck gives the tempo to the desk.</figcaption></figure>
-      <figure><img src="images/settings.png" alt="" loading="lazy"><figcaption data-de="Einstellungen mit Geräteliste und Lichtpult-Link.">Settings with the device list and the light desk link.</figcaption></figure>
-      <figure><img src="images/start.png" alt="" loading="lazy"><figcaption data-de="Start: ein Knopf für alle Geräte.">Start: one button for every device.</figcaption></figure>
-      <figure><img src="images/waveform-day.png" alt="" loading="lazy"><figcaption data-de="Tag-Modus für helle Räume.">Day mode for bright rooms.</figcaption></figure>
-      <figure><img src="images/player-details.png" alt="" loading="lazy"><figcaption data-de="Klick auf ein Deck: alles, was die Schnittstelle meldet.">Click a deck: everything the interface reports.</figcaption></figure>
+      <figure><img src="images/mixer.png" alt="Mixer tab of LJ-Link-PRO with ON AIR per channel for a Pioneer DJM and a Denon mixer" data-de-alt="Reiter Mixer in LJ-Link-PRO mit ON AIR je Kanal für einen Pioneer DJM und einen Denon-Mixer" width="2800" height="1980" loading="lazy" decoding="async"><figcaption data-de="Reiter Mixer: ein Block pro Mixer, Pioneer und Denon.">Mixer tab: one block per mixer, Pioneer and Denon.</figcaption></figure>
+      <figure><img src="images/send-bpm.png" alt="SEND BPM tab choosing which DJ deck sends its tempo to the grandMA lighting console" data-de-alt="Reiter SEND BPM: welches DJ-Deck sein Tempo ans grandMA-Lichtpult schickt" width="2800" height="1980" loading="lazy" decoding="async"><figcaption data-de="SEND BPM: welches Deck das Tempo ans Pult gibt.">SEND BPM: which deck gives the tempo to the desk.</figcaption></figure>
+      <figure><img src="images/settings.png" alt="LJ-Link-PRO settings with the list of found DJ devices and the light desk link" data-de-alt="Einstellungen von LJ-Link-PRO mit der Liste gefundener DJ-Geräte und dem Lichtpult-Link" width="2800" height="1980" loading="lazy" decoding="async"><figcaption data-de="Einstellungen mit Geräteliste und Lichtpult-Link.">Settings with the device list and the light desk link.</figcaption></figure>
+      <figure><img src="images/start.png" alt="Start screen of LJ-Link-PRO with one button to find all Pioneer and Denon devices" data-de-alt="Startbildschirm von LJ-Link-PRO mit einem Knopf, der alle Pioneer- und Denon-Geräte findet" width="2800" height="1980" loading="lazy" decoding="async"><figcaption data-de="Start: ein Knopf für alle Geräte.">Start: one button for every device.</figcaption></figure>
+      <figure><img src="images/waveform-day.png" alt="DJ waveforms in the bright day mode for daylight and open air stages" data-de-alt="DJ-Waveforms im hellen Tag-Modus für Tageslicht und Open-Air-Bühnen" width="2800" height="1980" loading="lazy" decoding="async"><figcaption data-de="Tag-Modus für helle Räume.">Day mode for bright rooms.</figcaption></figure>
+      <figure><img src="images/player-details.png" alt="Detail view of one CDJ deck with BPM, key, pitch, position and cues" data-de-alt="Detailansicht eines CDJ-Decks mit BPM, Tonart, Pitch, Position und Cues" width="2800" height="2100" loading="lazy" decoding="async"><figcaption data-de="Klick auf ein Deck: alles, was die Schnittstelle meldet.">Click a deck: everything the interface reports.</figcaption></figure>
     </div>
   </section>
 
@@ -219,7 +246,7 @@
         </ul>
         <p style="margin-top:18px"><a class="btn" href="https://github.com/skyplayser/LJ-Link-PRO/blob/main/docs/lichtpult.de.md" data-de="Schritt-für-Schritt-Anleitung für jedes Pult">Step-by-step guide for every desk (German)</a></p>
       </div>
-      <img src="images/send-bpm.png" alt="SEND BPM window" loading="lazy">
+      <img src="images/send-bpm.png" alt="SEND BPM sends the BPM of the DJ deck to grandMA2, grandMA3 or Daslight" data-de-alt="SEND BPM schickt das BPM des DJ-Decks an grandMA2, grandMA3 oder Daslight" width="2800" height="1980" loading="lazy" decoding="async">
     </div>
     <div class="table" style="margin-top:28px">
       <table>
@@ -313,6 +340,10 @@
   <section id="faq">
     <p class="eyebrow">FAQ</p>
     <h2 data-de="Häufige Fragen">Questions</h2>
+    <details><summary data-de="Was ist ein Lichtjockey (LJ)?">What is a lighting jockey (LJ)?</summary><p data-de="Ein Lichtjockey fährt die Lichtshow live zur Musik des DJs – im Club, auf Festivals und auf Veranstaltungen. Damit Licht und Musik zusammenpassen, muss der LJ wissen, was der DJ gerade spielt und wann der nächste Drop kommt. Genau das zeigt LJ-Link-PRO.">A lighting jockey runs the light show live to the DJ's music – in clubs, at festivals and at events. To match light and music, the LJ needs to know what the DJ is playing and when the next drop comes. That is exactly what LJ-Link-PRO shows.</p></details>
+    <details><summary data-de="Wie bekomme ich das BPM vom CDJ ins grandMA?">How do I get the BPM from the CDJs into my grandMA?</summary><p data-de="LJ-Link-PRO liest das Tempo über Pro DJ Link (Pioneer) bzw. StageLinQ (Denon) und schickt es per Telnet an grandMA2 oder per OSC an grandMA3 auf einen Speed Master. Chaser und Effekte laufen dann im Takt, ganz ohne Tap Tempo.">LJ-Link-PRO reads the tempo over Pro DJ Link (Pioneer) or StageLinQ (Denon) and sends it over Telnet to grandMA2 or over OSC to grandMA3, onto a speed master. Chasers and effects then run in time, without tap tempo.</p></details>
+    <details><summary data-de="Kann ich die DJ-Waveform am Lichtpult auf einem Tablet sehen?">Can I see the DJ's waveform on a tablet at the light desk?</summary><p data-de="Ja. Jedes Gerät im selben Netzwerk – Tablet, Handy oder zweiter Bildschirm – öffnet dieselbe Ansicht im Browser, mit Tag- und Nachtmodus.">Yes. Any device in the same network – tablet, phone or second screen – opens the same view in the browser, with day and night mode.</p></details>
+    <details><summary data-de="Braucht LJ-Link-PRO Internet?">Does LJ-Link-PRO need internet?</summary><p data-de="Nein. Für die Show reicht das lokale Netzwerk zwischen DJ-Geräten, Computer und Lichtpult. Keine Cloud, keine Telemetrie.">No. For the show it only needs the local network between DJ gear, computer and light desk. No cloud, no telemetry.</p></details>
     <details><summary data-de="Stört LJ-Link-PRO den DJ oder die Player?">Does LJ-Link-PRO disturb the DJ or the players?</summary><p data-de="Nein. Es hört nur zu und sendet keine Sync-, Master-, Tempo- oder Fader-Befehle an die DJ-Geräte. Im Pro-DJ-Link-Netz meldet es sich wie andere Programme als virtueller Player an.">No. It only listens and sends no sync, master, tempo or fader commands to the DJ gear. On Pro DJ Link it joins as a virtual player, like other programs do.</p></details>
     <details><summary data-de="Warum sehe ich keine Fader-Stellungen beim Pioneer-Mixer?">Why do I not see fader positions on a Pioneer mixer?</summary><p data-de="Pro DJ Link überträgt nur, ob ein Kanal auf Sendung ist. Fader und EQ sendet kein DJM. Denon-Geräte melden die Fader-Stellungen.">Pro DJ Link only transmits whether a channel is on air. No DJM sends faders or EQ. Denon devices do report fader positions.</p></details>
     <details><summary data-de="Warum hat ein Track keine Waveform?">Why does a track have no waveform?</summary><p data-de="Pioneer: Tracks müssen mit rekordbox analysiert und auf USB/SD exportiert sein; Streaming-Tracks haben keine Waveform-Daten. Denon: Die Waveform kommt aus der Engine-Bibliothek des Geräts.">Pioneer: tracks must be analysed with rekordbox and exported to USB/SD; streaming tracks have no waveform data. Denon: the waveform comes from the device's Engine library.</p></details>
@@ -335,23 +366,16 @@
 
 <script>
   (function () {
-    // Language: English in the page, German from data-de; the browser language decides, the button switches.
-    var nodes = document.querySelectorAll("[data-de]");
-    nodes.forEach(function (n) { n.setAttribute("data-en", n.textContent); });
-    function setLang(l) {
-      document.documentElement.setAttribute("data-lang", l);
-      document.documentElement.lang = l;
-      nodes.forEach(function (n) { n.textContent = n.getAttribute(l === "de" ? "data-de" : "data-en"); });
-      document.getElementById("lang").textContent = l === "de" ? "EN" : "DE";
-      try { localStorage.setItem("lj-lang", l); } catch (e) { /* private mode */ }
-      showVersion();
-    }
+    // Language: English at /, German at /de/ (built from data-de). A saved choice wins, otherwise a German
+    // browser goes from / to /de/ on the first visit. The button is a plain link, so search engines see both.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
     var saved = null;
     try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
-    var start = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
-    document.getElementById("lang").onclick = function () {
-      setLang(document.documentElement.getAttribute("data-lang") === "de" ? "en" : "de");
-    };
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
 
     // The download that fits this computer is highlighted and used by the big button.
     var ua = navigator.userAgent, os = /Windows/.test(ua) ? "win" : /Mac/.test(ua) ? "mac-arm" : null;
@@ -367,7 +391,7 @@
     var version = null;
     function showVersion() {
       if (!version) return;
-      var de = document.documentElement.getAttribute("data-lang") === "de";
+      var de = lang === "de";
       document.getElementById("hero-version").textContent = "Version " + version + " · ";
       document.getElementById("dl-version").textContent = de ? "Aktuelle Version: " + version + "." : "Current version: " + version + ".";
     }
@@ -375,7 +399,6 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j && j.tag_name) { version = j.tag_name.replace(/^v/, ""); showVersion(); } })
       .catch(function () { /* offline: no version line */ });
-    setLang(start);
 
     // Phone menu.
     var menu = document.getElementById("menu"), nav = document.getElementById("nav");
