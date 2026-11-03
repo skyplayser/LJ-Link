@@ -1,6 +1,6 @@
-# LJ-Link-PRO
+# LJ Link
 
-> Free, open-source app for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2, grandMA3 and Daslight, so no tap tempo is needed. macOS and Windows.
+> Free, open-source app (Eclipse Public License 2.0) for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2, grandMA3 and Daslight, so no tap tempo is needed. macOS and Windows.
 
 - Passive: it only listens and sends no commands to the DJ gear. No cloud, no telemetry.
 - Pioneer and Denon at the same time; devices are added and removed automatically.

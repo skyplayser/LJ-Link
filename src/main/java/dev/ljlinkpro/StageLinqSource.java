@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
  * downloaded once from the device's FileTransfer service ({@link StageLinqLibrary}).
  */
 final class StageLinqSource implements DeckSource {
-    private static final String SOFTWARE_NAME = "LJ-Link-PRO";
-    private static final String SOFTWARE_VERSION = "1.4.1";
+    private static final String SOFTWARE_NAME = "LJ Link";
+    private static final String SOFTWARE_VERSION = "1.4.2";
     private static final int DEFAULT_SAMPLE_RATE = 44_100;
     private static final Pattern DECK_VALUE = Pattern.compile("^/Engine/Deck(\\d)/(.+)$");
     private static final Pattern FADER = Pattern.compile("^/Mixer/CH(\\d)faderPosition$");

@@ -84,10 +84,10 @@ def structured_data(page, lang, url, home):
     shots = [BASE + p for p in dict.fromkeys(re.findall(r'<img [^>]*?src="(?:\.\./)?(images/[^"]+\.png)"', page))
              if not p.endswith("logo.png")]
     author = {"@type": "Organization", "name": "NEXTPHILM", "url": "https://github.com/skyplayser"}
-    app = {"@type": "SoftwareApplication", "@id": BASE + "#app", "name": "LJ-Link-PRO", "url": BASE,
+    app = {"@type": "SoftwareApplication", "@id": BASE + "#app", "name": "LJ Link", "url": BASE,
            "applicationCategory": "MultimediaApplication", "operatingSystem": "macOS, Windows",
            "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}}
-    graph = [{"@type": "WebSite", "@id": BASE + "#website", "name": "LJ-Link-PRO", "url": BASE,
+    graph = [{"@type": "WebSite", "@id": BASE + "#website", "name": "LJ Link", "url": BASE,
               "inLanguage": ["en", "de"]}]
     if 'id="features"' in page:  # the home page describes the app
         features = [text(f) for f in re.findall(r'<div class="card"><h3><span class="ico"[^>]*>[^<]*</span>(.*?)</h3>',
@@ -109,7 +109,7 @@ def structured_data(page, lang, url, home):
                       "author": author, "publisher": author, "about": app, "isPartOf": {"@id": BASE + "#website"},
                       "dateModified": datetime.date.today().isoformat()})
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "LJ-Link-PRO", "item": home},
+            {"@type": "ListItem", "position": 1, "name": "LJ Link", "item": home},
             {"@type": "ListItem", "position": 2, "name": headline, "item": url}]})
     if 'id="faq"' in page:
         faq = page.split('id="faq"')[1].split("</section>")[0]

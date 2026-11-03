@@ -9,7 +9,7 @@ import java.awt.TrayIcon;
 
 /**
  * Menu bar icon (macOS) / notification area icon (Windows). Offers "open" and "quit".
- * The icon is the LJ-Link-PRO logo, drawn in code ({@link Logo}).
+ * The icon is the LJ Link logo, drawn in code ({@link Logo}).
  */
 final class Tray {
     private Tray() {}
@@ -51,7 +51,7 @@ final class Tray {
         java.awt.EventQueue.invokeLater(Tray::updateLabel);
         if (first && trayIcon != null) {
             boolean de = "de".equals(AppSettings.language());
-            trayIcon.displayMessage("LJ-Link-PRO", de ? "Version " + r.version() + " ist verfügbar. Installieren über das Menü."
+            trayIcon.displayMessage("LJ Link", de ? "Version " + r.version() + " ist verfügbar. Installieren über das Menü."
                     : "Version " + r.version() + " is available. Install it from the menu.", TrayIcon.MessageType.INFO);
         }
     }
@@ -97,7 +97,7 @@ final class Tray {
             menu.add(updateItem);
             menu.add(quitItem);
 
-            TrayIcon icon = new TrayIcon(Logo.render(64, true), "LJ-Link-PRO", menu);
+            TrayIcon icon = new TrayIcon(Logo.render(64, true), "LJ Link", menu);
             icon.setImageAutoSize(true);
             // Double click on Windows opens the interface; on macOS the menu opens on a single click.
             icon.addActionListener(e -> open.run());

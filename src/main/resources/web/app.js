@@ -1239,6 +1239,7 @@ $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
 $("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); };
+$("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("settings").classList.add("hidden"); });
@@ -1275,7 +1276,7 @@ async function loadBpm() {
   const state = $("bpm-state");
   const list = $("bpm-list");
   if (!res || !res.config) {
-    state.textContent = t("This can only be set on the computer that runs LJ-Link-PRO.");
+    state.textContent = t("This can only be set on the computer that runs LJ Link.");
     list.textContent = "";
     return;
   }

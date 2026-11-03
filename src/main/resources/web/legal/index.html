@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licenses – LJ Link</title>
+<link rel="icon" href="../logo.svg" type="image/svg+xml">
+<style>
+  body { margin: 0; background: #07090c; color: #eef2f7; font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 56px; }
+  a { color: #60a5fa; }
+  h1 { margin: 0 0 6px; font-size: 30px; }
+  h2 { margin: 32px 0 8px; font-size: 20px; }
+  p { color: #c9d2de; }
+  .table { overflow-x: auto; border: 1px solid #242b36; border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  td, th { text-align: left; padding: 9px 12px; border-bottom: 1px solid #242b36; vertical-align: top; }
+  th { color: #9aa6b6; font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  ul { padding-left: 20px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Licenses</h1>
+  <p>LJ Link is © 2026 Philipp Spruck / NEXTPHILM and is distributed under the
+    <a href="LICENSE.txt">Eclipse Public License 2.0</a>, without any warranty. Source code:
+    <a href="https://github.com/skyplayser/LJ-Link-PRO">github.com/skyplayser/LJ-Link-PRO</a>.</p>
+
+  <h2>Open source components</h2>
+  <p>The program contains these components, unchanged. Their source code is available at the projects' pages, listed in the
+    <a href="THIRD_PARTY_NOTICES.md">third party notices</a>.</p>
+  <div class="table"><table>
+    <tr><th>Component</th><th>License</th></tr>
+    <tr><td>beat-link, crate-digger, electro (Deep Symmetry)</td><td><a href="EPL-2.0.txt">EPL-2.0</a></td></tr>
+    <tr><td>Remote Tea ONC/RPC (separate, replaceable library)</td><td><a href="LGPL-2.0.txt">LGPL-2.0</a></td></tr>
+    <tr><td>Kaitai Struct Java runtime</td><td><a href="MIT-kaitai.txt">MIT</a></td></tr>
+    <tr><td>SLF4J</td><td><a href="MIT-slf4j.txt">MIT</a></td></tr>
+    <tr><td>Eclipse Jetty, Jetty Jakarta Servlet API</td><td><a href="EPL-2.0.txt">EPL-2.0</a> or <a href="Apache-2.0.txt">Apache-2.0</a> (servlet API: EPL-2.0 or <a href="GPL-2.0-with-Classpath-Exception.txt">GPL-2.0 with Classpath Exception</a>)</td></tr>
+    <tr><td>Javalin, Jackson, Kotlin standard library, JetBrains annotations, SQLite JDBC, Apache Commons Math, API Guardian</td><td><a href="Apache-2.0.txt">Apache-2.0</a></td></tr>
+    <tr><td>OpenJDK runtime (installers only; its own notices are in the runtime's <code>legal</code> folder)</td><td><a href="GPL-2.0-with-Classpath-Exception.txt">GPL-2.0 with Classpath Exception</a></td></tr>
+  </table></div>
+
+  <h2>License and notice files of the libraries</h2>
+  <ul id="library-files"><li>…</li></ul>
+
+  <h2>Trademarks</h2>
+  <p>LJ Link is not an official product of, and is not endorsed by, AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting,
+    Daslight, Serato, Ableton or Native Instruments. All product names and trademarks belong to their owners and are named only
+    to describe compatibility. LJ Link is not related to the LightJockey software by Martin.</p>
+</div>
+<script>
+  // The build copies the license and notice files that the libraries ship and lists them in libraries/index.txt.
+  fetch("libraries/index.txt")
+    .then(r => r.ok ? r.text() : "")
+    .then(text => {
+      const ul = document.getElementById("library-files");
+      ul.textContent = "";
+      text.split("\n").filter(Boolean).forEach(path => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = "libraries/" + path;
+        a.textContent = path;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    });
+</script>
+</body>
+</html>

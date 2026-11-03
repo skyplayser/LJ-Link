@@ -1,6 +1,6 @@
-# LJ-Link-PRO – Anleitung
+# LJ Link – Anleitung
 
-LJ-Link-PRO zeigt dir live, **welcher Track auf jedem DJ-Player läuft und wo er gerade steht**. Gedacht für den Lichtjockey:
+LJ Link zeigt dir live, **welcher Track auf jedem DJ-Player läuft und wo er gerade steht**. Gedacht für den Lichtjockey:
 Drops und Übergänge rechtzeitig erkennen.
 
 ![Übersicht](images/de/waveform.png)
@@ -38,21 +38,21 @@ Lade die Datei für deinen Computer von der [Releases-Seite](../../../releases):
 Die Installer sind noch nicht bei Apple bzw. Microsoft signiert. Deshalb warnen beide Systeme **einmal** beim ersten Start.
 Das sagt nichts über die Sicherheit aus. So geht es weiter:
 
-### Mac: „LJ-Link-PRO“ nicht geöffnet
+### Mac: „LJ Link“ nicht geöffnet
 
-Meldung: *Apple konnte nicht überprüfen, ob „LJ-Link-PRO“ frei von Schadsoftware ist …*
+Meldung: *Apple konnte nicht überprüfen, ob „LJ Link“ frei von Schadsoftware ist …*
 
-1. `.dmg` öffnen und *LJ-Link-PRO* in den Ordner **Programme** ziehen.
-2. LJ-Link-PRO einmal starten. Die Warnung erscheint: **Fertig** klicken (nicht *In den Papierkorb legen*).
+1. `.dmg` öffnen und *LJ Link* in den Ordner **Programme** ziehen.
+2. LJ Link einmal starten. Die Warnung erscheint: **Fertig** klicken (nicht *In den Papierkorb legen*).
 3. **Systemeinstellungen** öffnen → **Datenschutz & Sicherheit** → ganz nach unten scrollen.
-4. Bei *„LJ-Link-PRO“ wurde blockiert …* auf **Dennoch öffnen** klicken und mit Passwort oder Touch ID bestätigen.
+4. Bei *„LJ Link“ wurde blockiert …* auf **Dennoch öffnen** klicken und mit Passwort oder Touch ID bestätigen.
 5. Im nächsten Fenster noch einmal **Öffnen** wählen.
-6. Fragt macOS nach dem **lokalen Netzwerk**: **Erlauben**. Ohne das findet LJ-Link-PRO keine Player.
+6. Fragt macOS nach dem **lokalen Netzwerk**: **Erlauben**. Ohne das findet LJ Link keine Player.
 
 Bis macOS 14 reicht auch: Rechtsklick auf die App → *Öffnen* → *Öffnen*. Für Profis per Terminal (danach keine Warnung mehr):
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/LJ-Link-PRO.app
+xattr -dr com.apple.quarantine "/Applications/LJ Link.app"
 ```
 
 ### Windows: „Der Computer wurde durch Windows geschützt“
@@ -60,10 +60,10 @@ xattr -dr com.apple.quarantine /Applications/LJ-Link-PRO.app
 1. `LJ-Link-PRO-windows.exe` starten.
 2. Im blauen SmartScreen-Fenster auf **Weitere Informationen** klicken.
 3. **Trotzdem ausführen** klicken und den Installer durchklicken.
-4. Beim ersten Start fragt die Firewall: **Private Netzwerke** anhaken und **Zugriff zulassen**. Ohne das findet LJ-Link-PRO keine
+4. Beim ersten Start fragt die Firewall: **Private Netzwerke** anhaken und **Zugriff zulassen**. Ohne das findet LJ Link keine
    Player.
 
-Firewall-Frage verpasst? *Windows-Sicherheit → Firewall- & Netzwerkschutz → App durch die Firewall zulassen* → LJ-Link-PRO für
+Firewall-Frage verpasst? *Windows-Sicherheit → Firewall- & Netzwerkschutz → App durch die Firewall zulassen* → LJ Link für
 *Privat* anhaken.
 
 ## Netzwerk aufbauen
@@ -90,7 +90,7 @@ Ein Klick darauf öffnet die **Weboberfläche**, schaltet den **Privatsphäre-Mo
 ### Denon-Geräte (Prime 4+, SC6000, Prime Go)
 
 Denon-Geräte findet **Automatisch suchen** zusammen mit den Pioneer-Geräten. Das Gerät muss im selben Netzwerk hängen
-(Netzwerkkabel oder WLAN, wie bei Engine DJ). LJ-Link-PRO zeigt dann Titel, Artist, Tempo, Spielstatus, Master, Laufzeit, Restzeit
+(Netzwerkkabel oder WLAN, wie bei Engine DJ). LJ Link zeigt dann Titel, Artist, Tempo, Spielstatus, Master, Laufzeit, Restzeit
 und die **echten Fader-Stellungen** des Mixers im blauen Balken. Die Waveform mit Beatgrid und Cues liest das Programm aus der Bibliothek des Geräts (Engine Library). Sie hat nur die Auflösung der Übersicht, die Detailansicht ist daraus geglättet; Cover erscheinen nur, wenn die Bibliothek welche enthält.
 Nach einem Abbruch braucht das Gerät manchmal einige Sekunden, bis es eine neue Verbindung annimmt.
 
@@ -189,13 +189,13 @@ Programm-Symbol ändert. Mit `--privacy` startet das Programm in diesem Modus.
 
 Unter der Werkzeugleiste steht eine Adresse wie `http://192.168.1.50:8080`. Gib sie auf einem Tablet oder Laptop im **selben
 Netzwerk** im Browser ein. Dort siehst du dieselbe Anzeige. Zum Starten und Beenden ist weiterhin der Computer nötig, auf dem
-LJ-Link-PRO läuft.
+LJ Link läuft.
 
 ![Tablet](images/de/tablet.png)
 
 ## Lichtpult-Link
 
-LJ-Link-PRO kann das **Tempo** an dein Lichtpult senden, damit Effekte im Takt laufen: an grandMA2 und grandMA2 onPC über
+LJ Link kann das **Tempo** an dein Lichtpult senden, damit Effekte im Takt laufen: an grandMA2 und grandMA2 onPC über
 Telnet, an grandMA3 und grandMA3 onPC über OSC, an Daslight und andere Programme als OSC-Zahl. Der dot2 lässt sich über das
 Netzwerk nicht ansteuern.
 
@@ -209,7 +209,7 @@ Passwort → **Speichern** → **Test senden**. Welches Deck das Tempo liefert, 
 **Die Suche findet nichts.**
 - Sind Player und Computer am selben Switch? Brennt am Netzwerkanschluss das Licht?
 - WLAN am Computer ausschalten.
-- Mac: *Systemeinstellungen → Datenschutz & Sicherheit → Lokales Netzwerk* – LJ-Link-PRO muss erlaubt sein.
+- Mac: *Systemeinstellungen → Datenschutz & Sicherheit → Lokales Netzwerk* – LJ Link muss erlaubt sein.
 - Windows: Firewall-Frage mit *Zugriff zulassen* für **private Netzwerke** bestätigen.
 - Läuft rekordbox auf diesem Computer? Beenden.
 - Weiter mit **Manuell einrichten**: die Prüfung nennt den Grund.
@@ -226,7 +226,7 @@ Passwort → **Speichern** → **Test senden**. Welches Deck das Tempo liefert, 
 - Rechtsklick auf das Programm → *Öffnen* → *Öffnen*.
 
 **Das Symbol in der Menüleiste fehlt.**
-- *Systemeinstellungen → Menüleiste*: prüfen, ob LJ-Link-PRO angezeigt werden darf. Bei voller Menüleiste blendet macOS Symbole aus.
+- *Systemeinstellungen → Menüleiste*: prüfen, ob LJ Link angezeigt werden darf. Bei voller Menüleiste blendet macOS Symbole aus.
 
 **Zwei Netzwerkkarten (Mac).** Hängt der Computer in zwei Netzwerken, wählt das Programm den Anschluss automatisch anhand des
 Netzwerks der Player. Die Liste unter *Manuell einrichten* zeigt, welche Anschlüsse es gibt.
