@@ -358,4 +358,4 @@ label.check input { width: 20px; height: 20px; min-height: 0; accent-color: var(
 @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
 
 /* Documentation screenshots: no local warnings */
-.shot #warnings, .shot-early #warnings { display: none !important; }
+.shot #warnings, .shot-early #warnings, .shot #search-warnings, .shot-early #search-warnings { display: none !important; }

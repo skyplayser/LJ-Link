@@ -90,6 +90,9 @@ function render() {
     show("search");
     setStatus("warn", "Search running");
     $("search-message").textContent = t(st.message || "");
+    const searchWarn = $("search-warnings");
+    searchWarn.textContent = (st.searchWarnings || []).map(w => t(w)).join(" · ");
+    searchWarn.classList.toggle("hidden", !(st.searchWarnings || []).length);
     renderFound(st.devices);
     $("search-title").textContent = t(st.devices.length ? "Device found!" : "Searching …");
     $("search-help").classList.toggle("hidden", st.devices.length > 0 || Date.now() - searchStartedAt < 15000);

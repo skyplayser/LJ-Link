@@ -303,7 +303,7 @@ final class Hub {
                 mode = sc.mode;
             }
             if (sc.phase.equals(phase) && message.isEmpty()) {
-                message = sc.message;
+                message = sc.message; // the first scope with a message: Pioneer before Denon
             }
             for (DeviceInfo d : sc.devices) {
                 list.add(Map.of("number", d.number(), "name", d.name(), "address", d.address()));
@@ -328,13 +328,21 @@ final class Hub {
             }
         }
         m.put("warnings", warnings);
+        // While still searching, a source that failed (Pioneer, while Denon is still searched) must not go unnoticed.
+        List<String> searchWarnings = new ArrayList<>();
+        for (Scope sc : sortedScopes()) {
+            if ("searching".equals(phase) && "error".equals(sc.phase) && !sc.message.isBlank()) {
+                searchWarnings.add(sc.message);
+            }
+        }
+        m.put("searchWarnings", searchWarnings);
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);
         return m;
     }
 
-    private String stateJson() {
+    String stateJson() {
         return write(stateJson0());
     }
 

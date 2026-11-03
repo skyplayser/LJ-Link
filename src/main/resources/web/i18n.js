@@ -38,6 +38,8 @@ const DE = {
   "Cancel": "Abbrechen",
   "No. {n} · {address}": "Nr. {n} · {address}",
   "Searching for DJ devices on the network …": "Suche nach DJ-Geräten im Netzwerk …",
+  "Searching for Pioneer CDJs (Pro DJ Link) …": "Suche nach Pioneer CDJs (Pro DJ Link) …",
+  "The Pioneer search could not start: another program on this computer uses Pro DJ Link (rekordbox, Beat Link Trigger …). Close it and search again.": "Die Pioneer-Suche konnte nicht starten: Ein anderes Programm auf diesem Computer nutzt Pro DJ Link (rekordbox, Beat Link Trigger …). Bitte schließen und erneut suchen.",
   "Device found – connecting …": "Gerät gefunden – verbinde …",
   "Connection to the DJ network failed. Please try again.": "Verbindung zum DJ-Netzwerk fehlgeschlagen. Bitte erneut versuchen.",
   "Demo mode – no real hardware": "Demo-Modus – keine echte Hardware",
