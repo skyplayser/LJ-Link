@@ -5,17 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Owns the running {@link DeckSource}s. "Search" starts every supported kind (Pro DJ Link, Denon StageLinQ,
- * Serato DJ Pro on this computer and Ableton Link), so devices of different makers show up together, and devices that
- * appear later are added by their source. Pioneer comes first: the Denon search joins once the CDJs are connected or
- * clearly absent.
+ * Owns the running {@link DeckSource}s. "Search" starts every supported kind at once (Pro DJ Link, Denon StageLinQ,
+ * Serato DJ Pro on this computer and Ableton Link),
+ * so devices of different makers show up together, and devices that appear later are added by their source.
  */
 final class Session {
-    /** How long the Denon search waits for Pioneer when no Pioneer device has announced itself. */
-    private static final long PIONEER_HEAD_START_MS = 4_000;
-    /** How long it waits at most while a Pioneer device was found and is being connected. */
-    private static final long PIONEER_CONNECT_MS = 15_000;
-
     private final Hub hub;
     private final List<DeckSource> active = new ArrayList<>();
 
@@ -33,9 +27,7 @@ final class Session {
         active.add(p);
         active.add(d);
         p.start();
-        Thread denonLater = new Thread(() -> startAfterPioneer(pioneer, d), "denon-after-pioneer");
-        denonLater.setDaemon(true);
-        denonLater.start();
+        d.start();
         java.nio.file.Path serato = SeratoSource.folder();
         if (serato != null) {
             SeratoSource s = new SeratoSource(hub.scope("serato", "serato", false, "Serato DJ Pro"), serato);
@@ -45,28 +37,6 @@ final class Session {
         LinkTempoSource link = new LinkTempoSource(hub.scope("link", "link", false, "Ableton Link"));
         active.add(link);
         link.start();
-    }
-
-    /** Starts the Denon search once Pioneer is connected, failed, or has found nothing for a moment. */
-    private void startAfterPioneer(Hub.Scope pioneer, DeckSource denon) {
-        long start = System.currentTimeMillis();
-        try {
-            while ("searching".equals(pioneer.phase())) {
-                long waited = System.currentTimeMillis() - start;
-                long limit = pioneer.devices.isEmpty() ? PIONEER_HEAD_START_MS : PIONEER_CONNECT_MS;
-                if (waited >= limit) {
-                    break;
-                }
-                Thread.sleep(200);
-            }
-        } catch (InterruptedException e) {
-            return;
-        }
-        synchronized (this) {
-            if (active.contains(denon)) { // not stopped or replaced by a new search meanwhile
-                denon.start();
-            }
-        }
     }
 
     synchronized void startDemo() {
@@ -100,5 +70,21 @@ final class Session {
         }
         active.clear();
         hub.reset();
+    }
+
+    synchronized List<String> diagnostics() {
+        List<String> out = new ArrayList<>();
+        for (DeckSource s : active) {
+            out.add("[" + s.getClass().getSimpleName() + "]");
+            try {
+                out.addAll(s.diagnostics());
+            } catch (RuntimeException e) {
+                out.add("  failed: " + e);
+            }
+        }
+        if (active.isEmpty()) {
+            out.add("No search running");
+        }
+        return out;
     }
 }

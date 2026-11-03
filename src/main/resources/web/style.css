@@ -358,4 +358,10 @@ label.check input { width: 20px; height: 20px; min-height: 0; accent-color: var(
 @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
 
 /* Documentation screenshots: no local warnings */
-.shot #warnings, .shot-early #warnings, .shot #search-warnings, .shot-early #search-warnings { display: none !important; }
+.shot #warnings, .shot-early #warnings { display: none !important; }
+
+/* Report a problem */
+.report-sheet { width: min(640px, 100%); }
+.report-sheet textarea { width: 100%; font: inherit; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; resize: vertical; }
+.report-preview { max-height: 260px; overflow: auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+#report details { margin: 10px 0; }

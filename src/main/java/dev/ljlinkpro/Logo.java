@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * The LJ Link logo: a waveform whose bars shoot light beams. Same geometry as {@code web/logo.svg}.
+ * The LJ-Link-PRO logo: a waveform whose bars shoot light beams. Same geometry as {@code web/logo.svg}.
  * Used for the menu bar / tray icon and, via {@link #main}, to generate the installer icons.
  */
 final class Logo {

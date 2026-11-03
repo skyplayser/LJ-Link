@@ -1,6 +1,6 @@
 # Lichtpult-Link: Tempo vom DJ ans Lichtpult
 
-Diese Anleitung erklärt Schritt für Schritt, wie LJ Link das Tempo (BPM) der DJ-Player an ein Lichtpult schickt, sodass
+Diese Anleitung erklärt Schritt für Schritt, wie LJ-Link-PRO das Tempo (BPM) der DJ-Player an ein Lichtpult schickt, sodass
 Chaser und Effekte im Takt der Musik laufen. Sie setzt nichts voraus: Wer noch nie ein Pult mit einem anderen Programm verbunden
 hat, kommt damit durch.
 
@@ -21,7 +21,7 @@ hat, kommt damit durch.
 
 ## 1. Was passiert eigentlich?
 
-LJ Link liest das Tempo der Player (Pioneer und Denon) und schickt es übers Netzwerk an dein Pult. Je nach Pult auf
+LJ-Link-PRO liest das Tempo der Player (Pioneer und Denon) und schickt es übers Netzwerk an dein Pult. Je nach Pult auf
 zwei verschiedenen Wegen:
 
 | Pult | Weg | Was ankommt |
@@ -34,7 +34,7 @@ zwei verschiedenen Wegen:
 Gesendet wird, sobald sich das Tempo um mindestens 0,1 BPM ändert. Bleibt es gleich, wird es zur Sicherheit wiederholt:
 per OSC alle 2 Sekunden, beim grandMA2 alle 15 Sekunden (damit die Kommandozeile nicht vollläuft).
 
-LJ Link **steuert nur das Tempo**. Es startet keine Cues, ändert keine Show und schickt nichts an die DJ-Geräte.
+LJ-Link-PRO **steuert nur das Tempo**. Es startet keine Cues, ändert keine Show und schickt nichts an die DJ-Geräte.
 
 > **Wichtig:** Ein Speedmaster bewegt nur Effekte und Chaser, die ihm **zugewiesen** sind. Wenn sich auf dem Pult nichts tut,
 > obwohl das Tempo ankommt, ist fast immer der Effekt keinem Speedmaster zugeordnet.
@@ -47,19 +47,19 @@ LJ Link **steuert nur das Tempo**. Es startet keine Cues, ändert keine Show und
 2. **IP-Adresse des Pults herausfinden.**
    - grandMA2: *Setup → Network → Network Interface* (oder in der Titelleiste von onPC).
    - grandMA3: *Menu → Network* (unter *Interfaces* steht die Adresse).
-   - onPC auf **demselben Computer** wie LJ Link: einfach `127.0.0.1` eintragen.
+   - onPC auf **demselben Computer** wie LJ-Link-PRO: einfach `127.0.0.1` eintragen.
 3. **Gleiches Netz?** Die ersten drei Zahlengruppen müssen gleich sein, wenn das Netz wie meistens `255.255.255.0` nutzt.
    Beispiel: Computer `192.168.1.10`, Pult `192.168.1.50` passt; `10.0.0.5` passt nicht.
 4. **Firewall (nur onPC auf einem anderen Rechner).** Windows fragt beim ersten Start von onPC, ob es im Netzwerk erreichbar sein
    darf: **„Private Netzwerke“ erlauben.** Wurde das abgelehnt: *Windows-Sicherheit → Firewall → App durch die Firewall
    zulassen → grandMA onPC* anhaken.
-5. **Pult automatisch suchen (nur grandMA2).** In LJ Link *Einstellungen → Lichtpult-Link → Pult suchen*. Gefunden wird jeder
+5. **Pult automatisch suchen (nur grandMA2).** In LJ-Link-PRO *Einstellungen → Lichtpult-Link → Pult suchen*. Gefunden wird jeder
    grandMA2 und jedes grandMA2 onPC im Netz, auch wenn die Fernsteuerung dort noch aus ist. Ein Klick auf den Treffer trägt die
    Adresse ein. Den grandMA3 findet die Suche noch nicht, dort die Adresse von Hand eintragen.
 
 ## 3. Welches Deck gibt das Tempo? (SEND BPM)
 
-Oben in LJ Link gibt es den Reiter **SEND BPM**. Dort legst du fest, woher das Tempo kommt:
+Oben in LJ-Link-PRO gibt es den Reiter **SEND BPM**. Dort legst du fest, woher das Tempo kommt:
 
 - **Auto:** das Deck, das **Master** und/oder **live** ist (am Mixer auf Sendung). Gibt es zwei Systeme mit je einem Master
   (z. B. CDJs und ein Denon), gewinnt der Master, der auch live ist und spielt.
@@ -72,7 +72,7 @@ Im Demo-Modus wird nie etwas an ein Pult gesendet.
 
 ## 4. grandMA2 und grandMA2 onPC
 
-Der grandMA2 hat **keinen OSC-Eingang**. LJ Link verbindet sich deshalb wie ein Telnet-Programm mit der Kommandozeile des
+Der grandMA2 hat **keinen OSC-Eingang**. LJ-Link-PRO verbindet sich deshalb wie ein Telnet-Programm mit der Kommandozeile des
 Pults (Port 30000), meldet sich mit einem Benutzer der Show an und tippt dort den Befehl für den Speedmaster.
 
 ### 4.1 Am Pult: Telnet einschalten
@@ -84,7 +84,7 @@ Pults (Port 30000), meldet sich mit einem Benutzer der Show an und tippt dort de
 Das gilt für das Pult und für onPC gleichermaßen. Solange Telnet aus ist (*Login Disabled*), findet die Suche das Pult zwar,
 aber es nimmt keine Befehle an.
 
-### 4.2 Am Pult: einen Benutzer für LJ Link anlegen (empfohlen)
+### 4.2 Am Pult: einen Benutzer für LJ-Link-PRO anlegen (empfohlen)
 
 Jede Telnet-Verbindung muss sich als Benutzer der Show anmelden. Benutzername und Passwort unterscheiden Groß- und
 Kleinschreibung. MA Lighting empfiehlt, für die Fernsteuerung einen eigenen Benutzer anzulegen, damit er niemandem am Pult in
@@ -97,7 +97,7 @@ die Quere kommt:
 4. **Show speichern.** Benutzer stehen in der Show; ohne Speichern sind sie nach dem nächsten Laden weg.
 
 **Ohne eigenen Benutzer geht es auch:** Laut grandMA2-Handbuch hat jede Show zwei Benutzer: **Administrator** mit dem Passwort
-`admin` (voller Zugriff) und **Guest** (eingeschränkt). LJ Link trägt deshalb `administrator` / `admin` als Vorgabe ein.
+`admin` (voller Zugriff) und **Guest** (eingeschränkt). LJ-Link-PRO trägt deshalb `administrator` / `admin` als Vorgabe ein.
 Hat jemand das Passwort in deiner Show geändert, trage das richtige ein. Weil dieses Passwort öffentlich bekannt ist, empfiehlt
 es sich, es in Shows zu ändern, die in einem offenen Netz laufen.
 
@@ -109,9 +109,9 @@ es sich, es in Shows zu ändern, die in einem offenen Netz laufen.
 2. **Test von Hand:** In die Kommandozeile des Pults `SpecialMaster 3.16 At 120` tippen (oder `3.1` usw. für Speed 1) und Enter drücken. Der Speedmaster
    sollte jetzt auf 120 BPM stehen (sichtbar im *Masters*-Fenster), und der zugeordnete Effekt im Takt laufen.
 3. Passt das nicht zu deiner Show (z. B. weil du einen anderen Speedmaster nimmst), merke dir den Befehl, der bei dir
-   funktioniert. Genau diesen trägst du gleich in LJ Link ein, nur mit `{bpm}` statt der Zahl.
+   funktioniert. Genau diesen trägst du gleich in LJ-Link-PRO ein, nur mit `{bpm}` statt der Zahl.
 
-### 4.4 In LJ Link einrichten
+### 4.4 In LJ-Link-PRO einrichten
 
 1. Menü (☰) öffnen → **Lichtpult-Link (Tempo senden)**, oder oben den Reiter **LINK** anklicken.
 2. Bei der Auswahl **grandMA2 / grandMA2 onPC (Telnet)** wählen.
@@ -132,25 +132,25 @@ es sich, es in Shows zu ändern, die in einem offenen Netz laufen.
 - Jeder gesendete Befehl landet in der Befehlshistorie des Pults. Deshalb wird ein gleichbleibendes Tempo beim grandMA2 nur
   alle 15 Sekunden wiederholt.
 - Nicht über Telnet ins Fixture-Setup oder den Zeitplan (Schedule) gehen: laut MA sperrt das den Zugriff für andere Benutzer
-  ohne Warnung. LJ Link schickt nur den eingetragenen Befehl.
+  ohne Warnung. LJ-Link-PRO schickt nur den eingetragenen Befehl.
 
 ---
 
 ## 5. grandMA3 und grandMA3 onPC
 
-Der grandMA3 nimmt Befehle für die Kommandozeile per **OSC** an (Adresse `/cmd`, Text). LJ Link schickt dorthin den
+Der grandMA3 nimmt Befehle für die Kommandozeile per **OSC** an (Adresse `/cmd`, Text). LJ-Link-PRO schickt dorthin den
 Befehl für den Speedmaster.
 
 ### 5.1 Am Pult: OSC-Eingang einrichten
 
 1. **Menu** öffnen → **In & Out** → Reiter **OSC**.
-2. Oben bei **Interface** die Netzwerkkarte wählen, über die der Computer mit LJ Link erreichbar ist.
+2. Oben bei **Interface** die Netzwerkkarte wählen, über die der Computer mit LJ-Link-PRO erreichbar ist.
 3. In der Tabelle eine Zeile anlegen (oder eine vorhandene nehmen) und so einstellen:
 
    | Feld | Wert |
    |---|---|
    | **Mode** | `UDP` |
-   | **Port** | `8000` (oder ein anderer freier Port; muss in LJ Link gleich sein) |
+   | **Port** | `8000` (oder ein anderer freier Port; muss in LJ-Link-PRO gleich sein) |
    | **Prefix** | leer lassen |
    | **Receive Command** | `Yes` (sonst werden Befehle ignoriert) |
    | **Receive** | egal (betrifft nur Daten an Fader und Tasten) |
@@ -158,7 +158,7 @@ Befehl für den Speedmaster.
 
 4. **Enable Input** einschalten. Kommt OSC an, leuchtet die Titelleiste von *Enable Input* gelb auf.
 
-Hinweis zum Prefix: Steht dort z. B. `gma3`, erwartet das Pult `/gma3/cmd` statt `/cmd`. LJ Link sendet an `/cmd`, also
+Hinweis zum Prefix: Steht dort z. B. `gma3`, erwartet das Pult `/gma3/cmd` statt `/cmd`. LJ-Link-PRO sendet an `/cmd`, also
 das Feld leer lassen.
 
 ### 5.2 Am Pult: Speedmaster prüfen
@@ -167,7 +167,7 @@ das Feld leer lassen.
 2. Test in der Kommandozeile: `Master 3.1 At BPM 120` tippen, Enter. Der Speedmaster steht auf 120 BPM.
    (Das ist die Schreibweise aus dem grandMA3-Handbuch.)
 
-### 5.3 In LJ Link einrichten
+### 5.3 In LJ-Link-PRO einrichten
 
 1. Menü (☰) → **Lichtpult-Link (Tempo senden)** oder Reiter **LINK**.
 2. **grandMA3 / grandMA3 onPC (OSC)** wählen.
@@ -181,11 +181,11 @@ das Feld leer lassen.
 ## 6. dot2
 
 Der dot2 lässt sich über das Netzwerk weder per Telnet noch per OSC steuern. Laut Handbuch nimmt er von außen nur MIDI,
-DMX (auch Art-Net und sACN) und Schaltkontakte an, und damit kann LJ Link ihm das Tempo heute **nicht** schicken.
+DMX (auch Art-Net und sACN) und Schaltkontakte an, und damit kann LJ-Link-PRO ihm das Tempo heute **nicht** schicken.
 
 Was du stattdessen tun kannst:
 
-- **Tap-Tempo:** Speed-Taste halten und im Takt auf die Taste eines Executors tippen. Das große BPM-Feld in LJ Link hilft
+- **Tap-Tempo:** Speed-Taste halten und im Takt auf die Taste eines Executors tippen. Das große BPM-Feld in LJ-Link-PRO hilft
   beim Mitzählen.
 - **Sound-to-Light:** Der dot2 hat einen Audio-Eingang mit BPM-Erkennung (Fenster *Sound Input*).
 
@@ -198,17 +198,17 @@ Ein Weg über MIDI ist für eine spätere Version vorgemerkt.
 Daslight synchronisiert sein Tempo offiziell über **Tap-Tempo**, **MIDI-Clock** und **Ableton Link**. Außerdem hat Daslight ein
 **OSC-Mapping**, mit dem eingehende OSC-Nachrichten Bedienelementen zugeordnet werden.
 
-LJ Link sendet für Daslight das Tempo als Zahl über OSC (z. B. `128.0` an `/ljlinkpro/bpm`). **Ob sich damit in deiner
+LJ-Link-PRO sendet für Daslight das Tempo als Zahl über OSC (z. B. `128.0` an `/ljlinkpro/bpm`). **Ob sich damit in deiner
 Daslight-Version das BPM setzen lässt, ist noch nicht bestätigt.** So probierst du es aus:
 
 1. In Daslight die **OSC-Eingabe** einschalten und den **Port** notieren (in den Einstellungen bzw. im OSC-Mapping).
-2. In LJ Link **Daslight** wählen, die IP-Adresse des Daslight-Rechners (gleicher Computer: `127.0.0.1`) und den Port
+2. In LJ-Link-PRO **Daslight** wählen, die IP-Adresse des Daslight-Rechners (gleicher Computer: `127.0.0.1`) und den Port
    eintragen, Adresse `/ljlinkpro/bpm` lassen, **Speichern**, **Test senden**.
 3. In Daslight im **MIDI/OSC-Monitor** nachsehen, ob `/ljlinkpro/bpm` ankommt.
 4. Im **OSC-Mapping** die Adresse dem BPM- oder Speed-Regler zuordnen, sofern deine Version das anbietet.
 
 Kommt die Nachricht an, lässt sich aber kein BPM zuordnen, bleibt im Moment nur Tap-Tempo oder MIDI-Clock von einer anderen
-Quelle. Eine MIDI-Clock direkt aus LJ Link ist vorgemerkt.
+Quelle. Eine MIDI-Clock direkt aus LJ-Link-PRO ist vorgemerkt.
 
 ---
 

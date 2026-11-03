@@ -18,6 +18,7 @@ public final class Main {
     private static volatile boolean appWindow = true;
 
     public static void main(String[] args) {
+        LogBuffer.install();
         int port = 8080;
         boolean openBrowser = true;
         boolean useTray = true;
@@ -30,7 +31,7 @@ public final class Main {
                 case "--privacy" -> Privacy.setForThisRun(true);
                 case "--help", "-h" -> {
                     System.out.println("""
-                            LJ Link
+                            LJ-Link-PRO
                               --port N       HTTP port (default 8080)
                               --no-browser   do not open the browser automatically
                               --no-tray      do not show the menu bar / system tray icon
@@ -46,7 +47,7 @@ public final class Main {
         // A second start (e.g. clicking the app icon again) just opens the running instance.
         for (int p = port; p < port + 10; p++) {
             if (isAppAt(p)) {
-                System.out.println("LJ Link is already running on port " + p);
+                System.out.println("LJ-Link-PRO is already running on port " + p);
                 if (openBrowser) {
                     openInBrowser("http://localhost:" + p);
                 }
@@ -71,6 +72,13 @@ public final class Main {
 
         final int[] boundPort = {port};
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
+        app.get("/api/diagnostics", ctx -> {
+            if (!isLocal(ctx)) {
+                ctx.status(403);
+                return;
+            }
+            ctx.contentType("text/plain; charset=utf-8").result(Diagnostics.report(hub, session, link));
+        });
         app.get("/api/version", ctx -> {
             Updater.Release r = Updater.latestCached();
             String current = Updater.currentVersion();
@@ -145,7 +153,7 @@ public final class Main {
             }
         }));
         app.post("/api/link/test", ctx -> control(ctx, link::sendTest));
-        // Control endpoints are only available on the computer running LJ Link, not to tablets in the LAN.
+        // Control endpoints are only available on the computer running LJ-Link-PRO, not to tablets in the LAN.
         app.post("/api/search/start", ctx -> control(ctx, session::startSearch));
         app.post("/api/denon/start", ctx -> control(ctx, session::startSearch));
         app.post("/api/demo/start", ctx -> control(ctx, session::startDemo));
@@ -167,13 +175,13 @@ public final class Main {
         int bound = start(app, port);
         boundPort[0] = bound;
         String url = "http://localhost:" + bound;
-        System.out.println("LJ Link is running: " + url);
+        System.out.println("LJ-Link-PRO is running: " + url);
         for (String u : NetworkCheck.lanUrls(bound)) {
             System.out.println("  On the network (e.g. tablet): " + u);
         }
         Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
         if (useTray) {
-            boolean installed = Tray.install(url, () -> openInBrowser(url), () -> {
+            boolean installed = Tray.install(url, () -> openInBrowser(url), () -> openInBrowser(url + "/#report"), () -> {
                 session.stop();
                 app.stop();
                 System.exit(0);

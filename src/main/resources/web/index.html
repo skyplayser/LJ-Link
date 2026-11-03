@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LJ Link</title>
+<title>LJ-Link-PRO</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header id="topbar">
   <img class="logo" src="logo.svg" alt="">
-  <div class="brand">LJ Link</div>
+  <div class="brand">LJ-Link-PRO</div>
   <nav class="tabs">
     <button class="tab active hidden" id="tab-waveform">WAVEFORM</button>
     <button class="tab hidden" id="tab-mixer">MIXER</button>
@@ -37,11 +37,11 @@
 <main>
   <!-- Start -->
   <section id="view-welcome" class="view">
-    <img class="hero-logo" src="logo.svg" alt="LJ Link">
+    <img class="hero-logo" src="logo.svg" alt="LJ-Link-PRO">
     <h1>What are the DJs playing right now?</h1>
-    <p class="lead">LJ Link shows live which track is playing on every player and where it is.</p>
+    <p class="lead">LJ-Link-PRO shows live which track is playing on every player and where it is.</p>
     <div id="remote-note" class="note hidden">
-      This view is read-only. To start, open LJ Link on the computer itself.
+      This view is read-only. To start, open LJ-Link-PRO on the computer itself.
     </div>
     <div id="controls">
       <button id="btn-auto" class="primary big">Search automatically</button>
@@ -76,7 +76,6 @@
     <div class="spinner" aria-hidden="true"></div>
     <h1 id="search-title">Searching …</h1>
     <p class="lead" id="search-message"></p>
-    <div id="search-warnings" class="note warn hidden"></div>
     <ul id="found-list" class="found"></ul>
     <div id="search-help" class="note hidden">
       <strong>Nothing found yet?</strong>
@@ -228,15 +227,10 @@
       </div>
     </div>
 
-    <div class="setting">
-      <span class="label">About LJ Link</span>
-      <div class="hint">© 2026 Philipp Spruck / NEXTPHILM · Eclipse Public License 2.0. Not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato or Ableton; all trademarks belong to their owners.</div>
-      <div class="row"><button id="btn-licenses" class="secondary">Licenses</button></div>
-    </div>
-
     <div class="row">
       <button id="btn-settings-close" class="primary">Done</button>
       <button id="btn-stop" class="secondary hidden">Disconnect</button>
+      <button id="btn-report" class="secondary">Report a problem</button>
     </div>
   </div>
 </div>
@@ -250,6 +244,24 @@
       <button id="bpm-close" class="primary">Done</button>
       <button id="bpm-setup" class="secondary">Light desk settings</button>
     </div>
+  </div>
+</div>
+<div id="report" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="report-title">
+  <div class="sheet report-sheet">
+    <h2 id="report-title">Report a problem</h2>
+    <p class="hint">Describe what happens and what you expected. Which devices, what you did, what you see.</p>
+    <p class="hint"><a href="https://skyplayser.github.io/LJ-Link-PRO/help.html" target="_blank" rel="noopener">Known problems and solutions</a></p>
+    <textarea id="report-text" rows="6" placeholder="Example: The CDJ-3000 shows up twice and says “No track loaded”, although a track is playing. Windows 11, cable to the switch."></textarea>
+    <label class="check" id="report-diag-row"><input type="checkbox" id="report-diag" checked> <span>Include diagnostic data</span></label>
+    <div class="hint" id="report-diag-hint">Program and system version, network adapters, the devices that were found and their connection state, what each deck receives (waveform, beat grid, cues) and the last log lines. No track titles, no covers, no passwords.</div>
+    <details id="report-preview-box"><summary>Show diagnostic data</summary><pre id="report-preview" class="report-preview"></pre></details>
+    <div class="row">
+      <button id="report-github" class="primary">Report on GitHub</button>
+      <button id="report-save" class="secondary">Save as file</button>
+      <button id="report-copy" class="secondary">Copy</button>
+      <button id="report-close" class="secondary">Close</button>
+    </div>
+    <div class="hint" id="report-status"></div>
   </div>
 </div>
 <div id="info" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="info-title">

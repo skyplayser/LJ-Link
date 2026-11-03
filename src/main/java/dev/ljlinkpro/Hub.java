@@ -303,7 +303,7 @@ final class Hub {
                 mode = sc.mode;
             }
             if (sc.phase.equals(phase) && message.isEmpty()) {
-                message = sc.message; // the first scope with a message: Pioneer before Denon
+                message = sc.message;
             }
             for (DeviceInfo d : sc.devices) {
                 list.add(Map.of("number", d.number(), "name", d.name(), "address", d.address()));
@@ -328,21 +328,13 @@ final class Hub {
             }
         }
         m.put("warnings", warnings);
-        // While still searching, a source that failed (Pioneer, while Denon is still searched) must not go unnoticed.
-        List<String> searchWarnings = new ArrayList<>();
-        for (Scope sc : sortedScopes()) {
-            if ("searching".equals(phase) && "error".equals(sc.phase) && !sc.message.isBlank()) {
-                searchWarnings.add(sc.message);
-            }
-        }
-        m.put("searchWarnings", searchWarnings);
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);
         return m;
     }
 
-    String stateJson() {
+    private String stateJson() {
         return write(stateJson0());
     }
 
@@ -430,5 +422,31 @@ final class Hub {
         } catch (RuntimeException e) {
             System.err.println("Hub tick failed: " + e);
         }
+    }
+
+    /** Overall state, sources and decks for a problem report. No track titles. */
+    List<String> diagnostics() {
+        List<String> out = new ArrayList<>();
+        out.add("Overall phase: " + phase() + ", browsers connected: " + clients.size());
+        for (Scope sc : sortedScopes()) {
+            out.add("Source " + sc.key + " (" + sc.kind + "): " + sc.phase + (sc.message.isBlank() ? "" : ", \"" + sc.message + "\"")
+                    + ", decks " + sc.own.size() + ", mixer " + (Boolean.TRUE.equals(sc.mixerBase.get("present")) ? sc.mixerBase.get("name") : "none"));
+            for (DeviceInfo d : sc.devices) {
+                out.add("  device " + d.number() + " " + d.name() + " " + d.address());
+            }
+        }
+        List<Deck> list = new ArrayList<>(decks.values());
+        list.sort(java.util.Comparator.comparingInt(d -> d.number));
+        for (Deck d : list) {
+            out.add("Deck " + d.number + " (" + (d.scope == null ? "?" : d.scope.kind) + " " + d.label + ", " + d.name + "): "
+                    + "track " + d.hasTrack + ", playing " + d.playing + ", on air " + d.onAir + ", master " + d.master
+                    + ", BPM " + String.format(java.util.Locale.ROOT, "%.2f", d.effectiveBpm)
+                    + ", length " + d.durationMs + " ms, position " + d.positionMs + " ms"
+                    + ", waveform " + (d.waveform != null) + ", detail " + (d.detail != null)
+                    + ", beat grid " + (d.beatTimes == null ? 0 : d.beatTimes.length) + ", cues " + d.cues.size()
+                    + ", art " + (d.art != null) + ", title known " + (d.title != null && !d.title.isBlank())
+                    + (d.noWaveformSource ? ", NO WAVEFORM SOURCE" : "") + (d.coarsePosition ? ", coarse position" : ""));
+        }
+        return out;
     }
 }

@@ -9,7 +9,7 @@ import java.awt.TrayIcon;
 
 /**
  * Menu bar icon (macOS) / notification area icon (Windows). Offers "open" and "quit".
- * The icon is the LJ Link logo, drawn in code ({@link Logo}).
+ * The icon is the LJ-Link-PRO logo, drawn in code ({@link Logo}).
  */
 final class Tray {
     private Tray() {}
@@ -18,6 +18,7 @@ final class Tray {
     private static CheckboxMenuItem privacyItem;
     private static MenuItem quitItem;
     private static MenuItem updateItem;
+    private static MenuItem reportItem;
     private static TrayIcon trayIcon;
     private static volatile Updater.Release available;
 
@@ -29,6 +30,7 @@ final class Tray {
             privacyItem.setLabel(de ? "Privatsphäre-Modus (Titel, Album, Cover ausblenden)"
                     : "Privacy mode (hide title, album, cover)");
             quitItem.setLabel(de ? "Beenden" : "Quit");
+            reportItem.setLabel(de ? "Problem melden …" : "Report a problem …");
             updateLabel();
         }
     }
@@ -51,13 +53,13 @@ final class Tray {
         java.awt.EventQueue.invokeLater(Tray::updateLabel);
         if (first && trayIcon != null) {
             boolean de = "de".equals(AppSettings.language());
-            trayIcon.displayMessage("LJ Link", de ? "Version " + r.version() + " ist verfügbar. Installieren über das Menü."
+            trayIcon.displayMessage("LJ-Link-PRO", de ? "Version " + r.version() + " ist verfügbar. Installieren über das Menü."
                     : "Version " + r.version() + " is available. Install it from the menu.", TrayIcon.MessageType.INFO);
         }
     }
 
     /** @return true if the icon was installed; false if the platform has no system tray (then run without one). */
-    static boolean install(String url, Runnable open, Runnable quit) {
+    static boolean install(String url, Runnable open, Runnable report, Runnable quit) {
         if (!SystemTray.isSupported()) {
             return false;
         }
@@ -72,6 +74,8 @@ final class Tray {
             info.setEnabled(false);
             quitItem = new MenuItem();
             quitItem.addActionListener(e -> quit.run());
+            reportItem = new MenuItem();
+            reportItem.addActionListener(e -> report.run());
             updateItem = new MenuItem();
             updateItem.addActionListener(e -> {
                 Updater.Release r = available;
@@ -95,9 +99,10 @@ final class Tray {
             menu.add(info);
             menu.addSeparator();
             menu.add(updateItem);
+            menu.add(reportItem);
             menu.add(quitItem);
 
-            TrayIcon icon = new TrayIcon(Logo.render(64, true), "LJ Link", menu);
+            TrayIcon icon = new TrayIcon(Logo.render(64, true), "LJ-Link-PRO", menu);
             icon.setImageAutoSize(true);
             // Double click on Windows opens the interface; on macOS the menu opens on a single click.
             icon.addActionListener(e -> open.run());

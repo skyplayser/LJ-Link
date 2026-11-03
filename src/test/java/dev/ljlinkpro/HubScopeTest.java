@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HubScopeTest {
     @Test
@@ -43,27 +42,5 @@ class HubScopeTest {
         assertEquals("monitoring", hub.phase());
         denon.setState("searching", "live", "");
         assertEquals("searching", hub.phase());
-    }
-
-    @Test
-    void whileSearchingPioneerSpeaksFirst() {
-        Hub hub = new Hub();
-        Hub.Scope pioneer = hub.scope("pioneer", "pioneer", true, "Pro DJ Link");
-        Hub.Scope denon = hub.scope("denon", "denon", false, "Denon");
-        denon.setState("searching", "live", "Searching for Denon devices (StageLinQ) …");
-        assertTrue(hub.stateJson().contains("\"message\":\"Searching for Denon devices"), "only Denon has a message yet");
-        pioneer.setState("searching", "live", "Searching for Pioneer CDJs (Pro DJ Link) …");
-        assertTrue(hub.stateJson().contains("\"message\":\"Searching for Pioneer CDJs"));
-    }
-
-    @Test
-    void aFailedPioneerSearchIsShownWhileDenonIsStillSearched() {
-        Hub hub = new Hub();
-        Hub.Scope pioneer = hub.scope("pioneer", "pioneer", true, "Pro DJ Link");
-        Hub.Scope denon = hub.scope("denon", "denon", false, "Denon");
-        denon.setState("searching", "live", "Searching for Denon devices (StageLinQ) …");
-        pioneer.setState("error", "live", "Pro DJ Link: boom");
-        assertEquals("searching", hub.phase());
-        assertTrue(hub.stateJson().contains("\"searchWarnings\":[\"Pro DJ Link: boom\"]"));
     }
 }

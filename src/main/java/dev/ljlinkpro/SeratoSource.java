@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 /**
  * Serato DJ Pro on this computer. Serato has no public live interface, but it writes a log while it runs
- * ({@code Music/_Serato_/Logs}); every track loaded to a deck shows up there with the deck and the file. LJ Link follows
+ * ({@code Music/_Serato_/Logs}); every track loaded to a deck shows up there with the deck and the file. LJ-Link-PRO follows
  * that log and reads title, artist, BPM, key, length, waveform overview, beat grid and cues from the tags Serato wrote into
  * the file ({@link SeratoTags}). Serato does not reveal the play position, so there is no playhead for these decks.
  */
@@ -184,5 +184,11 @@ final class SeratoSource implements DeckSource {
     @Override
     public void stop() {
         stopped = true;
+    }
+
+    @Override
+    public java.util.List<String> diagnostics() {
+        return java.util.List.of("Serato running: " + seratoRunning() + ", log " + (logFile == null ? "none" : logFile.getFileName())
+                + ", decks with a track: " + loaded.keySet());
     }
 }

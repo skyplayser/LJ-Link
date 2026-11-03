@@ -12,4 +12,9 @@ interface DeckSource {
     default java.util.List<java.util.Map<String, Object>> info(int deck) {
         return java.util.List.of();
     }
+
+    /** Lines for a problem report: what this source sees and how it is connected. No track titles. */
+    default java.util.List<String> diagnostics() {
+        return java.util.List.of();
+    }
 }

@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * clients and stays passive.
  */
 final class StageLinqDiscovery implements DeckSource {
-    private static final String SOFTWARE_NAME = "LJ Link";
-    private static final String SOFTWARE_VERSION = "1.4.2";
+    private static final String SOFTWARE_NAME = "LJ-Link-PRO";
+    private static final String SOFTWARE_VERSION = "1.4.1";
     /** Helper services some Denon devices announce next to the real device; their "decks" are not players. */
     private static final java.util.Set<String> IGNORED_SOFTWARE = java.util.Set.of("offlineanalyzer");
     /** A device that has not announced itself for this long is gone. */
@@ -175,7 +175,7 @@ final class StageLinqDiscovery implements DeckSource {
             return; // internal helper services of the device, they report decks that do not exist
         }
         if (d.port() == 0 || SOFTWARE_NAME.equalsIgnoreCase(d.softwareName())) {
-            return; // another listener (a second LJ Link, lighting software): it offers no decks
+            return; // another listener (a second LJ-Link-PRO, lighting software): it offers no decks
         }
         System.out.println("StageLinQ device: " + d.source() + " / " + d.softwareName() + " " + d.softwareVersion()
                 + " at " + address.getHostAddress() + ":" + d.port());
@@ -226,5 +226,19 @@ final class StageLinqDiscovery implements DeckSource {
             k.source().stop();
         }
         devices.clear();
+    }
+
+    @Override
+    public java.util.List<String> diagnostics() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        out.add("StageLinQ discovery: socket " + (socket != null && !socket.isClosed() ? "open on UDP " + StageLinqProtocol.DISCOVERY_PORT : "not open"));
+        for (Known k : devices.values()) {
+            out.add("Denon device " + k.scope().groupName + ": connected " + k.source().isConnected()
+                    + ", last announcement " + (System.currentTimeMillis() - k.lastSeen()[0]) + " ms ago");
+        }
+        if (devices.isEmpty()) {
+            out.add("No Denon device seen");
+        }
+        return out;
     }
 }

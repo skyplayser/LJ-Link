@@ -56,4 +56,11 @@ final class LinkTempoSource implements DeckSource {
         stopped = true;
         link.stop();
     }
+
+    @Override
+    public java.util.List<String> diagnostics() {
+        AbletonLink.State st = link.state();
+        return java.util.List.of("Ableton Link: " + (st == null ? "no session seen" : st.peers() + " peer(s), "
+                + String.format(java.util.Locale.ROOT, "%.2f", st.bpm()) + " BPM"));
+    }
 }

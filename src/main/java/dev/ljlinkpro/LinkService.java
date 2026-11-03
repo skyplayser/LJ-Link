@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Sends the tempo of the leading deck to a lighting desk or software: to a grandMA2 as a command line over Telnet, to a
- * grandMA3 as a command line over OSC, to anything else as an OSC number. Output only: LJ Link never receives from
+ * grandMA3 as a command line over OSC, to anything else as an OSC number. Output only: LJ-Link-PRO never receives from
  * or controls the DJ gear through this.
  */
 final class LinkService {

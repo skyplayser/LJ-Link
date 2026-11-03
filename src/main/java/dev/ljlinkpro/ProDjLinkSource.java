@@ -52,6 +52,10 @@ final class ProDjLinkSource implements DeckSource {
         }
     };
 
+    /** The latest status of every player, for the diagnostics. */
+    private final java.util.Map<Integer, CdjStatus> lastStatus = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Map<Integer, String> trackKeys = new java.util.concurrent.ConcurrentHashMap<>();
+
     ProDjLinkSource(Hub.Scope hub) {
         this.hub = hub;
         hub.setSource(this);
@@ -81,7 +85,7 @@ final class ProDjLinkSource implements DeckSource {
 
     private void run() {
         try {
-            hub.setState("searching", "live", "Searching for Pioneer CDJs (Pro DJ Link) …");
+            hub.setState("searching", "live", "Searching for DJ devices on the network …");
             DeviceFinder finder = DeviceFinder.getInstance();
             finder.addDeviceAnnouncementListener(announcementListener);
             finder.start();
@@ -182,11 +186,7 @@ final class ProDjLinkSource implements DeckSource {
         } catch (Exception e) {
             if (!stopped) {
                 System.err.println("Pro DJ Link failed: " + e);
-                boolean portTaken = e instanceof java.net.BindException
-                        || String.valueOf(e.getMessage()).toLowerCase(java.util.Locale.ROOT).contains("address already in use");
-                hub.setState("error", "live", portTaken
-                        ? "The Pioneer search could not start: another program on this computer uses Pro DJ Link (rekordbox, Beat Link Trigger …). Close it and search again."
-                        : "Pro DJ Link: " + e.getMessage());
+                hub.setState("error", "live", "Pro DJ Link: " + e.getMessage());
             }
         }
     }
@@ -203,11 +203,24 @@ final class ProDjLinkSource implements DeckSource {
         }
         Deck d = hub.deck(s.getDeviceNumber());
         d.name = s.getDeviceName();
-        boolean loaded = s.getTrackType() != CdjStatus.TrackType.NO_TRACK && s.getRekordboxId() != 0;
+        boolean loaded = s.getTrackType() != CdjStatus.TrackType.NO_TRACK;
+        // Tracks without rekordbox analysis (rekordbox id 0: unanalysed files, CDs, some streaming sources) are loaded
+        // too, they just have no metadata, waveform or beat grid. They used to show up as "No track loaded".
+        boolean analysed = loaded && s.getRekordboxId() != 0;
         if (!loaded && d.hasTrack) {
             d.clearTrack();
         }
         d.hasTrack = loaded;
+        d.noWaveformSource = loaded && !analysed;
+        String trackKey = s.getTrackType() + "/" + s.getTrackSourceSlot() + "/" + s.getTrackSourcePlayer() + "/"
+                + s.getRekordboxId() + "/" + s.getTrackNumber();
+        if (loaded && !trackKey.equals(trackKeys.put(s.getDeviceNumber(), trackKey)) && !analysed) {
+            d.title = null; // another unanalysed track: the title of the previous one must not stay
+        }
+        if (loaded && !analysed && (d.title == null || d.title.isBlank())) {
+            d.title = "Track without rekordbox analysis (" + s.getTrackType() + ", " + s.getTrackSourceSlot() + ")";
+        }
+        lastStatus.put(s.getDeviceNumber(), s);
         d.playing = s.isPlaying();
         d.onAir = s.isOnAir();
         d.master = s.isTempoMaster();
@@ -328,5 +341,45 @@ final class ProDjLinkSource implements DeckSource {
         } catch (RuntimeException e) {
             System.err.println("Stop step failed: " + e);
         }
+    }
+
+    @Override
+    public java.util.List<String> diagnostics() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        try {
+            VirtualCdj v = VirtualCdj.getInstance();
+            out.add("VirtualCdj running: " + v.isRunning() + (v.isRunning() ? ", own player number " + v.getDeviceNumber()
+                    + ", address " + v.getLocalAddress() + ", interfaces " + v.getMatchingInterfaces() : ""));
+        } catch (RuntimeException e) {
+            out.add("VirtualCdj: " + e);
+        }
+        out.add("Finders running: DeviceFinder " + DeviceFinder.getInstance().isRunning()
+                + ", MetadataFinder " + MetadataFinder.getInstance().isRunning()
+                + ", WaveformFinder " + WaveformFinder.getInstance().isRunning()
+                + ", BeatGridFinder " + BeatGridFinder.getInstance().isRunning()
+                + ", TimeFinder " + TimeFinder.getInstance().isRunning());
+        try {
+            java.util.Map<Integer, Integer> perNumber = new java.util.HashMap<>();
+            for (DeviceAnnouncement a : DeviceFinder.getInstance().getCurrentDevices()) {
+                perNumber.merge(a.getDeviceNumber(), 1, Integer::sum);
+                out.add("Device " + a.getDeviceNumber() + ": " + a.getDeviceName() + " at " + a.getAddress().getHostAddress()
+                        + ", peers " + a.getPeerCount());
+            }
+            perNumber.forEach((n, c) -> {
+                if (c > 1) {
+                    out.add("WARNING: player number " + n + " is announced " + c + " times (same number twice, or one player on two addresses)");
+                }
+            });
+        } catch (RuntimeException e) {
+            out.add("Devices: " + e);
+        }
+        for (CdjStatus s : lastStatus.values()) {
+            out.add("Player " + s.getDeviceNumber() + " status: firmware " + s.getFirmwareVersion() + ", track type " + s.getTrackType()
+                    + ", source slot " + s.getTrackSourceSlot() + " of player " + s.getTrackSourcePlayer()
+                    + ", rekordbox id " + (s.getRekordboxId() != 0 ? "set" : "0 (no analysis)")
+                    + ", USB " + s.isLocalUsbLoaded() + ", SD " + s.isLocalSdLoaded() + ", playing " + s.isPlaying()
+                    + ", on air " + s.isOnAir() + ", master " + s.isTempoMaster());
+        }
+        return out;
     }
 }

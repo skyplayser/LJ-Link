@@ -90,9 +90,6 @@ function render() {
     show("search");
     setStatus("warn", "Search running");
     $("search-message").textContent = t(st.message || "");
-    const searchWarn = $("search-warnings");
-    searchWarn.textContent = (st.searchWarnings || []).map(w => t(w)).join(" · ");
-    searchWarn.classList.toggle("hidden", !(st.searchWarnings || []).length);
     renderFound(st.devices);
     $("search-title").textContent = t(st.devices.length ? "Device found!" : "Searching …");
     $("search-help").classList.toggle("hidden", st.devices.length > 0 || Date.now() - searchStartedAt < 15000);
@@ -1214,6 +1211,77 @@ $("btn-demo").onclick = () => { ui.manualOpen = false; post("/api/demo/start"); 
 $("btn-manual").onclick = openManual;
 $("btn-help-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-cancel").onclick = () => post("/api/stop");
+/* ---------- Report a problem ---------- */
+
+const REPO = "skyplayser/LJ-Link-PRO";
+let reportDiag = "";
+
+async function openReport() {
+  $("settings").classList.add("hidden");
+  $("report").classList.remove("hidden");
+  $("report-status").textContent = "";
+  reportDiag = "";
+  $("report-preview").textContent = t("Loading …");
+  try {
+    const res = await fetch("/api/diagnostics");
+    if (!res.ok) throw new Error();
+    reportDiag = await res.text();
+    $("report-preview").textContent = reportDiag;
+  } catch (e) {
+    // On a tablet the diagnostics are not available; the report goes without them.
+    $("report-diag").checked = false;
+    $("report-diag-row").classList.add("hidden");
+    $("report-diag-hint").textContent = t("Diagnostic data can only be added on the computer that runs LJ-Link-PRO.");
+    $("report-preview-box").classList.add("hidden");
+  }
+  $("report-text").focus();
+}
+
+function reportText() {
+  const text = $("report-text").value.trim();
+  let out = text || t("(no description)");
+  if ($("report-diag").checked && reportDiag) out += "\n\n" + reportDiag;
+  return out;
+}
+
+$("btn-report").onclick = openReport;
+$("report-close").onclick = () => $("report").classList.add("hidden");
+$("report").addEventListener("click", (e) => { if (e.target === $("report")) $("report").classList.add("hidden"); });
+$("report-copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(reportText()); $("report-status").textContent = t("Copied."); }
+  catch (e) { $("report-status").textContent = t("Copying is not allowed here; use “Save as file”."); }
+};
+$("report-save").onclick = () => {
+  const blob = new Blob([reportText()], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "LJ-Link-PRO-report-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".txt";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $("report-status").textContent = t("Saved. Attach the file to your report or send it to us.");
+};
+$("report-github").onclick = async () => {
+  const text = $("report-text").value.trim();
+  if (!text) { $("report-status").textContent = t("Please describe the problem first."); $("report-text").focus(); return; }
+  const title = text.split("\n")[0].slice(0, 90);
+  const version = (reportDiag.match(/^Version (\S+)/m) || [])[1] || "";
+  let body = text + "\n\n" + (version ? "Version: " + version + "\n" : "");
+  let note = "";
+  if ($("report-diag").checked && reportDiag) {
+    const block = "\n<details><summary>Diagnostics</summary>\n\n```\n" + reportDiag + "```\n</details>\n";
+    if (encodeURIComponent(body + block).length < 6500) {
+      body += block;
+    } else {
+      // Too long for a link: the diagnostics go to the clipboard and are pasted into the issue.
+      try { await navigator.clipboard.writeText(reportDiag); note = t("The diagnostic data is in the clipboard: paste it into the issue (Ctrl/Cmd+V)."); }
+      catch (e) { note = t("Please also attach the file from “Save as file”."); }
+      body += "\n<!-- " + "Paste the diagnostic data below" + " -->\n";
+    }
+  }
+  window.open("https://github.com/" + REPO + "/issues/new?labels=bug&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body), "_blank");
+  $("report-status").textContent = (note ? note + " " : "") + t("A GitHub account is needed to send it. Without one: “Save as file” and send it to us.");
+};
+
 /** Version under the start page, with a hint when a newer one exists. */
 async function loadVersion() {
   try {
@@ -1239,7 +1307,6 @@ $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
 $("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); };
-$("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("settings").classList.add("hidden"); });
@@ -1276,7 +1343,7 @@ async function loadBpm() {
   const state = $("bpm-state");
   const list = $("bpm-list");
   if (!res || !res.config) {
-    state.textContent = t("This can only be set on the computer that runs LJ Link.");
+    state.textContent = t("This can only be set on the computer that runs LJ-Link-PRO.");
     list.textContent = "";
     return;
   }
@@ -1355,7 +1422,7 @@ $("tab-bpm").onclick = openBpm;
 $("bpm-close").onclick = closeBpm;
 $("bpm").addEventListener("click", (e) => { if (e.target === $("bpm")) closeBpm(); });
 $("bpm-setup").onclick = () => { closeBpm(); $("tab-link").onclick(); };
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeBpm(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeBpm(); $("report").classList.add("hidden"); } });
 
 $("tab-waveform").onclick = () => { $("settings").classList.add("hidden"); ui.tab = "waveform"; applyTab(); };
 $("tab-mixer").onclick = () => { $("settings").classList.add("hidden"); if (ui.state.phase === "monitoring") { ui.tab = "mixer"; applyTab(); } };
@@ -1391,6 +1458,7 @@ setTimeout(() => {
   if (h.includes("mixer")) { ui.tab = "mixer"; applyTab(); }
   if (h.includes("detail")) { settings.view = "detail"; applySettings(); }
   if (h.includes("bpm")) openBpm();
+  if (h.includes("report")) openReport();
   if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); }
   else if (h.includes("manual")) openManual();
   else { const m = h.match(/info-(\d+)/); if (m) openInfo(Number(m[1])); }
