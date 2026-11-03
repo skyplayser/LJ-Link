@@ -190,6 +190,8 @@ The goal is to cover every common DJ standard.
   (the bar then shows the real level); their EQ knobs are not transmitted. The demo mode simulates both to show the layout.
 - The CDJ-2000NXS2 did not report an active loop in our tests, the CDJ-3000 does. NXS players report scratching only roughly.
 - The player numbers and the mixer channels have to match for ON AIR to be right, and ON AIR also needs sound at the master output.
+- **Known bug:** with a direct cable to the players (no router) and Wi-Fi switched on, players sometimes show up twice or not
+  at all. Restarting LJ Link usually solves it; switching Wi-Fi off or using a switch avoids it. A fix is being worked on.
 - The program joins the Pro DJ Link network as a virtual player with its own number, like beat-link does.
 - CDJ-2000NXS2 and older send their position only between beats; LJ Link runs them at their pitch, so the waveform moves
   smoothly. The CDJ-3000 and Denon devices report their exact position.

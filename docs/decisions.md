@@ -132,3 +132,9 @@ The overall phase is monitoring as soon as any scope is, otherwise searching. "S
 The browser hides decks of unticked device groups (kept in localStorage, so a read-only tablet chooses for itself); new groups are
 shown by default. The Engine library gives only a 1024 value overview per track; the detail view is interpolated from it (honest
 limit, not a fake of the Pioneer 150 fps detail).
+
+## Known bug: direct cable plus Wi-Fi
+With players connected by a direct cable (link-local 169.254.x.x, no router) and Wi-Fi on, players sporadically show up twice
+or are not found; a restart of the program helps. Suspected cause: beat-link receives on all adapters but sends on one, and
+with a link-local network next to Wi-Fi macOS may route or deliver packets on the wrong or on two adapters. Needs a
+diagnostics report taken while the problem is visible before changing the interface choice.
