@@ -161,6 +161,7 @@ Type the command into the desk's command line by hand first, and edit it in LJ-L
 | CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-A9, DJM-V10 | expected to work, not tested |
 | Denon Prime 4+ (firmware 5.0.4) | tested over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
 | Denon SC6000, Prime 4, Prime Go | expected to work (same protocol), not tested |
+| Serato DJ Pro 3.x (macOS) | tested on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
 
 Please tell us what you tested with the *Hardware report* issue template.
 
@@ -172,14 +173,16 @@ Please tell us what you tested with the *Hardware report* issue template.
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
 | grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC), Daslight (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
 | dot2, MIDI clock out | planned |
-| Serato DJ | planned |
+| Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
+| Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |
 | Traktor | planned |
 
 The goal is to cover every common DJ standard.
 
 ## Good to know
 
-- **Search finds everything:** one press of *Search automatically* looks for Pro DJ Link and Denon StageLinQ devices at the same time and keeps looking while it runs.
+- **Search finds everything:** one press of *Search automatically* looks for Pro DJ Link and Denon StageLinQ devices, Serato DJ Pro on this computer and an Ableton Link session at the same time, and keeps looking while it runs.
+- **Serato DJ Pro** has no live interface. LJ-Link-PRO follows Serato's own log to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato does not reveal the play position, so these decks have no playhead.
 - Denon waveforms come from the Engine library on the device's internal drive or card, downloaded once. They have overview resolution (the detail view is smoothed from it), and covers appear only if the library stores them.
 - Do not run it on the computer that runs rekordbox. Tracks from streaming services have no waveform data.
 - From the mixer, Pro DJ Link only tells us which channels are on air. Fader positions and EQ knobs are **not** transmitted by

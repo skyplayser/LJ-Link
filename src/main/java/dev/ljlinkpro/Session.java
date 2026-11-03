@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Owns the running {@link DeckSource}s. "Search" starts every supported kind at once (Pro DJ Link and Denon StageLinQ),
+ * Owns the running {@link DeckSource}s. "Search" starts every supported kind at once (Pro DJ Link, Denon StageLinQ,
+ * Serato DJ Pro on this computer and Ableton Link),
  * so devices of different makers show up together, and devices that appear later are added by their source.
  */
 final class Session {
@@ -27,6 +28,15 @@ final class Session {
         active.add(d);
         p.start();
         d.start();
+        java.nio.file.Path serato = SeratoSource.folder();
+        if (serato != null) {
+            SeratoSource s = new SeratoSource(hub.scope("serato", "serato", false, "Serato DJ Pro"), serato);
+            active.add(s);
+            s.start();
+        }
+        LinkTempoSource link = new LinkTempoSource(hub.scope("link", "link", false, "Ableton Link"));
+        active.add(link);
+        link.start();
     }
 
     synchronized void startDemo() {

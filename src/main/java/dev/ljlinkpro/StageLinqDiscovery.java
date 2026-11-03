@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final class StageLinqDiscovery implements DeckSource {
     private static final String SOFTWARE_NAME = "LJ-Link-PRO";
-    private static final String SOFTWARE_VERSION = "1.3.1";
+    private static final String SOFTWARE_VERSION = "1.4.0";
     /** Helper services some Denon devices announce next to the real device; their "decks" are not players. */
     private static final java.util.Set<String> IGNORED_SOFTWARE = java.util.Set.of("offlineanalyzer");
     /** A device that has not announced itself for this long is gone. */

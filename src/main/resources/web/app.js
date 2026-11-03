@@ -491,7 +491,7 @@ function updateDeck(m) {
   setText(d, "num", d.q(".deck-num"), m.label);
   setText(d, "dev", d.q(".dev-name"), m.groupName || "");
   d.q(".chip.send").classList.toggle("hidden", !m.sendingBpm);
-  setText(d, "kind", d.q(".box.player small"), m.kind === "denon" ? "DECK" : "PLAYER");
+  setText(d, "kind", d.q(".box.player small"), m.kind === "denon" || m.kind === "serato" ? "DECK" : m.kind === "link" ? "LINK" : "PLAYER");
   if (isNew || d.order !== m.order) { d.order = m.order; sortDecks(); }
   d.el.classList.toggle("hidden", hiddenGroups.has(m.group));
   d.el.classList.toggle("onair", !!m.onAir);
