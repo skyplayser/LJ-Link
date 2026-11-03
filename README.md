@@ -10,15 +10,15 @@
 </p>
 
 <p align="center">
-  <a href="https://skyplayser.github.io/LJ-Link-PRO/">Website</a> &nbsp;·&nbsp;
-  <a href="https://github.com/skyplayser/LJ-Link-PRO/releases/latest">Download</a> &nbsp;·&nbsp;
+  <a href="https://skyplayser.github.io/LJ-Link/">Website</a> &nbsp;·&nbsp;
+  <a href="https://github.com/skyplayser/LJ-Link/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/skyplayser/LJ-Link-PRO/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link-PRO/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml/badge.svg" alt="Build"></a>
 </p>
 
 ![LJ Link showing three players](docs/images/waveform.png)
@@ -72,7 +72,7 @@ connection outside your network is the update check (GitHub, only when you ask o
 
 ## Install
 
-Download the installer for your computer from the [latest release](https://github.com/skyplayser/LJ-Link-PRO/releases/latest).
+Download the installer for your computer from the [latest release](https://github.com/skyplayser/LJ-Link/releases/latest).
 Java is included.
 
 | System | File |
@@ -90,7 +90,7 @@ The installers are not signed yet, so both systems warn once on the first start:
 - **Windows** (“Windows protected your PC”): click **More info**, then **Run anyway**. When the firewall asks, tick *Private
   networks* and allow access.
 
-The [website](https://skyplayser.github.io/LJ-Link-PRO/#install) shows the steps in detail.
+The [website](https://skyplayser.github.io/LJ-Link/#install) shows the steps in detail.
 
 After the start you get an icon in the menu bar (macOS) or next to the clock (Windows). Click it to open the web interface,
 switch privacy mode or quit.

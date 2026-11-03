@@ -24,7 +24,7 @@ import java.util.function.DoubleConsumer;
 final class Updater {
     private Updater() {}
 
-    static final String REPO = "skyplayser/LJ-Link-PRO";
+    static final String REPO = "skyplayser/LJ-Link";
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))

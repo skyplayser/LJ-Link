@@ -22,8 +22,8 @@ from pathlib import Path
 
 from PIL import Image
 
-BASE = "https://skyplayser.github.io/LJ-Link-PRO/"
-REPO = "https://github.com/skyplayser/LJ-Link-PRO"
+BASE = "https://skyplayser.github.io/LJ-Link/"
+REPO = "https://github.com/skyplayser/LJ-Link"
 NO_WEBP = {"logo", "og"}  # used by other sites and apps as PNG
 WIDTHS = (1400, 2800)
 

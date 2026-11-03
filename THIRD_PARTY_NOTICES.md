@@ -1,7 +1,7 @@
 # Third party notices
 
 LJ Link is © 2026 Philipp Spruck / NEXTPHILM and is distributed under the
-[Eclipse Public License 2.0](LICENSE). Its source code is available at https://github.com/skyplayser/LJ-Link-PRO.
+[Eclipse Public License 2.0](LICENSE). Its source code is available at https://github.com/skyplayser/LJ-Link.
 
 The installers contain the open source components below, unchanged. Each one is distributed under its own license. The
 license texts are included in the program (menu → *Licenses*) and in `src/main/resources/web/legal/`; the license and notice
