@@ -14,7 +14,7 @@ Do not post private data (your music library, serial numbers). Demo mode makes s
 
 ## Rules of the project
 
-- LJ-Link-PRO is **passive**. A change must never send sync, master, tempo or fader commands to players or mixers.
+- LJ Link is **passive**. A change must never send sync, master, tempo or fader commands to players or mixers.
 - No telemetry and no cloud services. Everything runs locally.
 - No proprietary assets of AlphaTheta / Pioneer DJ, inMusic / Denon DJ or others (logos, fonts, artwork).
 - Check beat-link's behaviour in its sources or Javadoc instead of guessing; note assumptions in `docs/decisions.md`.

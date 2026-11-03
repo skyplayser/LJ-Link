@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/images/logo.png" width="104" alt="LJ-Link-PRO logo">
+  <img src="docs/images/logo.png" width="104" alt="LJ Link logo">
 </p>
 
-<h1 align="center">LJ-Link-PRO</h1>
+<h1 align="center">LJ Link</h1>
 
 <p align="center">
   Show your LJ what the sound does.<br>
@@ -10,21 +10,21 @@
 </p>
 
 <p align="center">
-  <a href="https://skyplayser.github.io/LJ-Link-PRO/">Website</a> &nbsp;·&nbsp;
-  <a href="https://github.com/skyplayser/LJ-Link-PRO/releases/latest">Download</a> &nbsp;·&nbsp;
+  <a href="https://skyplayser.github.io/LJ-Link/">Website</a> &nbsp;·&nbsp;
+  <a href="https://github.com/skyplayser/LJ-Link/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/skyplayser/LJ-Link-PRO/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link-PRO/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml/badge.svg" alt="Build"></a>
 </p>
 
-![LJ-Link-PRO showing three players](docs/images/waveform.png)
+![LJ Link showing three players](docs/images/waveform.png)
 
 When the DJ loads a track, the lighting jockey has to know where it is, where the drop is and when the next phrase starts.
-LJ-Link-PRO listens to Pioneer Pro DJ Link and Denon StageLinQ and shows exactly that for all players at once, laid out like the
+LJ Link listens to Pioneer Pro DJ Link and Denon StageLinQ and shows exactly that for all players at once, laid out like the
 display of a CDJ-3000. It runs on your computer, opens in its own window and can be watched on a tablet next to it.
 
 It only listens to the DJ gear. It never sends sync, master, tempo or fader commands to it, there is no telemetry, and the only
@@ -72,7 +72,7 @@ connection outside your network is the update check (GitHub, only when you ask o
 
 ## Install
 
-Download the installer for your computer from the [latest release](https://github.com/skyplayser/LJ-Link-PRO/releases/latest).
+Download the installer for your computer from the [latest release](https://github.com/skyplayser/LJ-Link/releases/latest).
 Java is included.
 
 | System | File |
@@ -83,14 +83,14 @@ Java is included.
 
 The installers are not signed yet, so both systems warn once on the first start:
 
-- **macOS** (“LJ-Link-PRO” Not Opened): drag the app to *Applications* and start it once, click *Done*. Open *System Settings →
-  Privacy & Security*, scroll down, click **Open Anyway** next to LJ-Link-PRO and confirm with your password, then *Open*. Allow
+- **macOS** (“LJ Link” Not Opened): drag the app to *Applications* and start it once, click *Done*. Open *System Settings →
+  Privacy & Security*, scroll down, click **Open Anyway** next to LJ Link and confirm with your password, then *Open*. Allow
   *Local Network* access when asked. On macOS 14 and older, right-click the app → *Open* also works. Terminal alternative:
-  `xattr -dr com.apple.quarantine /Applications/LJ-Link-PRO.app`.
+  `xattr -dr com.apple.quarantine "/Applications/LJ Link.app"`.
 - **Windows** (“Windows protected your PC”): click **More info**, then **Run anyway**. When the firewall asks, tick *Private
   networks* and allow access.
 
-The [website](https://skyplayser.github.io/LJ-Link-PRO/#install) shows the steps in detail.
+The [website](https://skyplayser.github.io/LJ-Link/#install) shows the steps in detail.
 
 After the start you get an icon in the menu bar (macOS) or next to the clock (Windows). Click it to open the web interface,
 switch privacy mode or quit.
@@ -98,7 +98,7 @@ switch privacy mode or quit.
 ## Quick start
 
 1. Connect the computer, all players and the mixer to the same network switch with cables. Turn Wi-Fi off on the computer.
-2. Start LJ-Link-PRO and press **Search automatically**. It finds Pioneer and Denon devices at the same time.
+2. Start LJ Link and press **Search automatically**. It finds Pioneer and Denon devices at the same time.
 3. Nothing found? Press **Set up manually**; it checks the network step by step and explains what to change.
 4. Load tracks: on Pioneer from a rekordbox USB stick or SD card (they need rekordbox analysis), on Denon from the device's
    library (analysed by Engine DJ or on the device).
@@ -149,7 +149,7 @@ The **SEND BPM** tab decides where the tempo comes from:
 | A deck | always that deck, even when another one is live; nothing is sent while it has no track |
 
 The commands come from the MA manuals; the grandMA2 command and the Daslight mapping are **not yet confirmed on a real desk**.
-Type the command into the desk's command line by hand first, and edit it in LJ-Link-PRO to match your show.
+Type the command into the desk's command line by hand first, and edit it in LJ Link to match your show.
 
 ## Compatibility
 
@@ -182,7 +182,7 @@ The goal is to cover every common DJ standard.
 ## Good to know
 
 - **Search finds everything:** one press of *Search automatically* looks for Pro DJ Link and Denon StageLinQ devices, Serato DJ Pro on this computer and an Ableton Link session at the same time, and keeps looking while it runs.
-- **Serato DJ Pro** has no live interface. LJ-Link-PRO follows Serato's own log to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato does not reveal the play position, so these decks have no playhead.
+- **Serato DJ Pro** has no live interface. LJ Link follows Serato's own log to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato does not reveal the play position, so these decks have no playhead.
 - Denon waveforms come from the Engine library on the device's internal drive or card, downloaded once. They have overview resolution (the detail view is smoothed from it), and covers appear only if the library stores them.
 - Do not run it on the computer that runs rekordbox. Tracks from streaming services have no waveform data.
 - From the mixer, Pro DJ Link only tells us which channels are on air. Fader positions and EQ knobs are **not** transmitted by
@@ -191,7 +191,7 @@ The goal is to cover every common DJ standard.
 - The CDJ-2000NXS2 did not report an active loop in our tests, the CDJ-3000 does. NXS players report scratching only roughly.
 - The player numbers and the mixer channels have to match for ON AIR to be right, and ON AIR also needs sound at the master output.
 - The program joins the Pro DJ Link network as a virtual player with its own number, like beat-link does.
-- CDJ-2000NXS2 and older send their position only between beats; LJ-Link-PRO runs them at their pitch, so the waveform moves
+- CDJ-2000NXS2 and older send their position only between beats; LJ Link runs them at their pitch, so the waveform moves
   smoothly. The CDJ-3000 and Denon devices report their exact position.
 - Updates need the internet. Without it the program works as before, the check just says it could not reach GitHub.
 
@@ -214,18 +214,25 @@ architecture and the decisions behind it are in [docs/decisions.md](docs/decisio
 
 ## Problems?
 
-The [help page](https://skyplayser.github.io/LJ-Link-PRO/help.html) lists known problems and their solutions. To report a new one,
+The [help page](https://skyplayser.github.io/LJ-Link/help.html) lists known problems and their solutions. To report a new one,
 use **Report a problem** in the program (menu ☰, or the menu of the program icon): describe what happens and leave *Include
 diagnostic data* ticked. The diagnostic data holds the version, network adapters, the devices found and their connection state,
-what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending.
+what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it
+by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue.
 
 ## Credits and notices
 
 Built on [beat-link](https://github.com/Deep-Symmetry/beat-link) by Deep Symmetry and the protocol research of the
 [dysentery](https://github.com/Deep-Symmetry/dysentery) project (EPL-2.0). More in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-LJ-Link-PRO is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight. All product
-names belong to their owners and are used only to describe compatibility.
+LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton
+or Native Instruments, and is not related to the LightJockey software by Martin. All product names belong to their owners and
+are used only to describe compatibility.
+
+## License
+
+© 2026 Philipp Spruck / NEXTPHILM. LJ Link is distributed under the [Eclipse Public License 2.0](LICENSE), without any
+warranty. The program shows its own license and those of the bundled libraries under *Settings → Licenses*.
 
 <br>
 

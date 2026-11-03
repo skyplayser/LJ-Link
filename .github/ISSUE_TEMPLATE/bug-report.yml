@@ -13,7 +13,7 @@ body:
     id: version
     attributes:
       label: Version and system
-      description: LJ-Link-PRO version, macOS or Windows version
+      description: LJ Link version, macOS or Windows version
   - type: textarea
     id: devices
     attributes:

@@ -38,7 +38,7 @@ body:
     id: system
     attributes:
       label: Computer
-      description: macOS or Windows version, and the LJ-Link-PRO version
+      description: macOS or Windows version, and the LJ Link version
   - type: textarea
     id: notes
     attributes:

@@ -9,6 +9,7 @@ on:
       - "site/**"
       - "docs/images/**"
       - ".github/workflows/pages.yml"
+      - ".github/scripts/build_site.py"
   workflow_dispatch:
 
 permissions:
@@ -30,10 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add screenshots and logo to the site
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Screenshots with WebP versions, the German page de/, structured data and the sitemap.
+      - name: Build the site
         run: |
-          mkdir -p site/images
-          cp docs/images/*.png site/images/
+          pip install pillow
+          python .github/scripts/build_site.py site docs/images
 
       - uses: actions/configure-pages@v5
 

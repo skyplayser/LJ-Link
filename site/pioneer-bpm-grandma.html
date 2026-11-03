@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Pioneer BPM ans grandMA – CDJ-Tempo an grandMA2 und grandMA3 | LJ Link">Pioneer BPM to grandMA – send CDJ tempo to grandMA2 and grandMA3 | LJ Link</title>
+<meta name="description" content="How to send the BPM of Pioneer CDJs (CDJ-3000, CDJ-2000NXS2, XDJ) over Pro DJ Link to a grandMA2 or grandMA3 speed master – free, without tap tempo or MIDI clock. Older CDJs and mixers work too." data-de-content="So kommt das BPM von Pioneer CDJs (CDJ-3000, CDJ-2000NXS2, XDJ) über Pro DJ Link auf einen Speedmaster am grandMA2 oder grandMA3 – kostenlos, ohne Tap Tempo und MIDI-Clock. Auch ältere CDJs und Mixer.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/pioneer-bpm-grandma.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/pioneer-bpm-grandma.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="Pioneer BPM to grandMA – no more tap tempo" data-de-content="Pioneer BPM ans grandMA – Schluss mit Tap Tempo">
+<meta property="og:description" content="Send the tempo of Pioneer CDJs and Denon players to grandMA2 and grandMA3. Free, also for older CDJs." data-de-content="Das Tempo von Pioneer CDJs und Denon-Playern ans grandMA2 und grandMA3. Kostenlos, auch für ältere CDJs.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/pioneer-bpm-grandma.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./#features" data-de="Funktionen">Features</a>
+      <a href="pioneer-bpm-grandma.html" data-de="Pioneer → grandMA">Pioneer → grandMA</a>
+      <a href="lightjockey-waveforms.html">Waveforms</a>
+      <a href="denon-stagelinq-lighting.html">Denon</a>
+      <a href="./#download">Download</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/pioneer-bpm-grandma.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../pioneer-bpm-grandma.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./">LJ Link</a> › <span data-de="Pioneer BPM ans grandMA">Pioneer BPM to grandMA</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Anleitung · Pro DJ Link → grandMA2 / grandMA3">Guide · Pro DJ Link → grandMA2 / grandMA3</span><span data-de="Pioneer BPM ans grandMA">Pioneer BPM to grandMA</span></h1>
+    <p class="tag" data-de="Das Tempo der Pioneer CDJs automatisch auf einen Speedmaster deines grandMA2 oder grandMA3 – vom CDJ-3000 bis zum CDJ-2000NXS2, ohne Tap Tempo und ohne MIDI-Clock.">Get the tempo of Pioneer CDJs onto a speed master of your grandMA2 or grandMA3 automatically – from the CDJ-3000 down to the CDJ-2000NXS2, with no tap tempo and no MIDI clock.</p>
+    <div class="cta" style="justify-content:flex-start">
+      <a class="btn primary" href="./#download" data-de="Kostenlos herunterladen">Download for free</a>
+      <a class="btn" href="./" data-de="Alle Funktionen">All features</a>
+    </div>
+  </div>
+
+    <section id="answer">
+      <h2 data-de="Kurz gesagt">Short answer</h2>
+      <p data-de="Ein grandMA kann das Pro-DJ-Link-Netzwerk von Pioneer nicht selbst lesen. Man braucht also eine Software-Brücke auf einem Computer im selben Netz. LJ Link ist eine kostenlose, fertige Brücke: Es liest das BPM der Pioneer CDJs und XDJs (und von Denon-Playern) und schickt es auf einen Speedmaster – per Telnet ans grandMA2 und per OSC ans grandMA3. Dazu sieht der Lightjockey die Waveform jedes Decks.">A grandMA cannot read Pioneer's Pro DJ Link network by itself, so you need a software bridge on a computer in the same network. LJ Link is a free, ready-made bridge: it reads the BPM of Pioneer CDJs and XDJs (and Denon players) and sends it to a speed master – over Telnet to grandMA2 and over OSC to grandMA3. On top, the lightjockey sees the waveform of every deck.</p>
+      <p data-de="Kein Tap Tempo, keine MIDI-Clock, kein MIDI-Interface: ein Netzwerkkabel vom Computer zum DJ-Switch reicht.">No tap tempo, no MIDI clock, no MIDI interface: one network cable from the computer to the DJ switch is enough.</p>
+    </section>
+
+    <section id="older-gear">
+      <h2 data-de="Auch ältere CDJs und Mixer – nicht nur CDJ-3000 und DJM-A9">Older CDJs and mixers work too – not only CDJ-3000 and DJM-A9</h2>
+      <p data-de="Jeder Pioneer-Player mit LINK-Anschluss schickt sein Tempo über Pro DJ Link, die neuesten und die älteren. Deshalb bringt LJ Link auch das BPM eines CDJ-2000NXS2 oder eines XDJ ans grandMA – auch in Clubs, deren DJ-Pult seit Jahren nicht erneuert wurde.">Every Pioneer player with a LINK port sends its tempo over Pro DJ Link, the newest and the older ones. So LJ Link also brings the BPM of a CDJ-2000NXS2 or an XDJ to your grandMA, in clubs that have not replaced their booth for years.</p>
+      <div class="table"><table>
+      <tr><th data-de="Gerät">Device</th><th data-de="Stand">State</th></tr>
+      <tr><td>CDJ-3000</td><td class="ok" data-de="getestet: BPM, Waveforms, Cues, Loops, genaue Position">tested: BPM, waveforms, cues, loops, exact position</td></tr>
+      <tr><td>CDJ-2000NXS2</td><td class="ok" data-de="getestet: BPM, Waveforms, Cues, Position (zwischen Beats geschätzt)">tested: BPM, waveforms, cues, position (estimated between beats)</td></tr>
+      <tr><td>DJM-2000NXS</td><td class="ok" data-de="als Mixer getestet: ON AIR je Kanal">tested as mixer: ON AIR per channel</td></tr>
+      <tr><td>CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-1000MK2, XDJ-700, XDJ-XZ, XDJ-AZ</td><td class="plan" data-de="sollte funktionieren (gleiches Pro DJ Link), noch nicht getestet">expected to work (same Pro DJ Link), not tested yet</td></tr>
+      <tr><td>DJM-900NXS, DJM-900NXS2, DJM-A9, DJM-V10</td><td class="plan" data-de="sollte als Mixer funktionieren, noch nicht getestet">expected to work as mixer, not tested yet</td></tr>
+      </table></div>
+      <p data-de="Das BPM ist das, was der Player meldet, auch bei älteren Playern. Nur die Abspielposition zwischen zwei Beats wird beim CDJ-2000NXS2 und älter geschätzt; der CDJ-3000 meldet sie genau. Fader-Stellungen sendet kein DJM über Pro DJ Link, nur welcher Kanal auf Sendung ist.">The BPM is what the player reports, on older players too. Only the play position between two beats is estimated on the CDJ-2000NXS2 and older; the CDJ-3000 reports it exactly. Pro DJ Link sends no fader positions from any DJM, only which channel is on air.</p>
+      <p><a href="https://github.com/skyplayser/LJ-Link/issues/new/choose" data-de="Mit anderem Gerät getestet? Hier melden →">Tried it with other gear? Report it here →</a></p>
+    </section>
+
+    <section id="methods">
+      <h2 data-de="Pioneer BPM ans grandMA: die Wege im Vergleich">Pioneer BPM to grandMA: the methods compared</h2>
+      <div class="table"><table>
+      <tr><th data-de="Weg">Method</th><th data-de="Aufwand">Setup</th><th data-de="Waveforms für den LJ">Waveforms for the LJ</th></tr>
+      <tr><td data-de="Tap Tempo">Tap tempo</td><td data-de="keiner, aber eine Hand ist immer belegt und das Tempo driftet">none, but one hand is always busy and the tempo drifts</td><td data-de="nein">no</td></tr>
+      <tr><td data-de="MIDI-Clock">MIDI clock</td><td data-de="MIDI-Interface und Kabel zum Pult; kann bei Track-Wechseln springen">MIDI interface and cables to the desk; can jump on track changes</td><td data-de="nein">no</td></tr>
+      <tr><td data-de="Beat Link Trigger">Beat Link Trigger</td><td data-de="kostenlos und sehr flexibel; die Pult-Anbindung baust du mit eigenen Triggern und Expressions">free and very flexible; you set up the desk link with your own triggers and expressions</td><td data-de="Player-Fenster">player window</td></tr>
+      <tr><td data-de="LJ Link">LJ Link</td><td data-de="kostenlos; installieren, suchen drücken, grandMA2 oder grandMA3 wählen, fertig">free; install, press search, choose grandMA2 or grandMA3, done</td><td data-de="ja: jedes Deck, Cues, LIVE-Rahmen, auch auf dem Tablet">yes: every deck, cues, LIVE frame, also on a tablet</td></tr>
+      </table></div>
+      <p data-de="LJ Link baut auf beat-link von Deep Symmetry auf, derselben Bibliothek, auf der Beat Link Trigger läuft. Es ist für Lightjockeys gemacht, die das Ergebnis ohne Programmieren wollen: Pioneer und Denon gleichzeitig, Vorlagen für grandMA2 und grandMA3 und eine Ansicht, die fürs Lichtpult gebaut ist.">LJ Link is built on beat-link by Deep Symmetry, the same library that powers Beat Link Trigger. It is made for lightjockeys who want the result without programming: Pioneer and Denon at once, presets for grandMA2 and grandMA3, and a view made for the light desk.</p>
+    </section>
+
+    <section id="how">
+      <h2 data-de="So funktioniert es">How it works</h2>
+      <p data-de="Die CDJs teilen ihr Tempo im Pro-DJ-Link-Netz. LJ Link hört am selben Switch mit, nimmt das führende Deck (Master und/oder auf Sendung) und schickt dessen BPM ans Pult. Ändert sich das Tempo um 0,1 BPM, bekommt das Pult den neuen Wert sofort; ein gleichbleibendes Tempo wird zur Sicherheit ab und zu wiederholt.">The CDJs share their tempo on the Pro DJ Link network. LJ Link listens on the same switch, picks the leading deck (master and/or on air) and sends its BPM to the desk. When the tempo changes by 0.1 BPM, the desk gets the new value at once; a steady tempo is repeated now and then for safety.</p>
+      <p data-de="LJ Link setzt nur das Tempo: Es startet keine Cues, ändert nichts an deiner Show und schickt nichts an die DJ-Geräte.">LJ Link only sets the tempo: it starts no cues, changes nothing in your show and sends nothing to the DJ gear.</p>
+      <img class="pic" src="images/send-bpm.png" alt="SEND BPM: the deck that sends its tempo to the grandMA is marked green" data-de-alt="SEND BPM: das Deck, das sein Tempo ans grandMA schickt, ist grün markiert" width="2800" height="1980" loading="lazy" decoding="async">
+      <h2 data-de="Was du brauchst">What you need</h2>
+      <ul>
+        <li data-de="Pioneer CDJs oder XDJs und ein DJM an einem Netzwerk-Switch (Pro DJ Link).">Pioneer CDJs or XDJs and a DJM on one network switch (Pro DJ Link).</li>
+        <li data-de="Einen Mac oder Windows-Computer mit LJ Link an diesem Switch, WLAN aus.">A Mac or Windows computer with LJ Link on that switch, Wi-Fi off.</li>
+        <li data-de="Ein grandMA2, grandMA3 oder onPC, das der Computer erreicht. Hängt das Pult in einem eigenen Licht-Netz, braucht der Computer eine zweite Netzwerkkarte (z. B. USB-Adapter) in diesem Netz.">A grandMA2, grandMA3 or onPC that the computer can reach. If the desk is in its own light network, the computer needs a second network port (e.g. a USB adapter) in that network.</li>
+      </ul>
+    </section>
+
+    <section id="grandma2">
+      <h2 data-de="grandMA2 und grandMA2 onPC: Schritt für Schritt">grandMA2 and grandMA2 onPC: step by step</h2>
+      <ol>
+        <li data-de="Am Pult: Setup → Console → Global Settings → Telnet auf „Login Enabled“ stellen.">On the desk: Setup → Console → Global Settings → set Telnet to “Login Enabled”.</li>
+        <li data-de="Die Effekte und Chaser, die im Takt laufen sollen, einem Speedmaster zuordnen, z. B. Speed 16 = BPM.">Assign the effects and chasers that should run in time to a speed master, e.g. Speed 16 = BPM.</li>
+        <li data-de="In LJ Link den Reiter LINK öffnen, „grandMA2 / grandMA2 onPC (Telnet)“ wählen und „Pult suchen“ drücken. Den gefundenen grandMA2 anklicken (onPC auf demselben Computer: 127.0.0.1).">In LJ Link open the LINK tab, choose “grandMA2 / grandMA2 onPC (Telnet)” and press “Search for the desk”. Click the desk it finds (onPC on the same computer: 127.0.0.1).</li>
+        <li data-de="Port 30000 und den Benutzer der Show lassen (Standard jeder grandMA2-Show: administrator / admin).">Keep port 30000 and the show user (default of every grandMA2 show: administrator / admin).</li>
+        <li data-de="Den Speedmaster wählen. Der Befehl, der ans Pult geht, lautet:">Choose the speed master. The command sent to the desk is:</li>
+      </ol>
+      <pre><code>SpecialMaster 3.16 At {bpm}</code></pre>
+      <p data-de="Speichern und „Test senden (120 BPM)“ drücken: Der Speedmaster springt auf 120. Am grandMA2 onPC getestet.">Save and press “Send test (120 BPM)”: the speed master jumps to 120. Tested on grandMA2 onPC.</p>
+    </section>
+
+    <section id="grandma3">
+      <h2 data-de="grandMA3 und grandMA3 onPC: Schritt für Schritt">grandMA3 and grandMA3 onPC: step by step</h2>
+      <ol>
+        <li data-de="Am Pult: Menu → In &amp; Out → OSC. Eine Zeile mit Mode UDP, Port 8000, leerem Prefix und Receive Command = Yes anlegen, dann Enable Input einschalten.">On the desk: Menu → In &amp; Out → OSC. Add a line with Mode UDP, Port 8000, an empty Prefix and Receive Command = Yes, then switch on Enable Input.</li>
+        <li data-de="Die Effekte dem ersten Speedmaster (Master 3.1) zuordnen.">Assign your effects to the first speed master (Master 3.1).</li>
+        <li data-de="In LJ Link „grandMA3 / grandMA3 onPC (OSC)“ wählen, IP-Adresse des Pults und Port 8000 eintragen.">In LJ Link choose “grandMA3 / grandMA3 onPC (OSC)”, enter the IP address of the desk and port 8000.</li>
+        <li data-de="Der Befehl, der ans Pult geht, lautet:">The command sent to the desk is:</li>
+      </ol>
+      <pre><code>Master 3.1 At BPM {bpm}</code></pre>
+      <p data-de="Speichern und „Test senden“ drücken. Die grandMA3-Einstellungen folgen dem MA-Handbuch und sind noch nicht an einem echten grandMA3 geprüft – sag uns gern, ob es an deinem klappt.">Save and press “Send test”. The grandMA3 settings follow the MA manual and have not been tried on a real grandMA3 yet – please tell us if it works on yours.</p>
+      <p><a href="https://github.com/skyplayser/LJ-Link/blob/main/docs/lichtpult.de.md" data-de="Ausführliche Anleitung für jedes Pult →">Detailed guide for every desk (German) →</a></p>
+    </section>
+
+    <section id="send-bpm">
+      <h2 data-de="Welches Deck gibt das Tempo?">Which deck sends the tempo?</h2>
+      <p data-de="Der Reiter SEND BPM legt die Quelle fest. Auto nimmt das Deck, das Master und/oder auf Sendung ist; stehen CDJs und ein Denon in einer Kanzel, gewinnt der Master, der auch live ist und spielt. Oder du wählst ein Deck von Hand. Das sendende Deck trägt ein grünes SEND BPM.">The SEND BPM tab chooses the source. Auto takes the deck that is master and/or on air; with CDJs and a Denon in one booth, the master that is also live and playing wins. Or pick one deck by hand. The sending deck shows a green SEND BPM mark.</p>
+      <h2 data-de="Auf dem Pult tut sich nichts?">Nothing moves on the desk?</h2>
+      <ul>
+        <li data-de="Das Tempo kommt an, der Effekt folgt nicht: Der Effekt ist dem Speedmaster nicht zugeordnet.">The tempo arrives but the effect does not follow: the effect is not assigned to that speed master.</li>
+        <li data-de="grandMA2 „Connection refused“: Telnet ist aus oder die IP-Adresse falsch.">grandMA2 “Connection refused”: Telnet is off or the IP address is wrong.</li>
+        <li data-de="grandMA3: Enable Input leuchtet nie auf: falscher Port, falsches Interface oder Firewall.">grandMA3 Enable Input never lights up: wrong port, wrong interface or a firewall.</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2 data-de="Häufige Fragen">Questions</h2>
+      <details><summary data-de="Kann ein grandMA Pioneer Pro DJ Link direkt lesen?">Can a grandMA read Pioneer Pro DJ Link directly?</summary><p data-de="Nein. Weder grandMA2 noch grandMA3 verstehen Pro DJ Link. Ein Computer mit LJ Link im selben Netz liest das Tempo und schickt es per Telnet (grandMA2) oder OSC (grandMA3) ans Pult.">No. Neither grandMA2 nor grandMA3 understands Pro DJ Link. A computer with LJ Link in the same network reads the tempo and sends it to the desk over Telnet (grandMA2) or OSC (grandMA3).</p></details>
+      <details><summary data-de="Funktioniert es mit älteren CDJs wie dem CDJ-2000NXS2?">Does it work with older CDJs like the CDJ-2000NXS2?</summary><p data-de="Ja. CDJ-2000NXS2 und DJM-2000NXS sind getestet. Andere Player und Mixer mit Pro DJ Link, etwa CDJ-2000NXS, XDJ-1000 oder DJM-900NXS, sollten funktionieren, sind aber noch nicht getestet.">Yes. The CDJ-2000NXS2 and the DJM-2000NXS are tested. Other players and mixers with Pro DJ Link, like the CDJ-2000NXS, XDJ-1000 or DJM-900NXS, are expected to work but not tested yet.</p></details>
+      <details><summary data-de="Brauche ich MIDI-Clock oder extra Hardware?">Do I need MIDI clock or extra hardware?</summary><p data-de="Nein. Ein Computer am Netzwerk-Switch der DJs reicht. Das Tempo geht übers Netzwerk ans Pult.">No. A computer on the DJ network switch is enough. The tempo goes to the desk over the network.</p></details>
+      <details><summary data-de="Verändert LJ Link etwas an den CDJs?">Does LJ Link change anything on the CDJs?</summary><p data-de="Nein. Es hört nur zu und schickt keine Sync-, Master-, Tempo- oder Fader-Befehle an die DJ-Geräte.">No. It only listens and sends no sync, master, tempo or fader commands to the DJ gear.</p></details>
+      <details><summary data-de="Geht es mit grandMA onPC auf demselben Computer?">Does it work with grandMA onPC on the same computer?</summary><p data-de="Ja. Als Adresse des Pults 127.0.0.1 eintragen.">Yes. Enter 127.0.0.1 as the address of the desk.</p></details>
+      <details><summary data-de="Und der dot2?">What about the dot2?</summary><p data-de="Der dot2 nimmt übers Netzwerk weder Telnet noch OSC an, deshalb geht es noch nicht. Ein Weg über MIDI ist geplant.">The dot2 takes neither Telnet nor OSC over the network, so it is not possible yet. A way over MIDI is planned.</p></details>
+    </section>
+
+<div class="box"><h2 data-de="Kostenlos für macOS und Windows">Free for macOS and Windows</h2><p data-de="LJ Link ist kostenlos und Open Source. Installieren, „Automatisch suchen“ drücken, fertig.">LJ Link is free and open source. Install it, press “Search automatically” and you are live.</p><p><a class="btn primary" href="./#download" data-de="Kostenlos herunterladen">Download for free</a></p></div>
+
+    <section id="more">
+      <h2 data-de="Weitere Anleitungen">More guides</h2>
+      <div class="grid guides"><div class="card"><h3><a href="lightjockey-waveforms.html" data-de="Waveforms für den Lightjockey">Waveforms for the lightjockey</a></h3><p data-de="Jede CDJ- und Denon-Waveform live am FOH">See every CDJ and Denon waveform live at FOH</p></div><div class="card"><h3><a href="denon-stagelinq-lighting.html" data-de="Denon StageLinQ fürs Licht">Denon StageLinQ for lighting</a></h3><p data-de="Denon Prime und SC6000 mit grandMA und Waveforms">Denon Prime and SC6000 with grandMA and waveforms</p></div></div>
+    </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+</body>
+</html>

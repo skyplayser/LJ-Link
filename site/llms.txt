@@ -1,0 +1,25 @@
+# LJ Link
+
+> Free, open-source app (Eclipse Public License 2.0) for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2, grandMA3 and Daslight, so no tap tempo is needed. macOS and Windows.
+
+- Passive: it only listens and sends no commands to the DJ gear. No cloud, no telemetry.
+- Pioneer and Denon at the same time; devices are added and removed automatically.
+- Any tablet, phone or second screen in the network can open the same view.
+- Older gear works too, not only CDJ-3000 and DJM-A9: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-700 and DJM-900NXS are expected to work (not tested yet).
+- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight is not confirmed yet. Serato DJ Pro works on the same computer without play position. Traktor is planned.
+- Not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting or Daslight.
+
+## Guides
+
+- [Pioneer BPM to grandMA](https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html): send the tempo of Pioneer CDJs over Pro DJ Link to a grandMA2 (Telnet) or grandMA3 (OSC) speed master, compared with tap tempo, MIDI clock and Beat Link Trigger. German: https://skyplayser.github.io/LJ-Link/de/pioneer-bpm-grandma.html
+- [Waveforms for the lightjockey](https://skyplayser.github.io/LJ-Link/lightjockey-waveforms.html): CDJ and Denon waveforms live at the light desk, on a laptop or tablet.
+- [Denon StageLinQ for lighting](https://skyplayser.github.io/LJ-Link/denon-stagelinq-lighting.html): Prime 4+, Prime 4, Prime Go and SC6000 with waveforms, faders and BPM to grandMA.
+
+## Links
+
+- [Website (English)](https://skyplayser.github.io/LJ-Link/)
+- [Website (Deutsch)](https://skyplayser.github.io/LJ-Link/de/)
+- [Download (latest release)](https://github.com/skyplayser/LJ-Link/releases/latest)
+- [README](https://github.com/skyplayser/LJ-Link#readme)
+- [Light desk guide (German)](https://github.com/skyplayser/LJ-Link/blob/main/docs/lichtpult.de.md)
+- [User guide (German)](https://github.com/skyplayser/LJ-Link/blob/main/docs/anleitung.de.md)

@@ -19,7 +19,7 @@ final class Diagnostics {
 
     static String report(Hub hub, Session session, LinkService link) {
         List<String> out = new ArrayList<>();
-        out.add("== LJ-Link-PRO diagnostics ==");
+        out.add("== LJ Link diagnostics ==");
         out.add("Version " + Updater.currentVersion() + ", " + ZonedDateTime.now());
         out.add("System " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch")
                 + "), Java " + System.getProperty("java.version"));

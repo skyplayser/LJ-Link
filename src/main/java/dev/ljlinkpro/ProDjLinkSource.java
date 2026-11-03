@@ -85,7 +85,7 @@ final class ProDjLinkSource implements DeckSource {
 
     private void run() {
         try {
-            hub.setState("searching", "live", "Searching for DJ devices on the network …");
+            hub.setState("searching", "live", "Searching for Pioneer CDJs (Pro DJ Link) …");
             DeviceFinder finder = DeviceFinder.getInstance();
             finder.addDeviceAnnouncementListener(announcementListener);
             finder.start();
@@ -186,7 +186,11 @@ final class ProDjLinkSource implements DeckSource {
         } catch (Exception e) {
             if (!stopped) {
                 System.err.println("Pro DJ Link failed: " + e);
-                hub.setState("error", "live", "Pro DJ Link: " + e.getMessage());
+                boolean portTaken = e instanceof java.net.BindException
+                        || String.valueOf(e.getMessage()).toLowerCase(java.util.Locale.ROOT).contains("address already in use");
+                hub.setState("error", "live", portTaken
+                        ? "The Pioneer search could not start: another program on this computer uses Pro DJ Link (rekordbox, Beat Link Trigger …). Close it and search again."
+                        : "Pro DJ Link: " + e.getMessage());
             }
         }
     }

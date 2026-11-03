@@ -39,7 +39,7 @@ final class UpdateDialog {
                         message(current.equals("dev")
                                 ? tr("This is a development build; updates are only offered to installed versions.",
                                      "Das ist eine Entwicklungsversion; Updates gibt es nur für installierte Versionen.")
-                                : tr("LJ-Link-PRO " + current + " is up to date.", "LJ-Link-PRO " + current + " ist aktuell."));
+                                : tr("LJ Link " + current + " is up to date.", "LJ Link " + current + " ist aktuell."));
                     }
                     return;
                 }
@@ -67,10 +67,10 @@ final class UpdateDialog {
         int[] answer = new int[1];
         SwingUtilities.invokeAndWait(() -> answer[0] = JOptionPane.showConfirmDialog(null,
                 tr("Version " + r.version() + " is available (installed: " + Updater.currentVersion() + ").\n"
-                                + "Install now? LJ-Link-PRO quits and starts again with the new version.",
+                                + "Install now? LJ Link quits and starts again with the new version.",
                         "Version " + r.version() + " ist verfügbar (installiert: " + Updater.currentVersion() + ").\n"
-                                + "Jetzt installieren? LJ-Link-PRO beendet sich und startet mit der neuen Version neu."),
-                "LJ-Link-PRO", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE));
+                                + "Jetzt installieren? LJ Link beendet sich und startet mit der neuen Version neu."),
+                "LJ Link", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE));
         if (answer[0] != JOptionPane.YES_OPTION) {
             return;
         }
@@ -82,7 +82,7 @@ final class UpdateDialog {
             panel.setBorder(new EmptyBorder(16, 16, 16, 16));
             panel.add(new JLabel(tr("Downloading version " + r.version() + " …", "Lade Version " + r.version() + " herunter …")), BorderLayout.NORTH);
             panel.add(bar, BorderLayout.CENTER);
-            dialog[0] = new JDialog((java.awt.Frame) null, "LJ-Link-PRO", false);
+            dialog[0] = new JDialog((java.awt.Frame) null, "LJ Link", false);
             dialog[0].setContentPane(panel);
             dialog[0].setSize(380, 120);
             dialog[0].setLocationRelativeTo(null);
@@ -94,7 +94,7 @@ final class UpdateDialog {
             Updater.install(file);
             SwingUtilities.invokeLater(() -> dialog[0].dispose());
             if (System.getProperty("os.name", "").toLowerCase().contains("win")) {
-                message(tr("The installer starts now. Follow it; LJ-Link-PRO quits.", "Der Installer startet jetzt. Folge ihm; LJ-Link-PRO beendet sich."));
+                message(tr("The installer starts now. Follow it; LJ Link quits.", "Der Installer startet jetzt. Folge ihm; LJ Link beendet sich."));
             }
             quit.run();
         } catch (Exception e) {
@@ -105,7 +105,7 @@ final class UpdateDialog {
 
     private static void message(String text) {
         try {
-            SwingUtilities.invokeAndWait(() -> JOptionPane.showMessageDialog(null, text, "LJ-Link-PRO", JOptionPane.INFORMATION_MESSAGE));
+            SwingUtilities.invokeAndWait(() -> JOptionPane.showMessageDialog(null, text, "LJ Link", JOptionPane.INFORMATION_MESSAGE));
         } catch (Exception e) {
             System.out.println(text);
         }

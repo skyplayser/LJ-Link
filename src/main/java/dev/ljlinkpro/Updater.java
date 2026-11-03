@@ -24,7 +24,7 @@ import java.util.function.DoubleConsumer;
 final class Updater {
     private Updater() {}
 
-    static final String REPO = "skyplayser/LJ-Link-PRO";
+    static final String REPO = "skyplayser/LJ-Link";
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))
@@ -164,7 +164,7 @@ final class Updater {
         Path script = installer.resolveSibling("update.sh");
         Files.writeString(script, """
                 #!/bin/bash
-                # Replaces LJ-Link-PRO with the new version once the running program has quit.
+                # Replaces LJ Link with the new version once the running program has quit.
                 PID="$1"; DMG="$2"; APP="$3"
                 for i in $(seq 1 120); do kill -0 "$PID" 2>/dev/null || break; sleep 0.5; done
                 MNT="$(mktemp -d)"
@@ -190,7 +190,7 @@ final class Updater {
         if (launcher == null) {
             return null;
         }
-        // .../LJ-Link-PRO.app/Contents/MacOS/LJ-Link-PRO
+        // .../LJ Link.app/Contents/MacOS/LJ Link (installs from before the rename keep the folder LJ-Link-PRO.app)
         Path p = Path.of(launcher).getParent();
         for (int i = 0; i < 3 && p != null; i++) {
             if (p.getFileName() != null && p.getFileName().toString().endsWith(".app")) {

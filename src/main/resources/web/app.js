@@ -90,6 +90,9 @@ function render() {
     show("search");
     setStatus("warn", "Search running");
     $("search-message").textContent = t(st.message || "");
+    const searchWarn = $("search-warnings");
+    searchWarn.textContent = (st.searchWarnings || []).map(w => t(w)).join(" · ");
+    searchWarn.classList.toggle("hidden", !(st.searchWarnings || []).length);
     renderFound(st.devices);
     $("search-title").textContent = t(st.devices.length ? "Device found!" : "Searching …");
     $("search-help").classList.toggle("hidden", st.devices.length > 0 || Date.now() - searchStartedAt < 15000);
@@ -1213,7 +1216,7 @@ $("btn-help-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-cancel").onclick = () => post("/api/stop");
 /* ---------- Report a problem ---------- */
 
-const REPO = "skyplayser/LJ-Link-PRO";
+const REPO = "skyplayser/LJ-Link";
 let reportDiag = "";
 
 async function openReport() {
@@ -1231,7 +1234,7 @@ async function openReport() {
     // On a tablet the diagnostics are not available; the report goes without them.
     $("report-diag").checked = false;
     $("report-diag-row").classList.add("hidden");
-    $("report-diag-hint").textContent = t("Diagnostic data can only be added on the computer that runs LJ-Link-PRO.");
+    $("report-diag-hint").textContent = t("Diagnostic data can only be added on the computer that runs LJ Link.");
     $("report-preview-box").classList.add("hidden");
   }
   $("report-text").focus();
@@ -1252,14 +1255,37 @@ $("report-copy").onclick = async () => {
   catch (e) { $("report-status").textContent = t("Copying is not allowed here; use “Save as file”."); }
 };
 $("report-save").onclick = () => {
+  saveReportFile();
+  $("report-status").textContent = t("Saved. Attach the file to your report or send it to us.");
+};
+const REPORT_MAIL = "fehlermelden@nextphilm.de";
+
+function saveReportFile() {
   const blob = new Blob([reportText()], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "LJ-Link-PRO-report-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".txt";
+  a.download = "LJ-Link-report-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".txt";
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  $("report-status").textContent = t("Saved. Attach the file to your report or send it to us.");
+}
+
+$("report-mail").onclick = async () => {
+  const text = $("report-text").value.trim();
+  if (!text) { $("report-status").textContent = t("Please describe the problem first."); $("report-text").focus(); return; }
+  const subject = "LJ Link: " + text.split("\n")[0].slice(0, 80);
+  let body = reportText();
+  let note = "";
+  // Mail programs (above all on Windows) only take short links; long diagnostics go as a file to attach.
+  if (encodeURIComponent(body).length > 1800 && $("report-diag").checked && reportDiag) {
+    saveReportFile();
+    try { await navigator.clipboard.writeText(reportDiag); } catch (e) { /* the file is enough */ }
+    body = text + "\n\n" + t("The diagnostic data is attached as a file (LJ-Link-report-….txt from the downloads folder).");
+    note = t("The diagnostic data was saved as a file: attach it to the mail (it is also in the clipboard).");
+  }
+  location.href = "mailto:" + REPORT_MAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  $("report-status").textContent = (note ? note + " " : "") + t("Your mail program opens with the report to {mail}. If nothing opens, send it by hand to that address.", { mail: REPORT_MAIL });
 };
+
 $("report-github").onclick = async () => {
   const text = $("report-text").value.trim();
   if (!text) { $("report-status").textContent = t("Please describe the problem first."); $("report-text").focus(); return; }
@@ -1279,7 +1305,7 @@ $("report-github").onclick = async () => {
     }
   }
   window.open("https://github.com/" + REPO + "/issues/new?labels=bug&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body), "_blank");
-  $("report-status").textContent = (note ? note + " " : "") + t("A GitHub account is needed to send it. Without one: “Save as file” and send it to us.");
+  $("report-status").textContent = (note ? note + " " : "") + t("A GitHub account is needed to send it. Without one: “Send by email”.");
 };
 
 /** Version under the start page, with a hint when a newer one exists. */
@@ -1307,6 +1333,7 @@ $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
 $("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); };
+$("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("settings").classList.add("hidden"); });
@@ -1343,7 +1370,7 @@ async function loadBpm() {
   const state = $("bpm-state");
   const list = $("bpm-list");
   if (!res || !res.config) {
-    state.textContent = t("This can only be set on the computer that runs LJ-Link-PRO.");
+    state.textContent = t("This can only be set on the computer that runs LJ Link.");
     list.textContent = "";
     return;
   }

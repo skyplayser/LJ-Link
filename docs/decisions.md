@@ -57,7 +57,7 @@ plain float at a configurable address. Settings are stored in `~/.ljlinkpro/link
 Daslight mapping are NOT verified against real consoles and must be checked on site. Beat/phrase/deck-state output is not built yet.
 
 ## ADR-011: Name and logo
-The product is called LJ-Link-PRO (not BoothView, which is trademarked). Java package `dev.ljlinkpro`, config in
+The product is called LJ Link (not BoothView, which is trademarked). Java package `dev.ljlinkpro`, config in
 `~/.ljlinkpro/`. The logo (waveform bars shooting light beams) is drawn in code in `Logo.java` and mirrored in
 `web/logo.svg`; `packaging/LJ-Link-PRO.icns|ico|png` are generated from it (`java dev.ljlinkpro.Logo <dir>`, then `iconutil`)
 and passed to jpackage as the installer and app icon.
