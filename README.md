@@ -14,6 +14,7 @@
   <a href="https://github.com/skyplayser/LJ-Link/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
+  <a href="https://discord.gg/N6DMca4Bjk">Discord</a> &nbsp;·&nbsp;
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
