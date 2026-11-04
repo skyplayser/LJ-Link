@@ -15,13 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Sends the tempo of the leading deck to a lighting desk or software: to a grandMA2 as a command line over Telnet, to a
- * grandMA3 as a command line over OSC, to anything else as an OSC number. Output only: LJ Link never receives from
- * or controls the DJ gear through this.
+ * grandMA3 as a command line over OSC, to anything else as an OSC number, to the Wolfmix software (WTOOLS) and other
+ * OS2L receivers as a beat on every beat. Output only: LJ Link never receives from or controls the DJ gear through this.
  */
 final class LinkService {
     /**
      * {@code type}: "off", "ma2" (grandMA2 / onPC command line over Telnet, with {@code user} and {@code password}),
-     * "ma" (grandMA3 / onPC command line over OSC {@code /cmd}) or "osc" (the tempo as an OSC number to {@code address}).
+     * "ma" (grandMA3 / onPC command line over OSC {@code /cmd}), "osc" (the tempo as an OSC number to {@code address})
+     * or "os2l" (beats and tempo as OS2L messages over TCP, for the Wolfmix software WTOOLS).
      */
     record Config(String type, String host, int port, String address, String command, String user, String password) {
         static Config off() {
@@ -38,6 +39,10 @@ final class LinkService {
     private static final long MA2_KEEPALIVE_MS = 15_000;
 
     private final Ma2Telnet telnet = new Ma2Telnet();
+    private final Os2lClient os2l = new Os2lClient();
+    private final Os2lBeats beats = new Os2lBeats();
+    /** OS2L: how often the beat clock is checked, which is also the largest delay a beat can get. */
+    private static final long BEAT_TICK_MS = 4;
 
     record Status(Double bpm, int sentCount, String error, String source, String sendingDeck) {}
 
@@ -55,7 +60,13 @@ final class LinkService {
         t.setDaemon(true);
         return t;
     });
+    private final ScheduledExecutorService beatExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "os2l-beat");
+        t.setDaemon(true);
+        return t;
+    });
     private volatile Config config = load();
+    private volatile long beatRetryAt;
     private volatile Double lastBpm;
     private volatile long lastSentAt;
     private volatile int sentCount;
@@ -74,6 +85,7 @@ final class LinkService {
         this.hub = hub;
         if (send) {
             executor.scheduleAtFixedRate(this::tick, 250, 250, TimeUnit.MILLISECONDS);
+            beatExecutor.scheduleAtFixedRate(this::beatTick, 250, BEAT_TICK_MS, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -86,18 +98,21 @@ final class LinkService {
     }
 
     void setConfig(Config c) throws IOException {
-        String type = java.util.List.of("off", "ma2", "ma", "osc").contains(c.type()) ? c.type() : "off";
+        String type = java.util.List.of("off", "ma2", "ma", "osc", "os2l").contains(c.type()) ? c.type() : "off";
         Config clean = new Config(
                 type,
                 c.host() == null ? "127.0.0.1" : c.host().trim(),
-                c.port() < 1 || c.port() > 65535 ? ("ma2".equals(type) ? Ma2Telnet.PORT : 8000) : c.port(),
+                c.port() < 1 || c.port() > 65535 ? ("ma2".equals(type) ? Ma2Telnet.PORT : "os2l".equals(type) ? Os2lClient.PORT : 8000) : c.port(),
                 c.address() == null || c.address().isBlank() ? "/ljlinkpro/bpm" : c.address().trim(),
                 c.command() == null || c.command().isBlank() ? ("ma2".equals(type) ? MA2_COMMAND : MA3_COMMAND) : c.command().trim(),
                 "ma2".equals(type) && (c.user() == null || c.user().isBlank()) ? MA2_DEFAULT_USER : c.user() == null ? "" : c.user().trim(),
                 "ma2".equals(type) && (c.user() == null || c.user().isBlank()) && (c.password() == null || c.password().isEmpty())
                         ? MA2_DEFAULT_PASSWORD : c.password() == null ? "" : c.password());
         telnet.close();
+        os2l.close();
+        beats.reset();
         retryAt = 0;
+        beatRetryAt = 0;
         config = clean;
         error = null;
         lastBpm = null;
@@ -143,7 +158,70 @@ final class LinkService {
 
     /** Sends a fixed tempo once so the user can check the connection and the mapping on the desk. */
     void sendTest() {
+        Config c = config;
+        if (c.type().equals("os2l")) {
+            // Eight beats at 120 BPM, off the beat thread so the call returns at once.
+            Thread t = new Thread(() -> {
+                try {
+                    for (int i = 0; i < 8; i++) {
+                        os2l.beat(c.host(), c.port(), i == 0, i, 120.0);
+                        sentCount++;
+                        lastBpm = 120.0;
+                        error = null;
+                        Thread.sleep(500);
+                    }
+                } catch (IOException e) {
+                    error = os2lError(c, e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }, "os2l-test");
+            t.setDaemon(true);
+            t.start();
+            return;
+        }
         send(config, 120.0);
+    }
+
+    private static String os2lError(Config c, IOException e) {
+        return "No OS2L receiver at " + c.host() + ":" + c.port() + " (" + e.getMessage()
+                + "). Is the lighting program running with OS2L switched on?";
+    }
+
+    /** OS2L: sends a beat when one of the leading deck passes. Runs every few milliseconds, so it must stay cheap. */
+    private void beatTick() {
+        try {
+            Config c = config;
+            if (!c.type().equals("os2l")) {
+                return;
+            }
+            Deck lead = leadingDeck();
+            if (lead != null && lead.scope != null && "demo".equals(lead.scope.kind)) {
+                return; // the demo tempo never reaches a real receiver; tick() explains it in the status
+            }
+            Os2lBeats.Beat beat = beats.next(lead, System.nanoTime());
+            if (beat == null) {
+                return;
+            }
+            long now = System.currentTimeMillis();
+            if (now < beatRetryAt) {
+                return;
+            }
+            try {
+                os2l.beat(c.host(), c.port(), beat.change(), beat.pos(), beat.bpm());
+                sentCount++;
+                lastBpm = beat.bpm();
+                lastSentAt = now;
+                if (error != null && error.startsWith("No OS2L")) {
+                    error = null;
+                }
+            } catch (IOException e) {
+                error = os2lError(c, e);
+                beatRetryAt = now + 5000;
+            }
+        } catch (RuntimeException e) {
+            error = e.getMessage();
+        }
     }
 
     private static Config load() {
@@ -223,6 +301,9 @@ final class LinkService {
             }
             if (error != null && (error.startsWith("The chosen deck") || error.startsWith("Demo mode"))) {
                 error = null;
+            }
+            if (c.type().equals("os2l")) {
+                return; // beats go out from beatTick()
             }
             double bpm = lead.effectiveBpm;
             if (c.type().equals("ma2")) {

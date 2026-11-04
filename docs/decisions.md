@@ -138,3 +138,15 @@ With players connected by a direct cable (link-local 169.254.x.x, no router) and
 or are not found; a restart of the program helps. Suspected cause: beat-link receives on all adapters but sends on one, and
 with a link-local network next to Wi-Fi macOS may route or deliver packets on the wrong or on two adapters. Needs a
 diagnostics report taken while the problem is visible before changing the interface choice.
+
+## ADR-020: Wolfmix through OS2L, beat by beat
+The Wolfmix has no network, only USB; the tempo reaches it through the computer app WTOOLS, which accepts OS2L (the protocol of
+VirtualDJ, spec at os2l.org: TCP, one JSON object per message, `beat` with `change`, `pos`, `bpm`). LJ Link is the audio side:
+it connects to WTOOLS (127.0.0.1:5000 by default) and sends `beat` on every beat. `Os2lBeats` takes the beat from the beat grid
+and the position predicted from the latest sample (`Deck.predictedPositionMs`), checked every 4 ms in its own thread, so a
+beat is at most a few ms late (measured mean 1.5 ms, max 7 ms against a local receiver). `pos` is the grid index shifted so that
+bar starts are multiples of 4. `change` is set after a start, a jump of more than 400 ms, a track or deck change and a tempo
+step of 0.5 BPM. A first beat that began more than 60 ms ago is skipped rather than sent late. Decks without a position
+(Serato, Ableton Link) run freely at their tempo. The spec names no message delimiter; every object ends with a line feed.
+Not yet checked against a real WTOOLS: whether it accepts a connection from another computer, how it takes the line feed, and
+the USB latency (an offset setting is planned).

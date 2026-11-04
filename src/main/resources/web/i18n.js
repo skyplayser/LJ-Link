@@ -179,6 +179,9 @@ const DE = {
   "Hides title, artist, album and cover. It can only be changed with the program icon: menu bar (Mac) or taskbar next to the clock (Windows) → click the icon → tick “Privacy mode”. It cannot be changed in the web interface, not even from a tablet.": "Blendet Titel, Artist, Album und Cover aus. Das lässt sich nur über das Programm-Symbol ändern: Menüleiste (Mac) bzw. Taskleiste neben der Uhr (Windows) → Symbol anklicken → Haken bei „Privatsphäre-Modus“. Über die Weboberfläche ist keine Änderung möglich, auch nicht vom Tablet.",
   "Light desk link (send tempo)": "Lichtpult-Link (Tempo senden)",
   "Custom OSC target": "Eigenes OSC-Ziel",
+  "Wolfmix (OS2L, WTOOLS) – Alpha": "Wolfmix (OS2L, WTOOLS) – Alpha",
+  "ALPHA, UNTESTED: never tried on a real Wolfmix, do not rely on it yet. Wolfmix (WTOOLS) and other OS2L software. Start WTOOLS on the computer the Wolfmix is plugged into, switch OS2L on there and enter that computer's address (127.0.0.1 if it is this one). LJ Link sends the tempo and every beat. On the Wolfmix, push the first encoder in an FX rack so it follows the BPM. See the Wolfmix guide, and please report how it went.": "ALPHA, UNGETESTET: noch nie an einem echten Wolfmix ausprobiert, nicht darauf verlassen. Wolfmix (WTOOLS) und andere OS2L-Software. WTOOLS auf dem Computer starten, an dem der Wolfmix per USB hängt, dort OS2L einschalten und die Adresse dieses Computers eintragen (127.0.0.1, wenn es dieser hier ist). LJ Link sendet das Tempo und jeden Beat. Am Wolfmix den ersten Drehregler im FX-Rack drücken, damit er dem BPM folgt. Siehe Wolfmix-Anleitung und melde uns bitte, wie es lief.",
+  "No OS2L receiver at {host}:{port} ({e}). Is the lighting program running with OS2L switched on?": "Kein OS2L-Empfänger unter {host}:{port} ({e}). Läuft das Lichtprogramm (WTOOLS) und ist OS2L eingeschaltet?",
   "IP address of the desk, e.g. 192.168.1.50": "IP des Pults, z. B. 192.168.1.50",
   "Save": "Speichern",
   "Send test (120 BPM)": "Test senden (120 BPM)",
@@ -274,6 +277,9 @@ function t(text, vars) {
       else if (/^Sending to .* failed: /.test(text)) {
         const e = text.match(/^Sending to (.*):(\d+) failed: (.*)$/);
         if (e) out = t("Sending to {host}:{port} failed: {e}", { host: e[1], port: e[2], e: e[3] });
+      } else if (/^No OS2L receiver at /.test(text)) {
+        const e = text.match(/^No OS2L receiver at (.*):(\d+) \((.*)\)\. Is the lighting/);
+        if (e) out = t("No OS2L receiver at {host}:{port} ({e}). Is the lighting program running with OS2L switched on?", { host: e[1], port: e[2], e: e[3] });
       } else if (text.startsWith("Player ")) out = text;
       else if (text.includes(" – loop until ")) out = text.replace(" – loop until ", " – Loop bis ");
       else if (/^CD with \d+ tracks$/.test(text)) out = text.replace("CD with ", "CD mit ").replace(" tracks", " Tracks");

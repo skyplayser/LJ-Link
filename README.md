@@ -133,6 +133,7 @@ even from the computer's own browser. `--privacy` starts the program in this mod
 | grandMA2, grandMA2 onPC | command line over **Telnet** (TCP 30000), `SpecialMaster 3.16 At {bpm}` (Speed 16 = BPM; Speed 1–15 selectable), whole BPM | Setup → Console → Global Settings → Telnet: *Login Enabled*; a user of the show to log in |
 | grandMA3, grandMA3 onPC | command line over **OSC** `/cmd`, `Master 3.1 At BPM {bpm}` | Menu → In & Out → OSC: UDP, port, *Receive Command: Yes*, *Enable Input* |
 | Daslight, Resolume, QLC+ … | the tempo as an **OSC number** to an address | map the address in the program's OSC mapping |
+| Wolfmix (via WTOOLS), other OS2L programs — **untested alpha feature** | **OS2L** over TCP (port 5000): the tempo and every beat | start WTOOLS on the computer the Wolfmix is plugged into and switch OS2L on; **never tried on a real Wolfmix**, guide: [docs/wolfmix-anleitung.de.md](docs/wolfmix-anleitung.de.md) (German) |
 | dot2 | not possible: the dot2 takes no Telnet or OSC from the network | tap tempo or sound-to-light |
 
 The step-by-step guide for every desk (German) is in [docs/lichtpult.de.md](docs/lichtpult.de.md). The grandMA2 has no OSC input,
@@ -172,6 +173,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 | Pioneer Pro DJ Link | done |
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
 | grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC), Daslight (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
+| Wolfmix / OS2L (beats and tempo) | **untested alpha**: built and tested against a test receiver only, never tried on a real Wolfmix |
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
 | Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |

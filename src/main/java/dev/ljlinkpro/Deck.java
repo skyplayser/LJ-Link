@@ -38,6 +38,8 @@ final class Deck {
     volatile double velocity;
     /** Counts position samples so the {@link Hub} knows when there is something new to send. */
     volatile long positionSample;
+    /** {@link System#nanoTime()} when the latest position sample arrived here, for predicting the position between samples. */
+    volatile long positionArrivedNanos;
     volatile int loopBeats;
     /** Pitch change in percent (+0.35 = 0.35 % faster). */
     volatile double pitchPercent;
@@ -142,7 +144,18 @@ final class Deck {
         lastSampleNanos = now;
         lastSamplePos = ms;
         positionMs = ms;
+        positionArrivedNanos = System.nanoTime();
         positionSample++;
+    }
+
+    /** The position now, carried on from the latest sample at the measured speed; -1 when unknown. */
+    long predictedPositionMs(long nowNanos) {
+        long ms = positionMs;
+        if (ms < 0) {
+            return -1;
+        }
+        double elapsed = (nowNanos - positionArrivedNanos) / 1e6;
+        return ms + Math.round(velocity * Math.max(0, Math.min(elapsed, 500)));
     }
 
     void setWaveform(byte[] data) {

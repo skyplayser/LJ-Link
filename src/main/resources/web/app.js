@@ -196,6 +196,8 @@ const LINK_PRESETS = {
               hint: "Daslight receives this address as a number over OSC; map it in Daslight's OSC mapping. Whether your Daslight version can set the BPM this way is not confirmed yet, see the light desk guide." },
   osc:      { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
               hint: "The tempo is sent as a number (float) to this address." },
+  wolfmix:  { type: "os2l", port: 5000, text: "", noText: true, noScan: true,
+              hint: "ALPHA, UNTESTED: never tried on a real Wolfmix, do not rely on it yet. Wolfmix (WTOOLS) and other OS2L software. Start WTOOLS on the computer the Wolfmix is plugged into, switch OS2L on there and enter that computer's address (127.0.0.1 if it is this one). LJ Link sends the tempo and every beat. On the Wolfmix, push the first encoder in an FX rack so it follows the BPM. See the Wolfmix guide, and please report how it went." },
 };
 
 /* Speed masters of the grandMA: 1 to 15, and 16, which is the BPM master. The choice is written into the command. */
@@ -222,6 +224,7 @@ function linkPresetFromConfig(c) {
   if (c.type === "off") return "off";
   if (c.type === "osc") return ui.linkPreset === "daslight" ? "daslight" : "osc";
   if (c.type === "ma2") return "grandma2";
+  if (c.type === "os2l") return "wolfmix";
   return "grandma";
 }
 
@@ -232,6 +235,9 @@ function showLinkFields(preset) {
   $("link-hint").textContent = t(p.hint);
   $("link-login").classList.toggle("hidden", !p.login);
   $("link-speed-row").classList.toggle("hidden", !p.speed);
+  $("link-text").classList.toggle("hidden", !!p.noText);
+  $("link-scan-row").classList.toggle("hidden", !!p.noScan);
+  $("link-found").classList.toggle("hidden", !!p.noScan);
   syncSpeedFromCommand();
   $("link-text").placeholder = t(p.label);
 }
@@ -280,6 +286,7 @@ $("link-target").onchange = () => {
   if (preset !== "off") {
     $("link-port").value = p.port;
     $("link-text").value = p.text;
+    if (p.noScan && $("link-host").value === "") $("link-host").value = "127.0.0.1";
     // A new grandMA2 show always has the user "administrator" with the password "admin".
     if (p.login && !$("link-user").value) { $("link-user").value = p.user; $("link-pass").value = p.password; }
     if (!$("link-host").value) $("link-host").value = "127.0.0.1";
