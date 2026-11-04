@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Anwendungsfall: getrenntes DJ- und Lichtnetz | LJ Link Wiki">Use case: separate DJ and light networks | LJ Link Wiki</title>
+<meta name="description" content="Keep MA-Net, Art-Net or sACN apart from the Pro DJ Link network: a computer with two network ports, fixed address without gateway, LJ Link chooses the DJ port itself." data-de-content="MA-Net, Art-Net oder sACN vom Pro-DJ-Link-Netz getrennt halten: ein Computer mit zwei Netzwerkanschlüssen, feste Adresse ohne Gateway, LJ Link wählt den DJ-Anschluss selbst.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-case-two-networks.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-case-two-networks.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-case-two-networks.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-case-two-networks.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-case-two-networks.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link Wiki – Use case: separate DJ and light networks" data-de-content="LJ Link Wiki – Anwendungsfall: getrenntes DJ- und Lichtnetz">
+<meta property="og:description" content="Keep MA-Net, Art-Net or sACN apart from the Pro DJ Link network: a computer with two network ports, fixed address without gateway, LJ Link chooses the DJ port itself." data-de-content="MA-Net, Art-Net oder sACN vom Pro-DJ-Link-Netz getrennt halten: ein Computer mit zwei Netzwerkanschlüssen, feste Adresse ohne Gateway, LJ Link wählt den DJ-Anschluss selbst.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-case-two-networks.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-case-two-networks.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="docs-page">
+<header class="top">
+  <div class="wrap dwrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span><span class="brand-sub">Wiki</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./" data-de="Startseite">Home</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-case-two-networks.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-case-two-networks.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+<nav class="dtabs" aria-label="Wiki sections" data-de-aria-label="Wiki-Bereiche"><div class="dwrap"><a class="dtab" href="wiki.html" data-de="Start">Start</a><a class="dtab" href="wiki-network.html" data-de="Netzwerk">Network</a><a class="dtab" href="wiki-sources.html" data-de="DJ-Quellen">DJ sources</a><a class="dtab" href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a><a class="dtab on" href="wiki-use-cases.html" data-de="Anwendungsfälle">Use cases</a><a class="dtab" href="wiki-troubleshooting.html" data-de="Hilfe">Help</a></div></nav>
+<div class="docs dwrap">
+  <button class="dside-btn" id="dside-btn" aria-controls="dside" aria-expanded="false"><span aria-hidden="true">&#9776;</span> <span data-de="Inhalt des Wikis">Wiki contents</span></button>
+  <aside class="dside" id="dside"><nav aria-label="Wiki pages" data-de-aria-label="Wiki-Seiten"><p class="dgroup">Start</p><a class="dlink" href="wiki.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-quickstart.html" data-de="Schnellstart">Quick start</a><a class="dlink" href="wiki-install.html" data-de="Installieren und aktualisieren">Install and update</a><a class="dlink" href="wiki-interface.html" data-de="Die Oberfläche">The interface</a><p class="dgroup" data-de="Netzwerk">Network</p><a class="dlink" href="wiki-network.html" data-de="Grundlagen">Basics</a><a class="dlink" href="wiki-network-setups.html" data-de="Aufbauten im Vergleich">Setups compared</a><a class="dlink" href="wiki-network-ip.html" data-de="IP-Adresse einstellen">Set an IP address</a><a class="dlink" href="wiki-network-ports.html" data-de="Ports und Firewall">Ports and firewall</a><p class="dgroup" data-de="DJ-Quellen">DJ sources</p><a class="dlink" href="wiki-sources.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-pioneer.html" data-de="Pioneer Pro DJ Link">Pioneer Pro DJ Link</a><a class="dlink" href="wiki-denon.html" data-de="Denon StageLinQ">Denon StageLinQ</a><a class="dlink" href="wiki-serato.html" data-de="Serato DJ Pro">Serato DJ Pro</a><a class="dlink" href="wiki-ableton-link.html" data-de="Ableton Link">Ableton Link</a><p class="dgroup" data-de="Lichtpulte">Light desks</p><a class="dlink" href="wiki-lighting-desks.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-grandma2.html" data-de="grandMA2">grandMA2</a><a class="dlink" href="wiki-grandma3.html" data-de="grandMA3">grandMA3</a><a class="dlink" href="wiki-wolfmix.html" data-de="Wolfmix">Wolfmix</a><a class="dlink" href="wiki-daslight.html" data-de="Daslight">Daslight</a><a class="dlink" href="wiki-other-desks.html" data-de="OSC, OS2L, dot2">OSC, OS2L, dot2</a><p class="dgroup" data-de="Anwendungsfälle">Use cases</p><a class="dlink" href="wiki-use-cases.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-case-club.html" data-de="Club mit CDJs und grandMA2">Club with CDJs and grandMA2</a><a class="dlink" href="wiki-case-onpc.html" data-de="Ein Laptop mit onPC">One laptop with onPC</a><a class="dlink" href="wiki-case-mixed.html" data-de="Mehrere DJs, gemischte Geräte">Several DJs, mixed gear</a><a class="dlink" href="wiki-case-mobile.html" data-de="Mobil mit Denon und Wolfmix">Mobile with Denon and Wolfmix</a><a class="dlink" href="wiki-case-serato.html" data-de="Serato auf dem DJ-Laptop">Serato on the DJ laptop</a><a class="dlink" href="wiki-case-tablet.html" data-de="Waveforms auf dem Tablet">Waveforms on a tablet</a><a class="dlink on" href="wiki-case-two-networks.html" aria-current="page" data-de="Zwei Netzwerke">Two networks</a><div class="dsub"><a href="#steps" data-de="Schritte">Steps</a><a href="#why-not-one-network" data-de="Warum nicht ein Netz">Why not one network</a></div><a class="dlink" href="wiki-case-direct.html" data-de="Direktkabel">Direct cable</a><a class="dlink" href="wiki-case-stream.html" data-de="Livestream und Privatsphäre-Modus">Livestream and privacy mode</a><p class="dgroup" data-de="Hilfe">Help</p><a class="dlink" href="wiki-troubleshooting.html" data-de="Fehlersuche">Troubleshooting</a><a class="dlink" href="wiki-glossary.html" data-de="Glossar">Glossary</a><a class="dlink" href="wiki-reference.html" data-de="Referenz">Reference</a></nav></aside>
+  <main class="dbody article wiki">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="wiki.html">Wiki</a> › <span data-de="Anwendungsfälle">Use cases</span> › <span data-de="Zwei Netzwerke">Two networks</span></nav>
+    <h1><span class="kicker" data-de="Anwendungsfall">Use case</span><span data-de="Zwei Netzwerke">Two networks</span></h1>
+    <p class="tag" data-de="Ein Computer zwischen DJ-Netz und Lichtnetz.">One computer between the DJ network and the light network.</p>
+    <div class="table facts"><table><tbody><tr><td><b data-de="Geräte">Gear</b></td><td><span data-de="DJ-Netz, ein getrenntes Lichtnetz (MA-Net, Art-Net, sACN), ein Computer mit zwei Netzwerkanschlüssen">DJ network, a separate light network (MA-Net, Art-Net, sACN), a computer with two network ports</span></td></tr><tr><td><b data-de="Warum">Why</b></td><td><span data-de="Lichtnetze haben oft feste Adressen und viel Verkehr; sie sollen getrennt bleiben">light networks often have fixed addresses and lots of traffic; they should stay apart</span></td></tr><tr><td><b data-de="Stand">Status</b></td><td><span class="badge ok" data-de="Geht, hängt vom Computer ab">Works, depends on your computer</span></td></tr></tbody></table></div><figure class="ddiag"><svg viewBox="0 0 720 300" role="img" aria-label="Diagram" data-de-aria-label="Diagramm" xmlns="http://www.w3.org/2000/svg"><line x1="95" y1="68" x2="133" y2="125" stroke="#60a5fa" stroke-width="2.5"/><line x1="212" y1="68" x2="169" y2="125" stroke="#60a5fa" stroke-width="2.5"/><line x1="300" y1="225" x2="200" y2="175" stroke="#60a5fa" stroke-width="2.5"/><rect x="213" y="190" width="73" height="20" rx="6" fill="#07090c" stroke="#60a5fa"/><text x="250" y="204" text-anchor="middle" font-size="12" fill="#60a5fa" data-de="eingebaut">built-in</text><line x1="420" y1="225" x2="520" y2="175" stroke="#60a5fa" stroke-width="2.5"/><rect x="427" y="190" width="87" height="20" rx="6" fill="#07090c" stroke="#60a5fa"/><text x="470" y="204" text-anchor="middle" font-size="12" fill="#60a5fa" data-de="USB-Adapter">USB adapter</text><line x1="570" y1="70" x2="570" y2="125" stroke="#60a5fa" stroke-width="2.5"/><rect x="80" y="125" width="140" height="50" rx="10" fill="#0f2219" stroke="#22c55e" stroke-width="1.5"/><text x="150" y="147" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="DJ-Switch">DJ switch</text><text x="150" y="164" text-anchor="middle" font-size="11.5" fill="#9aa6b6" data-de="169.254 / 192.168.1">169.254 / 192.168.1</text><rect x="30" y="22" width="100" height="46" rx="10" fill="#13233f" stroke="#3b82f6" stroke-width="1.5"/><text x="80" y="50" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="CDJ 1">CDJ 1</text><rect x="180" y="22" width="100" height="46" rx="10" fill="#13233f" stroke="#3b82f6" stroke-width="1.5"/><text x="230" y="50" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="CDJ 2">CDJ 2</text><rect x="280" y="225" width="160" height="60" rx="10" fill="#1a1530" stroke="#8b5cf6" stroke-width="1.5"/><text x="360" y="252" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="Computer">Computer</text><text x="360" y="269" text-anchor="middle" font-size="11.5" fill="#9aa6b6" data-de="2 Netzwerkanschlüsse">2 network ports</text><rect x="495" y="125" width="150" height="50" rx="10" fill="#0f2219" stroke="#22c55e" stroke-width="1.5"/><text x="570" y="147" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="Licht-Switch">Light switch</text><text x="570" y="164" text-anchor="middle" font-size="11.5" fill="#9aa6b6" data-de="z. B. 2.0.0.x">e.g. 2.0.0.x</text><rect x="505" y="20" width="130" height="50" rx="10" fill="#231708" stroke="#ff8a00" stroke-width="1.5"/><text x="570" y="50" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="grandMA">grandMA</text></svg></figure><h2 id="steps" data-de="Schritte">Steps</h2><ol class="dsteps"><li><p data-de="Anschluss 1 (eingebaut oder Adapter 1) in den DJ-Switch. Automatisch lassen.">Port 1 (built-in or adapter 1) into the DJ switch. Leave it automatic.</p></li><li><p><span data-de="Anschluss 2 (USB-Netzwerkadapter) ins Lichtnetz. Ihm eine ">Port 2 (USB network adapter) into the light network. Give it a </span><b data-de="feste Adresse">fixed address</b><span data-de=" im Bereich des Lichtnetzes geben, zum Beispiel Pult "> in the light network’s range, for example desk </span><code>2.0.0.1</code><span data-de=" → Computer "> → computer </span><code>2.0.0.50</code><span data-de=", Maske ">, mask </span><code>255.0.0.0</code><span data-de=" oder wie das Lichtnetz es nutzt. "> or as the light network uses. </span><a href="wiki-network-ip.html" data-de="So geht’s">How to</a></p></li><li><p><b data-de="Nie ein Gateway">Never a gateway</b><span data-de=" an Anschluss 2. *Router* leer lassen, damit Internet- und DJ-Verkehr nicht dorthin gehen."> on port 2. Leave *router* empty, so internet and DJ traffic do not go there.</span></p></li><li><p>LJ Link → <b data-de="Automatisch suchen">Search automatically</b><span data-de=". Es wählt den DJ-Anschluss selbst danach, wo die Player sind. *Manuell einrichten* listet beide Anschlüsse.">. It picks the DJ port by itself from where the players are. *Set up manually* lists both ports.</span></p></li><li><p><span data-de="LINK → Adresse des Pults im Lichtnetz (">LINK → desk address in the light network (</span><code>2.0.0.1</code><span data-de="). Der Computer schickt es über Anschluss 2, weil dieses Netz direkt an ihm hängt.">). The computer sends it through port 2 because that network is directly on it.</span></p></li></ol><div class="adm danger"><p class="adm-t"><span class="adm-i" aria-hidden="true">✕</span><span data-de="Wichtig">Important</span></p><p><span data-de="Die zwei Netze müssen ">The two networks must use </span><b data-de="verschiedene Adressbereiche">different address ranges</b><span data-de=" haben. Sind beide ">. If both are </span><code>192.168.1.x</code><span data-de=", weiß der Computer nicht, wohin er senden soll, und beides geht kaputt.">, the computer does not know where to send and both break.</span></p></div><h2 id="why-not-one-network" data-de="Warum nicht ein Netz">Why not one network</h2><ul><li data-de="Art-Net und sACN können viel Broadcast-Verkehr senden; die DJ-Geräte brauchen ihn nicht.">Art-Net and sACN can send a lot of broadcast traffic; DJ gear does not need it.</li><li data-de="Das Lichtnetz ist oft mit festen Adressen installiert, die du nicht ändern solltest.">The light network is often installed with fixed addresses you should not change.</li><li data-de="Ein Problem in einem Netz reißt das andere nicht mit.">A problem in one network does not take the other one down.</li></ul><div class="adm tip"><p class="adm-t"><span class="adm-i" aria-hidden="true">✓</span><span data-de="Checkliste vor Einlass">Checklist before the doors open</span></p><ul><li data-de="Zwei verschiedene Adressbereiche.">Two different address ranges.</li><li data-de="Kein Gateway am Licht-Anschluss.">No gateway on the light port.</li><li data-de="Test gesendet kommt am Pult an.">Test sent arrives on the desk.</li></ul></div>
+    <div class="adm community"><p class="adm-t"><span class="adm-i" aria-hidden="true">💬</span><span data-de="Fehlt etwas oder stimmt etwas nicht?">Something missing or wrong?</span></p><p><span data-de="Frag auf unserem ">Ask in our </span><a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a><span data-de=" oder "> or </span><a href="help.html#report" data-de="melde ein Problem">report a problem</a><span data-de=". Am meisten helfen Berichte von echten Geräten, auch wenn etwas nicht klappt.">. Reports from real gear help most, also when something does not work.</span></p></div>
+    <nav class="dpn"><a class="prev" href="wiki-case-tablet.html"><small data-de="Zurück">Previous</small><span data-de="← Waveforms auf dem Tablet">← Waveforms on a tablet</span></a><a class="next" href="wiki-case-direct.html"><small data-de="Weiter">Next</small><span data-de="Direktkabel →">Direct cable →</span></a></nav>
+  </main>
+</div>
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var b = document.getElementById("dside-btn"), s = document.getElementById("dside");
+    if (b && s) b.addEventListener("click", function () { var o = s.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
+    // Keep the current page visible in the side navigation and the current section in the tabs.
+    var on = document.querySelector(".dlink.on"), side = document.getElementById("dside");
+    if (on && side && side.scrollHeight > side.clientHeight) side.scrollTop = on.offsetTop - side.clientHeight / 3;
+    var tab = document.querySelector(".dtab.on");
+    if (tab) tab.parentNode.scrollLeft = tab.offsetLeft - 16;
+    if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; }
+  })();
+</script>
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+</body>
+</html>

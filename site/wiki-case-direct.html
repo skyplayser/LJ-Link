@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Anwendungsfall: Direktkabel ohne Switch oder Router | LJ Link Wiki">Use case: direct cable without switch or router | LJ Link Wiki</title>
+<meta name="description" content="Connect one CDJ, controller or Denon Prime directly to the LJ Link computer with one cable: 169.254 addresses, Wi-Fi off, the known bug and why a small switch is better." data-de-content="Einen CDJ, Controller oder Denon Prime mit einem Kabel direkt an den LJ-Link-Computer: 169.254-Adressen, WLAN aus, der bekannte Fehler und warum ein kleiner Switch besser ist.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-case-direct.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-case-direct.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-case-direct.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-case-direct.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-case-direct.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link Wiki – Use case: direct cable without switch or router" data-de-content="LJ Link Wiki – Anwendungsfall: Direktkabel ohne Switch oder Router">
+<meta property="og:description" content="Connect one CDJ, controller or Denon Prime directly to the LJ Link computer with one cable: 169.254 addresses, Wi-Fi off, the known bug and why a small switch is better." data-de-content="Einen CDJ, Controller oder Denon Prime mit einem Kabel direkt an den LJ-Link-Computer: 169.254-Adressen, WLAN aus, der bekannte Fehler und warum ein kleiner Switch besser ist.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-case-direct.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-case-direct.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="docs-page">
+<header class="top">
+  <div class="wrap dwrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span><span class="brand-sub">Wiki</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./" data-de="Startseite">Home</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-case-direct.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-case-direct.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+<nav class="dtabs" aria-label="Wiki sections" data-de-aria-label="Wiki-Bereiche"><div class="dwrap"><a class="dtab" href="wiki.html" data-de="Start">Start</a><a class="dtab" href="wiki-network.html" data-de="Netzwerk">Network</a><a class="dtab" href="wiki-sources.html" data-de="DJ-Quellen">DJ sources</a><a class="dtab" href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a><a class="dtab on" href="wiki-use-cases.html" data-de="Anwendungsfälle">Use cases</a><a class="dtab" href="wiki-troubleshooting.html" data-de="Hilfe">Help</a></div></nav>
+<div class="docs dwrap">
+  <button class="dside-btn" id="dside-btn" aria-controls="dside" aria-expanded="false"><span aria-hidden="true">&#9776;</span> <span data-de="Inhalt des Wikis">Wiki contents</span></button>
+  <aside class="dside" id="dside"><nav aria-label="Wiki pages" data-de-aria-label="Wiki-Seiten"><p class="dgroup">Start</p><a class="dlink" href="wiki.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-quickstart.html" data-de="Schnellstart">Quick start</a><a class="dlink" href="wiki-install.html" data-de="Installieren und aktualisieren">Install and update</a><a class="dlink" href="wiki-interface.html" data-de="Die Oberfläche">The interface</a><p class="dgroup" data-de="Netzwerk">Network</p><a class="dlink" href="wiki-network.html" data-de="Grundlagen">Basics</a><a class="dlink" href="wiki-network-setups.html" data-de="Aufbauten im Vergleich">Setups compared</a><a class="dlink" href="wiki-network-ip.html" data-de="IP-Adresse einstellen">Set an IP address</a><a class="dlink" href="wiki-network-ports.html" data-de="Ports und Firewall">Ports and firewall</a><p class="dgroup" data-de="DJ-Quellen">DJ sources</p><a class="dlink" href="wiki-sources.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-pioneer.html" data-de="Pioneer Pro DJ Link">Pioneer Pro DJ Link</a><a class="dlink" href="wiki-denon.html" data-de="Denon StageLinQ">Denon StageLinQ</a><a class="dlink" href="wiki-serato.html" data-de="Serato DJ Pro">Serato DJ Pro</a><a class="dlink" href="wiki-ableton-link.html" data-de="Ableton Link">Ableton Link</a><p class="dgroup" data-de="Lichtpulte">Light desks</p><a class="dlink" href="wiki-lighting-desks.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-grandma2.html" data-de="grandMA2">grandMA2</a><a class="dlink" href="wiki-grandma3.html" data-de="grandMA3">grandMA3</a><a class="dlink" href="wiki-wolfmix.html" data-de="Wolfmix">Wolfmix</a><a class="dlink" href="wiki-daslight.html" data-de="Daslight">Daslight</a><a class="dlink" href="wiki-other-desks.html" data-de="OSC, OS2L, dot2">OSC, OS2L, dot2</a><p class="dgroup" data-de="Anwendungsfälle">Use cases</p><a class="dlink" href="wiki-use-cases.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-case-club.html" data-de="Club mit CDJs und grandMA2">Club with CDJs and grandMA2</a><a class="dlink" href="wiki-case-onpc.html" data-de="Ein Laptop mit onPC">One laptop with onPC</a><a class="dlink" href="wiki-case-mixed.html" data-de="Mehrere DJs, gemischte Geräte">Several DJs, mixed gear</a><a class="dlink" href="wiki-case-mobile.html" data-de="Mobil mit Denon und Wolfmix">Mobile with Denon and Wolfmix</a><a class="dlink" href="wiki-case-serato.html" data-de="Serato auf dem DJ-Laptop">Serato on the DJ laptop</a><a class="dlink" href="wiki-case-tablet.html" data-de="Waveforms auf dem Tablet">Waveforms on a tablet</a><a class="dlink" href="wiki-case-two-networks.html" data-de="Zwei Netzwerke">Two networks</a><a class="dlink on" href="wiki-case-direct.html" aria-current="page" data-de="Direktkabel">Direct cable</a><div class="dsub"><a href="#what-works" data-de="Was geht">What works</a><a href="#steps" data-de="Schritte">Steps</a><a href="#better-a-small-switch" data-de="Besser: ein kleiner Switch">Better: a small switch</a></div><a class="dlink" href="wiki-case-stream.html" data-de="Livestream und Privatsphäre-Modus">Livestream and privacy mode</a><p class="dgroup" data-de="Hilfe">Help</p><a class="dlink" href="wiki-troubleshooting.html" data-de="Fehlersuche">Troubleshooting</a><a class="dlink" href="wiki-glossary.html" data-de="Glossar">Glossary</a><a class="dlink" href="wiki-reference.html" data-de="Referenz">Reference</a></nav></aside>
+  <main class="dbody article wiki">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="wiki.html">Wiki</a> › <span data-de="Anwendungsfälle">Use cases</span> › <span data-de="Direktkabel">Direct cable</span></nav>
+    <h1><span class="kicker" data-de="Anwendungsfall">Use case</span><span data-de="Direktkabel">Direct cable</span></h1>
+    <p class="tag" data-de="Ein Kabel, kein Switch. Schnell, mit einem Haken.">One cable, no switch. Quick, with one catch.</p>
+    <div class="table facts"><table><tbody><tr><td><b data-de="Geräte">Gear</b></td><td><span data-de="ein Player oder Controller, ein Netzwerkkabel, ein Computer">one player or controller, one network cable, a computer</span></td></tr><tr><td><b data-de="Wann">When</b></td><td><span data-de="schnelle Probe, ein einzelner Controller (XDJ-RX, Prime), ein Notfall">quick rehearsal, a single controller (XDJ-RX, Prime), an emergency</span></td></tr><tr><td><b data-de="Stand">Status</b></td><td><span class="badge ok" data-de="Geht, mit bekanntem Fehler">Works, with a known bug</span></td></tr></tbody></table></div><h2 id="what-works" data-de="Was geht">What works</h2><ul><li><b data-de="Ein Gerät">One device</b><span data-de=" direkt: ein CDJ, ein All-in-One-Controller oder ein Denon Prime."> directly: a CDJ, an all-in-one controller or a Denon Prime.</span></li><li><span data-de="Stattdessen in eine ">Into a </span><b data-de="LINK-Buchse des DJM">DJM LINK socket</b><span data-de=": Alle Player am Mixer werden gesehen. Das ist das bessere Direktkabel."> instead: all players on the mixer are seen. That is the better direct cable.</span></li><li><span data-de="Kein Router: Beide Seiten geben sich ">No router: both sides give themselves </span><code>169.254.x.x</code><span data-de="-Adressen. Nach dem Einstecken bis zu einer Minute warten."> addresses. Wait up to a minute after plugging in.</span></li></ul><h2 id="steps" data-de="Schritte">Steps</h2><ol class="dsteps"><li><p><b data-de="WLAN am Computer ausschalten.">Switch Wi-Fi off</b><span data-de=" Das ist der wichtigste Schritt."> on the computer. This is the most important step.</span></p></li><li><p data-de="Das Kabel in den Player (LINK-Buchse) und den Computer (oder USB-Adapter) stecken.">Plug the cable into the player (LINK socket) and the computer (or USB adapter).</p></li><li><p><span data-de="30–60 Sekunden warten, dann ">Wait 30–60 seconds, then </span><b data-de="Automatisch suchen">Search automatically</b>.</p></li><li><p><span data-de="Nichts? ">Nothing? </span><b data-de="Manuell einrichten">Set up manually</b><span data-de=", die Adresse des Players eintragen (Utility → Link Info) und ">, enter the player’s address (Utility → Link Info) and </span><b data-de="Verbindung prüfen">Check connection</b>.</p></li></ol><div class="adm danger"><p class="adm-t"><span class="adm-i" aria-hidden="true">✕</span><span data-de="Wichtig">Important</span></p><p><b data-de="Bekannter Fehler:">Known bug:</b><span data-de=" Mit Direktkabel und eingeschaltetem WLAN erscheinen Player manchmal doppelt oder gar nicht. LJ Link beenden (Symbol → Beenden) und neu starten; WLAN ausschalten; oder einen kleinen Switch dazwischen. Wenn du es siehst, bitte "> with a direct cable and Wi-Fi on, players sometimes show up twice or not at all. Quit LJ Link (icon → Quit) and start again; switch Wi-Fi off; or put a small switch between. If you see it, please </span><a href="help.html#report" data-de="einen Bericht senden">send a report</a><span data-de=", solange es auf dem Bildschirm ist."> while it is on screen.</span></p></div><h2 id="better-a-small-switch" data-de="Besser: ein kleiner Switch">Better: a small switch</h2><p data-de="Ein 5-Port-Switch kostet wenig, braucht keine Einrichtung und beseitigt die meisten Probleme des Direktkabels. Einen in der Tasche haben.">A 5-port switch costs little, needs no setup and removes most problems of the direct cable. Keep one in the bag.</p>
+    <div class="adm community"><p class="adm-t"><span class="adm-i" aria-hidden="true">💬</span><span data-de="Fehlt etwas oder stimmt etwas nicht?">Something missing or wrong?</span></p><p><span data-de="Frag auf unserem ">Ask in our </span><a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a><span data-de=" oder "> or </span><a href="help.html#report" data-de="melde ein Problem">report a problem</a><span data-de=". Am meisten helfen Berichte von echten Geräten, auch wenn etwas nicht klappt.">. Reports from real gear help most, also when something does not work.</span></p></div>
+    <nav class="dpn"><a class="prev" href="wiki-case-two-networks.html"><small data-de="Zurück">Previous</small><span data-de="← Zwei Netzwerke">← Two networks</span></a><a class="next" href="wiki-case-stream.html"><small data-de="Weiter">Next</small><span data-de="Livestream und Privatsphäre-Modus →">Livestream and privacy mode →</span></a></nav>
+  </main>
+</div>
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var b = document.getElementById("dside-btn"), s = document.getElementById("dside");
+    if (b && s) b.addEventListener("click", function () { var o = s.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
+    // Keep the current page visible in the side navigation and the current section in the tabs.
+    var on = document.querySelector(".dlink.on"), side = document.getElementById("dside");
+    if (on && side && side.scrollHeight > side.clientHeight) side.scrollTop = on.offsetTop - side.clientHeight / 3;
+    var tab = document.querySelector(".dtab.on");
+    if (tab) tab.parentNode.scrollLeft = tab.offsetLeft - 16;
+    if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; }
+  })();
+</script>
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+</body>
+</html>

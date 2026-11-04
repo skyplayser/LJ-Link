@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Ableton-Link-Tempo | LJ Link Wiki">Ableton Link tempo | LJ Link Wiki</title>
+<meta name="description" content="Take the tempo from an Ableton Link session (Serato DJ Pro, Traktor, Ableton Live) in LJ Link and send it to the light desk. Setup and limits." data-de-content="Das Tempo einer Ableton-Link-Session (Serato DJ Pro, Traktor, Ableton Live) in LJ Link übernehmen und ans Lichtpult schicken. Einrichtung und Grenzen.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-ableton-link.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-ableton-link.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-ableton-link.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-ableton-link.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-ableton-link.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link Wiki – Ableton Link tempo" data-de-content="LJ Link Wiki – Ableton-Link-Tempo">
+<meta property="og:description" content="Take the tempo from an Ableton Link session (Serato DJ Pro, Traktor, Ableton Live) in LJ Link and send it to the light desk. Setup and limits." data-de-content="Das Tempo einer Ableton-Link-Session (Serato DJ Pro, Traktor, Ableton Live) in LJ Link übernehmen und ans Lichtpult schicken. Einrichtung und Grenzen.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-ableton-link.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-ableton-link.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="docs-page">
+<header class="top">
+  <div class="wrap dwrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span><span class="brand-sub">Wiki</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./" data-de="Startseite">Home</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-ableton-link.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-ableton-link.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+<nav class="dtabs" aria-label="Wiki sections" data-de-aria-label="Wiki-Bereiche"><div class="dwrap"><a class="dtab" href="wiki.html" data-de="Start">Start</a><a class="dtab" href="wiki-network.html" data-de="Netzwerk">Network</a><a class="dtab on" href="wiki-sources.html" data-de="DJ-Quellen">DJ sources</a><a class="dtab" href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a><a class="dtab" href="wiki-use-cases.html" data-de="Anwendungsfälle">Use cases</a><a class="dtab" href="wiki-troubleshooting.html" data-de="Hilfe">Help</a></div></nav>
+<div class="docs dwrap">
+  <button class="dside-btn" id="dside-btn" aria-controls="dside" aria-expanded="false"><span aria-hidden="true">&#9776;</span> <span data-de="Inhalt des Wikis">Wiki contents</span></button>
+  <aside class="dside" id="dside"><nav aria-label="Wiki pages" data-de-aria-label="Wiki-Seiten"><p class="dgroup">Start</p><a class="dlink" href="wiki.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-quickstart.html" data-de="Schnellstart">Quick start</a><a class="dlink" href="wiki-install.html" data-de="Installieren und aktualisieren">Install and update</a><a class="dlink" href="wiki-interface.html" data-de="Die Oberfläche">The interface</a><p class="dgroup" data-de="Netzwerk">Network</p><a class="dlink" href="wiki-network.html" data-de="Grundlagen">Basics</a><a class="dlink" href="wiki-network-setups.html" data-de="Aufbauten im Vergleich">Setups compared</a><a class="dlink" href="wiki-network-ip.html" data-de="IP-Adresse einstellen">Set an IP address</a><a class="dlink" href="wiki-network-ports.html" data-de="Ports und Firewall">Ports and firewall</a><p class="dgroup" data-de="DJ-Quellen">DJ sources</p><a class="dlink" href="wiki-sources.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-pioneer.html" data-de="Pioneer Pro DJ Link">Pioneer Pro DJ Link</a><a class="dlink" href="wiki-denon.html" data-de="Denon StageLinQ">Denon StageLinQ</a><a class="dlink" href="wiki-serato.html" data-de="Serato DJ Pro">Serato DJ Pro</a><a class="dlink on" href="wiki-ableton-link.html" aria-current="page" data-de="Ableton Link">Ableton Link</a><div class="dsub"><a href="#what-it-is" data-de="Was es ist">What it is</a><a href="#when-to-use-it" data-de="Wann du es nutzt">When to use it</a><a href="#step-by-step" data-de="Schritt für Schritt">Step by step</a><a href="#limits" data-de="Grenzen">Limits</a></div><p class="dgroup" data-de="Lichtpulte">Light desks</p><a class="dlink" href="wiki-lighting-desks.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-grandma2.html" data-de="grandMA2">grandMA2</a><a class="dlink" href="wiki-grandma3.html" data-de="grandMA3">grandMA3</a><a class="dlink" href="wiki-wolfmix.html" data-de="Wolfmix">Wolfmix</a><a class="dlink" href="wiki-daslight.html" data-de="Daslight">Daslight</a><a class="dlink" href="wiki-other-desks.html" data-de="OSC, OS2L, dot2">OSC, OS2L, dot2</a><p class="dgroup" data-de="Anwendungsfälle">Use cases</p><a class="dlink" href="wiki-use-cases.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-case-club.html" data-de="Club mit CDJs und grandMA2">Club with CDJs and grandMA2</a><a class="dlink" href="wiki-case-onpc.html" data-de="Ein Laptop mit onPC">One laptop with onPC</a><a class="dlink" href="wiki-case-mixed.html" data-de="Mehrere DJs, gemischte Geräte">Several DJs, mixed gear</a><a class="dlink" href="wiki-case-mobile.html" data-de="Mobil mit Denon und Wolfmix">Mobile with Denon and Wolfmix</a><a class="dlink" href="wiki-case-serato.html" data-de="Serato auf dem DJ-Laptop">Serato on the DJ laptop</a><a class="dlink" href="wiki-case-tablet.html" data-de="Waveforms auf dem Tablet">Waveforms on a tablet</a><a class="dlink" href="wiki-case-two-networks.html" data-de="Zwei Netzwerke">Two networks</a><a class="dlink" href="wiki-case-direct.html" data-de="Direktkabel">Direct cable</a><a class="dlink" href="wiki-case-stream.html" data-de="Livestream und Privatsphäre-Modus">Livestream and privacy mode</a><p class="dgroup" data-de="Hilfe">Help</p><a class="dlink" href="wiki-troubleshooting.html" data-de="Fehlersuche">Troubleshooting</a><a class="dlink" href="wiki-glossary.html" data-de="Glossar">Glossary</a><a class="dlink" href="wiki-reference.html" data-de="Referenz">Reference</a></nav></aside>
+  <main class="dbody article wiki">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="wiki.html">Wiki</a> › <span data-de="DJ-Quellen">DJ sources</span> › <span>Ableton Link</span></nav>
+    <h1><span class="kicker" data-de="DJ-Quellen">DJ sources</span><span data-de="Ableton Link">Ableton Link</span></h1>
+    <p class="tag" data-de="Das Tempo von Serato, Traktor, Live und vielen Apps.">The tempo of Serato, Traktor, Live and many apps.</p>
+    <div class="adm beta"><p class="adm-t"><span class="adm-i" aria-hidden="true">β</span><span>Beta</span></p><p data-de="Nach dem veröffentlichten Protokoll von Ableton gebaut und dagegen getestet, aber noch nicht mit einer echten Session auf einem Gig ausprobiert.">Built from Ableton’s published protocol and tested against it, but not yet tried with a real session at a gig.</p></div><h2 id="what-it-is" data-de="Was es ist">What it is</h2><p><span data-de="Ableton Link hält das Tempo mehrerer Programme über das Netzwerk im Gleichschritt. Serato DJ Pro, Traktor, Ableton Live und viele Apps unterstützen es. LJ Link hört der Session zu und nimmt ihr ">Ableton Link keeps the tempo of several programs in step over the network. Serato DJ Pro, Traktor, Ableton Live and many apps support it. LJ Link listens to the session and takes its </span><b data-de="Tempo">tempo</b><span data-de="; es tritt ihr nie bei und ändert nichts.">; it never joins or changes the session.</span></p><h2 id="when-to-use-it" data-de="Wann du es nutzt">When to use it</h2><ul><li><b>Traktor</b><span data-de=" oder ein anderes Programm ohne eigene Unterstützung: Tempo ans Lichtpult."> or another program without its own support: tempo to the light desk.</span></li><li><b>Serato</b><span data-de=": das Live-Tempo mit Pitch, zusätzlich zu den Trackdaten aus der Datei.">: the live tempo with pitch, in addition to the track data from the file.</span></li><li><b data-de="Live-Sets">Live sets</b><span data-de=" mit Ableton Live."> with Ableton Live.</span></li></ul><h2 id="step-by-step" data-de="Schritt für Schritt">Step by step</h2><ol class="dsteps"><li><p><span data-de="In der DJ-Software ">In the DJ software switch on </span><b>Link</b><span data-de=" einschalten (Serato: *Setup → Expansion Packs → Ableton Link*, Traktor: *Preferences → Link*, Live: Knopf *Link*)."> (Serato: *Setup → Expansion Packs → Ableton Link*, Traktor: *Preferences → Link*, Live: *Link* button).</span></p></li><li><p data-de="LJ Link läuft auf demselben Computer oder im selben Netz.">LJ Link runs on the same computer or in the same network.</p></li><li><p><b data-de="Automatisch suchen.">Search automatically.</b><span data-de=" Ein Deck *Ableton Link* erscheint mit dem Tempo der Session."> A deck *Ableton Link* appears with the session tempo.</span></p></li><li><p><span data-de="Unter ">Under </span><b>SEND BPM</b><span data-de=" dieses Deck wählen, wenn das Tempo von Link kommen soll."> choose this deck, if the tempo should come from Link.</span></p></li></ol><h2 id="limits" data-de="Grenzen">Limits</h2><ul><li data-de="Nur Tempo: kein Track, keine Waveform, keine Position.">Tempo only: no track, no waveform, no position.</li><li data-de="Die Beat-Phase wird noch nicht gelesen, ein Wolfmix bekommt also frei laufende Beats in diesem Tempo.">The beat phase is not read yet, so a Wolfmix gets free running beats at this tempo.</li><li data-de="rekordbox folgt einer Link-Session eventuell nur und führt sie nicht; dann liefert es kein Tempo.">rekordbox may only follow a Link session and not lead it; then it gives no tempo.</li></ul>
+    <div class="adm community"><p class="adm-t"><span class="adm-i" aria-hidden="true">💬</span><span data-de="Fehlt etwas oder stimmt etwas nicht?">Something missing or wrong?</span></p><p><span data-de="Frag auf unserem ">Ask in our </span><a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a><span data-de=" oder "> or </span><a href="help.html#report" data-de="melde ein Problem">report a problem</a><span data-de=". Am meisten helfen Berichte von echten Geräten, auch wenn etwas nicht klappt.">. Reports from real gear help most, also when something does not work.</span></p></div>
+    <nav class="dpn"><a class="prev" href="wiki-serato.html"><small data-de="Zurück">Previous</small><span>← Serato DJ Pro</span></a><a class="next" href="wiki-lighting-desks.html"><small data-de="Weiter">Next</small><span data-de="Übersicht →">Overview →</span></a></nav>
+  </main>
+</div>
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var b = document.getElementById("dside-btn"), s = document.getElementById("dside");
+    if (b && s) b.addEventListener("click", function () { var o = s.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
+    // Keep the current page visible in the side navigation and the current section in the tabs.
+    var on = document.querySelector(".dlink.on"), side = document.getElementById("dside");
+    if (on && side && side.scrollHeight > side.clientHeight) side.scrollTop = on.offsetTop - side.clientHeight / 3;
+    var tab = document.querySelector(".dtab.on");
+    if (tab) tab.parentNode.scrollLeft = tab.offsetLeft - 16;
+    if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; }
+  })();
+</script>
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+</body>
+</html>

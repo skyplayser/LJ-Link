@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Anwendungsfall: LJ Link und grandMA onPC auf einem Laptop | LJ Link Wiki">Use case: LJ Link and grandMA onPC on one laptop | LJ Link Wiki</title>
+<meta name="description" content="Run LJ Link and grandMA2 or grandMA3 onPC on the same laptop: tempo over 127.0.0.1, Telnet and OSC settings, performance tips and checklist." data-de-content="LJ Link und grandMA2 oder grandMA3 onPC auf demselben Laptop: Tempo über 127.0.0.1, Telnet- und OSC-Einstellungen, Leistungstipps und Checkliste.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-case-onpc.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-case-onpc.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-case-onpc.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-case-onpc.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-case-onpc.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link Wiki – Use case: LJ Link and grandMA onPC on one laptop" data-de-content="LJ Link Wiki – Anwendungsfall: LJ Link und grandMA onPC auf einem Laptop">
+<meta property="og:description" content="Run LJ Link and grandMA2 or grandMA3 onPC on the same laptop: tempo over 127.0.0.1, Telnet and OSC settings, performance tips and checklist." data-de-content="LJ Link und grandMA2 oder grandMA3 onPC auf demselben Laptop: Tempo über 127.0.0.1, Telnet- und OSC-Einstellungen, Leistungstipps und Checkliste.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-case-onpc.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-case-onpc.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="docs-page">
+<header class="top">
+  <div class="wrap dwrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span><span class="brand-sub">Wiki</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./" data-de="Startseite">Home</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-case-onpc.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-case-onpc.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+<nav class="dtabs" aria-label="Wiki sections" data-de-aria-label="Wiki-Bereiche"><div class="dwrap"><a class="dtab" href="wiki.html" data-de="Start">Start</a><a class="dtab" href="wiki-network.html" data-de="Netzwerk">Network</a><a class="dtab" href="wiki-sources.html" data-de="DJ-Quellen">DJ sources</a><a class="dtab" href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a><a class="dtab on" href="wiki-use-cases.html" data-de="Anwendungsfälle">Use cases</a><a class="dtab" href="wiki-troubleshooting.html" data-de="Hilfe">Help</a></div></nav>
+<div class="docs dwrap">
+  <button class="dside-btn" id="dside-btn" aria-controls="dside" aria-expanded="false"><span aria-hidden="true">&#9776;</span> <span data-de="Inhalt des Wikis">Wiki contents</span></button>
+  <aside class="dside" id="dside"><nav aria-label="Wiki pages" data-de-aria-label="Wiki-Seiten"><p class="dgroup">Start</p><a class="dlink" href="wiki.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-quickstart.html" data-de="Schnellstart">Quick start</a><a class="dlink" href="wiki-install.html" data-de="Installieren und aktualisieren">Install and update</a><a class="dlink" href="wiki-interface.html" data-de="Die Oberfläche">The interface</a><p class="dgroup" data-de="Netzwerk">Network</p><a class="dlink" href="wiki-network.html" data-de="Grundlagen">Basics</a><a class="dlink" href="wiki-network-setups.html" data-de="Aufbauten im Vergleich">Setups compared</a><a class="dlink" href="wiki-network-ip.html" data-de="IP-Adresse einstellen">Set an IP address</a><a class="dlink" href="wiki-network-ports.html" data-de="Ports und Firewall">Ports and firewall</a><p class="dgroup" data-de="DJ-Quellen">DJ sources</p><a class="dlink" href="wiki-sources.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-pioneer.html" data-de="Pioneer Pro DJ Link">Pioneer Pro DJ Link</a><a class="dlink" href="wiki-denon.html" data-de="Denon StageLinQ">Denon StageLinQ</a><a class="dlink" href="wiki-serato.html" data-de="Serato DJ Pro">Serato DJ Pro</a><a class="dlink" href="wiki-ableton-link.html" data-de="Ableton Link">Ableton Link</a><p class="dgroup" data-de="Lichtpulte">Light desks</p><a class="dlink" href="wiki-lighting-desks.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-grandma2.html" data-de="grandMA2">grandMA2</a><a class="dlink" href="wiki-grandma3.html" data-de="grandMA3">grandMA3</a><a class="dlink" href="wiki-wolfmix.html" data-de="Wolfmix">Wolfmix</a><a class="dlink" href="wiki-daslight.html" data-de="Daslight">Daslight</a><a class="dlink" href="wiki-other-desks.html" data-de="OSC, OS2L, dot2">OSC, OS2L, dot2</a><p class="dgroup" data-de="Anwendungsfälle">Use cases</p><a class="dlink" href="wiki-use-cases.html" data-de="Übersicht">Overview</a><a class="dlink" href="wiki-case-club.html" data-de="Club mit CDJs und grandMA2">Club with CDJs and grandMA2</a><a class="dlink on" href="wiki-case-onpc.html" aria-current="page" data-de="Ein Laptop mit onPC">One laptop with onPC</a><div class="dsub"><a href="#why-this-is-easy" data-de="Warum das einfach ist">Why this is easy</a><a href="#steps-with-grandma2-onpc" data-de="Schritte mit grandMA2 onPC">Steps with grandMA2 onPC</a><a href="#steps-with-grandma3-onpc" data-de="Schritte mit grandMA3 onPC">Steps with grandMA3 onPC</a><a href="#performance" data-de="Leistung">Performance</a></div><a class="dlink" href="wiki-case-mixed.html" data-de="Mehrere DJs, gemischte Geräte">Several DJs, mixed gear</a><a class="dlink" href="wiki-case-mobile.html" data-de="Mobil mit Denon und Wolfmix">Mobile with Denon and Wolfmix</a><a class="dlink" href="wiki-case-serato.html" data-de="Serato auf dem DJ-Laptop">Serato on the DJ laptop</a><a class="dlink" href="wiki-case-tablet.html" data-de="Waveforms auf dem Tablet">Waveforms on a tablet</a><a class="dlink" href="wiki-case-two-networks.html" data-de="Zwei Netzwerke">Two networks</a><a class="dlink" href="wiki-case-direct.html" data-de="Direktkabel">Direct cable</a><a class="dlink" href="wiki-case-stream.html" data-de="Livestream und Privatsphäre-Modus">Livestream and privacy mode</a><p class="dgroup" data-de="Hilfe">Help</p><a class="dlink" href="wiki-troubleshooting.html" data-de="Fehlersuche">Troubleshooting</a><a class="dlink" href="wiki-glossary.html" data-de="Glossar">Glossary</a><a class="dlink" href="wiki-reference.html" data-de="Referenz">Reference</a></nav></aside>
+  <main class="dbody article wiki">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="wiki.html">Wiki</a> › <span data-de="Anwendungsfälle">Use cases</span> › <span data-de="Ein Laptop mit onPC">One laptop with onPC</span></nav>
+    <h1><span class="kicker" data-de="Anwendungsfall">Use case</span><span data-de="Ein Laptop mit onPC">One laptop with onPC</span></h1>
+    <p class="tag" data-de="Der einfachste Pult-Link: alles auf einem Computer.">The simplest desk link: everything on one computer.</p>
+    <div class="table facts"><table><tbody><tr><td><b data-de="Geräte">Gear</b></td><td><span data-de="DJ-Geräte, ein Laptop mit LJ Link und grandMA2 oder grandMA3 onPC, eventuell ein MA-Node oder Wing">DJ gear, one laptop with LJ Link and grandMA2 or grandMA3 onPC, maybe an MA node or wing</span></td></tr><tr><td><b data-de="Netzwerk">Network</b></td><td><span data-de="der Laptop im DJ-Netz; Pult-Adresse ">the laptop in the DJ network; desk address </span><code>127.0.0.1</code></td></tr><tr><td><b data-de="Stand">Status</b></td><td><span class="badge stable" data-de="grandMA2 onPC stabil">grandMA2 onPC stable</span> <span class="badge beta" data-de="grandMA3 onPC Beta">grandMA3 onPC beta</span></td></tr></tbody></table></div><figure class="ddiag"><svg viewBox="0 0 720 170" role="img" aria-label="Diagram" data-de-aria-label="Diagramm" xmlns="http://www.w3.org/2000/svg"><line x1="175" y1="85" x2="275" y2="85" stroke="#60a5fa" stroke-width="2.5"/><line x1="385" y1="85" x2="480" y2="85" stroke="#60a5fa" stroke-width="2.5"/><rect x="45" y="60" width="130" height="50" rx="10" fill="#13233f" stroke="#3b82f6" stroke-width="1.5"/><text x="110" y="90" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="DJ-Geräte">DJ gear</text><rect x="275" y="62" width="110" height="46" rx="10" fill="#0f2219" stroke="#22c55e" stroke-width="1.5"/><text x="330" y="90" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="Switch">Switch</text><rect x="480" y="50" width="200" height="70" rx="10" fill="#1a1530" stroke="#8b5cf6" stroke-width="1.5"/><text x="580" y="82" text-anchor="middle" font-size="14" font-weight="600" fill="#eef2f7" data-de="Laptop">Laptop</text><text x="580" y="99" text-anchor="middle" font-size="11.5" fill="#9aa6b6" data-de="LJ Link → 127.0.0.1 → onPC">LJ Link → 127.0.0.1 → onPC</text></svg><figcaption data-de="Das Tempo verlässt den Laptop nie: kein Pult-Netz nötig.">The tempo never leaves the laptop: no desk network needed.</figcaption></figure><h2 id="why-this-is-easy" data-de="Warum das einfach ist">Why this is easy</h2><p><span data-de="LJ Link und onPC auf demselben Computer sprechen über ">LJ Link and onPC on the same computer talk over </span><code>127.0.0.1</code><span data-de=" (der Computer selbst). Keine Adresse, keine Firewall dazwischen, kein zweites Netz. Nur die DJ-Geräte müssen erreichbar sein."> (the computer itself). No address, no firewall between them, no second network. Only the DJ gear has to be reachable.</span></p><h2 id="steps-with-grandma2-onpc" data-de="Schritte mit grandMA2 onPC">Steps with grandMA2 onPC</h2><ol class="dsteps"><li><p><span data-de="Laptop per Kabel ins DJ-Netz, WLAN aus. LJ Link → ">Laptop by cable into the DJ network, Wi-Fi off. LJ Link → </span><b data-de="Automatisch suchen">Search automatically</b>.</p></li><li><p>onPC: Setup → Console → Global Settings → Telnet <b>Login Enabled</b>.</p></li><li><p><span data-de="LJ Link: LINK → grandMA2 → Adresse ">LJ Link: LINK → grandMA2 → address </span><code>127.0.0.1</code><span data-de=", Port ">, port </span><code>30000</code>, <code>administrator</code> / <code>admin</code><span data-de=" (oder dein Benutzer) → "> (or your user) → </span><b data-de="Speichern">Save</b> → <b data-de="Test senden">Send test</b>.</p></li></ol><h2 id="steps-with-grandma3-onpc" data-de="Schritte mit grandMA3 onPC">Steps with grandMA3 onPC</h2><ol class="dsteps"><li><p><span data-de="onPC: Menu → In &amp; Out → OSC: Interface ">onPC: Menu → In &amp; Out → OSC: interface </span><b>127.0.0.1</b><span data-de=" (oder der Loopback-Eintrag), Port "> (or the loopback entry), port </span><code>8000</code>, Receive Command <b>Yes</b><span data-de=", Prefix leer, ">, prefix empty, </span><b>Enable Input</b>.</p></li><li><p>LJ Link: LINK → grandMA3 → <code>127.0.0.1</code>, <code>8000</code> → <b data-de="Speichern">Save</b> → <b data-de="Test senden">Send test</b>.</p></li></ol><div class="adm note"><p class="adm-t"><span class="adm-i" aria-hidden="true">✎</span><span data-de="Hinweis">Note</span></p><p><span data-de="Hat die OSC-Interface-Liste des grandMA3 keinen Loopback-Eintrag, den Netzwerkanschluss des Laptops wählen und dessen Adresse statt ">If the grandMA3 OSC interface list has no loopback entry, choose the network port the laptop uses and enter that address in LJ Link instead of </span><code>127.0.0.1</code><span data-de=" in LJ Link eintragen. Noch nicht getestet; sag uns bitte, was dein onPC anzeigt.">. Not tested yet; please tell us what your onPC shows.</span></p></div><h2 id="performance" data-de="Leistung">Performance</h2><ul><li data-de="LJ Link braucht wenig Rechenleistung, onPC mit großer Show und 3D-Ansicht aber viel. Den Browser-Tab von LJ Link auf dem Laptop schließen, wenn du nur auf dem Tablet schaust.">LJ Link needs little CPU, but onPC with a big show and a 3D view needs a lot. Close the browser tab of LJ Link on the laptop if you only watch on a tablet.</li><li data-de="Laptop am Netzteil, Energiesparen aus; unter Windows den Energieplan *Höchstleistung* wählen.">Laptop on mains power, energy saving off; on Windows choose the *High performance* power plan.</li><li><span data-de="Ein MA-Node oder Art-Net-Ausgang läuft über einen zweiten Netzwerkanschluss, siehe ">An MA node or Art-Net out runs on a second network port, see </span><a href="wiki-case-two-networks.html" data-de="Zwei Netzwerke">two networks</a>.</li></ul><div class="adm tip"><p class="adm-t"><span class="adm-i" aria-hidden="true">✓</span><span data-de="Checkliste vor Einlass">Checklist before the doors open</span></p><ul><li data-de="Test gesendet → Master zeigt 120.">Test sent → master shows 120.</li><li data-de="Effekt diesem Master zugeordnet.">Effect assigned to that master.</li><li data-de="Show gespeichert (mit dem Benutzer für LJ Link).">Show saved (with the user for LJ Link).</li></ul></div>
+    <div class="adm community"><p class="adm-t"><span class="adm-i" aria-hidden="true">💬</span><span data-de="Fehlt etwas oder stimmt etwas nicht?">Something missing or wrong?</span></p><p><span data-de="Frag auf unserem ">Ask in our </span><a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a><span data-de=" oder "> or </span><a href="help.html#report" data-de="melde ein Problem">report a problem</a><span data-de=". Am meisten helfen Berichte von echten Geräten, auch wenn etwas nicht klappt.">. Reports from real gear help most, also when something does not work.</span></p></div>
+    <nav class="dpn"><a class="prev" href="wiki-case-club.html"><small data-de="Zurück">Previous</small><span data-de="← Club mit CDJs und grandMA2">← Club with CDJs and grandMA2</span></a><a class="next" href="wiki-case-mixed.html"><small data-de="Weiter">Next</small><span data-de="Mehrere DJs, gemischte Geräte →">Several DJs, mixed gear →</span></a></nav>
+  </main>
+</div>
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var b = document.getElementById("dside-btn"), s = document.getElementById("dside");
+    if (b && s) b.addEventListener("click", function () { var o = s.classList.toggle("open"); b.setAttribute("aria-expanded", o); });
+    // Keep the current page visible in the side navigation and the current section in the tabs.
+    var on = document.querySelector(".dlink.on"), side = document.getElementById("dside");
+    if (on && side && side.scrollHeight > side.clientHeight) side.scrollTop = on.offsetTop - side.clientHeight / 3;
+    var tab = document.querySelector(".dtab.on");
+    if (tab) tab.parentNode.scrollLeft = tab.offsetLeft - 16;
+    if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; }
+  })();
+</script>
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+</body>
+</html>
