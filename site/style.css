@@ -14,9 +14,9 @@ picture { display: block; }
 header.top { position: sticky; top: 0; z-index: 5; background: rgba(7, 9, 12, .86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 header.top .wrap { display: flex; align-items: center; gap: 12px; height: 60px; }
 header.top img { width: 32px; height: 32px; border-radius: 8px; }
-header.top .brand { font-weight: 700; color: var(--text); text-decoration: none; }
+header.top .brand { font-weight: 700; color: var(--text); text-decoration: none; white-space: nowrap; flex: 0 0 auto; }
 header.top nav { margin-left: auto; display: flex; gap: 18px; align-items: center; }
-header.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+header.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; white-space: nowrap; }
 header.top nav a:hover { color: var(--text); }
 .lang { background: transparent; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 14px; cursor: pointer; }
 .menu-btn { display: none; background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 4px 10px; font-size: 18px; }

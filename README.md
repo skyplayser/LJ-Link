@@ -219,7 +219,7 @@ architecture and the decisions behind it are in [docs/decisions.md](docs/decisio
 
 ## Problems?
 
-The [help page](https://skyplayser.github.io/LJ-Link/help.html) lists known problems and their solutions. To report a new one,
+The [troubleshooting page](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html) lists known problems and their solutions. To report a new one,
 use **Report a problem** in the program (menu ☰, or the menu of the program icon): describe what happens and leave *Include
 diagnostic data* ticked. The diagnostic data holds the version, network adapters, the devices found and their connection state,
 what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it

@@ -3,105 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-de="Hilfe und Fehlersuche – bekannte Probleme und Lösungen | LJ Link">Help and debugging – known problems and solutions | LJ Link</title>
-<meta name="description" content="Known problems with LJ Link and how to solve them: players not found or shown twice, no waveform, light desk, updates – and how to report a problem with diagnostic data." data-de-content="Bekannte Probleme mit LJ Link und ihre Lösung: Player nicht gefunden oder doppelt, keine Waveform, Lichtpult, Updates – und wie man ein Problem mit Diagnosedaten meldet.">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
-<meta name="author" content="SKYPLAYSER / NEXTPHILM">
-<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/help.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/help.html">
-<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/help.html">
-<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/help.html">
-<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/help.html">
+<title data-de="Hilfe ist umgezogen | LJ Link">Help has moved | LJ Link</title>
+<meta name="description" content="The LJ Link help is now the troubleshooting page of the wiki." data-de-content="Die Hilfe von LJ Link ist jetzt die Fehlersuche im Wiki.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-troubleshooting.html">
+<meta http-equiv="refresh" content="0; url=wiki-troubleshooting.html">
 <link rel="icon" href="images/logo.png" type="image/png">
-<link rel="apple-touch-icon" href="images/logo.png">
-<meta name="theme-color" content="#07090c">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="LJ Link">
-<meta property="og:locale" content="en_US" data-de-content="de_DE">
-<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
-<meta property="og:title" content="LJ Link – help and debugging" data-de-content="LJ Link – Hilfe und Fehlersuche">
-<meta property="og:description" content="Known problems and solutions, and how to report a problem." data-de-content="Bekannte Probleme und Lösungen, und wie man ein Problem meldet.">
-<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/help.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/help.html">
-<meta name="twitter:card" content="summary_large_image">
 <!-- structured-data -->
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="top">
-  <div class="wrap">
-    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
-    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
-    <nav id="nav">
-      <a href="./#features" data-de="Funktionen">Features</a>
-      <a href="help.html" data-de="Pioneer → grandMA">Pioneer → grandMA</a>
-      <a href="lightjockey-waveforms.html">Waveforms</a>
-      <a href="denon-stagelinq-lighting.html">Denon</a>
-      <a href="./#download">Download</a>
-      <a href="wiki.html">Wiki</a>
-      <a href="help.html" data-de="Hilfe">Help</a>
-      <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a>
-      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
-      <a class="lang" id="lang" href="de/help.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../help.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
-    </nav>
-  </div>
-</header>
-
-<main class="wrap article">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="./">LJ Link</a> › <span data-de="Hilfe und Fehlersuche">Help and debugging</span></nav>
-  <div class="hero">
-    <h1><span class="kicker" data-de="Hilfe">Help</span><span data-de="Hilfe und Fehlersuche">Help and debugging</span></h1>
-    <p class="tag" data-de="Bekannte Probleme und ihre Lösung. Fehlt deins, melde es – mit Diagnosedaten können wir am schnellsten helfen.">Known problems and how to solve them. If yours is missing, report it – with diagnostic data we can help fastest.</p>
-  </div>
-  <section id="problems" class="help">
-<h2 data-de="Bekannte Probleme">Known problems</h2>
-<details id="no-track"><summary data-de="Ein Player wird erkannt, zeigt aber „Kein Track geladen“ oder keine Waveform">A player shows up, but says “No track loaded” or has no waveform</summary><ol><li data-de="Auf 1.4.1 oder neuer aktualisieren: Ältere Versionen zeigten Tracks ohne rekordbox-Analyse als „Kein Track geladen“.">Update to 1.4.1 or newer: older versions showed tracks without rekordbox analysis as “No track loaded”.</li><li data-de="Tracks von einem USB-Stick oder einer SD-Karte spielen, die mit rekordbox exportiert wurde (Export-Modus, Tracks analysiert). Tracks von Streaming-Diensten, CDs oder nie analysierte Dateien haben keine Waveform-Daten.">Play tracks from a USB stick or SD card that was exported with rekordbox (Export mode, tracks analysed). Tracks from streaming services, CDs or files that were never analysed have no waveform data.</li><li data-de="Beim CDJ-3000 mit aktueller Firmware: nach einem rekordbox-Update den Stick noch einmal mit rekordbox 6 oder 7 exportieren.">On a CDJ-3000 with current firmware: export with rekordbox 6 or 7 to the stick again after updating rekordbox.</li><li data-de="rekordbox (mit „Link“ oder Performance-Modus) nicht auf demselben Computer laufen lassen: Es belegt dieselben Netzwerk-Ports.">Do not run rekordbox (with “Link” or “Performance” mode) on the same computer: it occupies the same network ports.</li><li data-de="Immer noch nichts? Eine Meldung mit Diagnosedaten schicken (siehe unten); darin steht, was der Player zum Track meldet.">Still nothing? Send a report with diagnostic data (see below); it shows what the player reports for the track.</li></ol></details><details id="direct-cable"><summary data-de="Bekannter Fehler: Mit Direktkabel (ohne Router) und eingeschaltetem WLAN erscheinen Player doppelt oder gar nicht">Known bug: with a direct cable (no router) and Wi-Fi on, players show up twice or not at all</summary><ol><li data-de="Das passiert gelegentlich und ist noch nicht behoben. Ohne Router geben sich Computer und Player selbst Adressen (169.254.x.x); mit eingeschaltetem WLAN kann der Computer dann über den falschen Adapter senden oder jedes Paket doppelt empfangen.">This happens now and then and is not fixed yet. Without a router the computer and the players give themselves addresses (169.254.x.x); with Wi-Fi on, the computer can then send on the wrong adapter or receive every packet twice.</li><li data-de="Schnelle Hilfe: LJ Link beenden (Programm-Symbol → Beenden), neu starten und „Automatisch suchen“ drücken. Das behebt es meistens.">Quick help: quit LJ Link (program icon → Quit) and start it again, then “Search automatically”. That usually solves it.</li><li data-de="Kommt es wieder: WLAN ausschalten, solange du mit Direktkabel arbeitest, oder einen kleinen Switch oder Router zwischen Computer und Player setzen.">If it comes back: switch Wi-Fi off while you work with a direct cable, or use a small switch or router between computer and players.</li><li data-de="Wenn du es siehst: Bitte eine Meldung mit Diagnosedaten schicken (Problem melden → Per E-Mail senden), solange der Fehler zu sehen ist; das hilft uns beim Beheben.">If you see it, please send a report with diagnostic data (Report a problem → Send by email) while the problem is on screen; it helps us fix it.</li></ol></details><details id="twice"><summary data-de="Ein Player erscheint doppelt">A player shows up twice</summary><ol><li data-de="Nur eine Netzwerkverbindung nutzen: WLAN ausschalten, wenn der Computer per Kabel verbunden ist. Sind WLAN und Kabel im selben Netz, kommt jedes DJ-Link-Paket doppelt an.">Use only one network connection: turn Wi-Fi off when the computer is connected by cable. If Wi-Fi and cable are in the same network, every DJ Link packet arrives twice.</li><li data-de="Nicht benötigte virtuelle Netzwerkadapter abschalten (VPN, Parallels, VMware, VirtualBox, Hyper-V, Docker).">Switch off virtual network adapters you do not need (VPN, Parallels, VMware, VirtualBox, Hyper-V, Docker).</li><li data-de="Jedem Player eine eigene Nummer geben (am Player: Utility → Player No.). Zwei Player mit derselben Nummer oder zweimal gestartetes LJ Link sehen aus wie ein doppelter Player.">Give every player its own number (on the player: Utility → Player No.). Two players with the same number, or LJ Link started twice, look like one player twice.</li><li data-de="Hat der Computer keine Adresse vom Router (169.254.x.x), die Player aber schon: an denselben Switch oder Router wie die Player anschließen.">If the computer has no address from a router (169.254.x.x) while the players have one, connect it to the same switch or router as the players.</li></ol></details><details id="nothing"><summary data-de="Es wird nichts gefunden">Nothing is found</summary><ol><li data-de="Computer, Player und Mixer müssen per Kabel am selben Netzwerk-Switch hängen. Ein direktes Kabel vom Computer zu einem Player geht auch.">Computer, players and mixer must be on the same network switch, connected with cables. A direct cable from the computer to one player also works.</li><li data-de="Windows: LJ Link in der Firewall für private Netzwerke zulassen (Windows-Sicherheit → Firewall- &amp; Netzwerkschutz → App durch die Firewall zulassen). Ist das Netzwerk auf „Öffentlich“ gestellt, auf „Privat“ umstellen.">Windows: allow LJ Link in the firewall for private networks (Windows Security → Firewall &amp; network protection → Allow an app through firewall). If the network is set to “Public”, switch it to “Private”.</li><li data-de="macOS: „Lokales Netzwerk“ für LJ Link erlauben (Systemeinstellungen → Datenschutz &amp; Sicherheit → Lokales Netzwerk).">macOS: allow “Local Network” for LJ Link (System Settings → Privacy &amp; Security → Local Network).</li><li data-de="Im Programm „Manuell einrichten“ nutzen: Es prüft die Adresse eines Players Schritt für Schritt und sagt, was zu ändern ist.">Use “Set up manually” in the program: it checks the address of a player step by step and says what to change.</li></ol></details><details id="beatport"><summary data-de="Gelber Hinweis „Beat-Port 50001 ist belegt“">Yellow note “Beat port 50001 is in use”</summary><ol><li data-de="Ein anderes Programm hört auf Beats: rekordbox, Beat Link Trigger, SoundSwitch oder ein zweites LJ Link. Schließen und die Suche neu starten. Bis dahin werden Positionen geschätzt.">Another program listens for beats: rekordbox, Beat Link Trigger, SoundSwitch or a second LJ Link. Close it and start the search again. Until then positions are estimated.</li></ol></details><details id="nxs2"><summary data-de="Die Waveform eines CDJ-2000NXS2 springt">The waveform of a CDJ-2000NXS2 jumps</summary><ol><li data-de="NXS2 und ältere Player melden ihre Position nur zwischen den Beats. LJ Link lässt sie mit ihrem Pitch laufen; kleine Sprünge nach Cue oder Loop sind normal. Der CDJ-3000 meldet seine genaue Position.">NXS2 and older players only report their position between beats. LJ Link runs them at their pitch; small jumps after a cue or loop are normal. The CDJ-3000 reports its exact position.</li></ol></details><details id="denon"><summary data-de="Ein Denon-Gerät wird nicht gefunden oder verbindet sich ständig neu">A Denon device is not found or keeps reconnecting</summary><ol><li data-de="Auf 1.3.1 oder neuer aktualisieren (1.3.0 konnte sich im Kreis neu verbinden).">Update to 1.3.1 or newer (1.3.0 could reconnect in a loop).</li><li data-de="Engine DJ und andere StageLinQ-Programme (SoundSwitch, Resolume …) auf demselben Computer schließen; sie nutzen denselben Port.">Close Engine DJ and other StageLinQ programs (SoundSwitch, Resolume …) on the same computer; they use the same port.</li><li data-de="Nach einem Abbruch braucht das Gerät ein paar Sekunden, bis es eine neue Verbindung annimmt.">After a connection broke, the device needs a few seconds before it accepts a new one.</li></ol></details><details id="ma"><summary data-de="Das Lichtpult reagiert nicht">The light desk does not react</summary><ol><li data-de="grandMA2: Telnet einschalten (Setup → Console → Global Settings → Telnet: Login Enabled). Der Benutzer braucht genug Rechte: „Error #44 INSUFFICIENT USER RIGHTS“ heißt, er darf keine Master ändern.">grandMA2: switch Telnet on (Setup → Console → Global Settings → Telnet: Login Enabled). The user needs enough rights: “Error #44 INSUFFICIENT USER RIGHTS” means the user may not change masters.</li><li data-de="grandMA2 nimmt nur ganze BPM; LJ Link 1.3.0 und neuer sendet sie so.">grandMA2 takes whole BPM only; LJ Link 1.3.0 and newer send them that way.</li><li data-de="grandMA3: In &amp; Out → OSC: Receive Command = Yes und Enable Input. Prefix leer lassen.">grandMA3: In &amp; Out → OSC: Receive Command = Yes and Enable Input. Leave the prefix empty.</li><li data-de="Prüfen, ob der Effekt auf dem Speedmaster läuft, an den gesendet wird (Vorgabe Speed 16 = BPM).">Check that the effect runs on the speed master you send to (Speed 16 = BPM by default).</li><li data-de="Einzelheiten: die Lichtpult-Anleitung.">Details: the light desk guide.</li></ol></details><details id="icon"><summary data-de="Kein Symbol in der Menüleiste (Mac) bzw. neben der Uhr (Windows)">No icon in the menu bar (Mac) or next to the clock (Windows)</summary><ol><li data-de="Läuft LJ Link schon, öffnet ein zweiter Start nur die Oberfläche und beendet sich; das erste schließen.">If LJ Link is already running, a second start only opens the interface and quits; close the first one.</li><li data-de="macOS: unter Systemeinstellungen → Menüleiste prüfen, ob LJ Link dort erlaubt ist.">macOS: check System Settings → Menu Bar whether LJ Link is allowed there.</li><li data-de="Windows: Das Symbol kann hinter dem Pfeil neben der Uhr versteckt sein; herausziehen.">Windows: the icon may be hidden behind the arrow next to the clock; drag it out.</li></ol></details><details id="update"><summary data-de="„Nach Updates suchen“ schlägt fehl">“Check for updates” fails</summary><ol><li data-de="Die Versionen 1.2.x können im installierten Programm keine Updates suchen („Handshake failed“). Die neueste Version einmal von Hand installieren; ab 1.3.0 funktioniert es.">Versions 1.2.x cannot check for updates in the installed program (“Handshake failed”). Install the newest version once by hand; from 1.3.0 on it works.</li><li data-de="Die Suche braucht Internet; in einem Show-Netz ohne Internet meldet sie, dass GitHub nicht erreichbar ist.">The check needs the internet; in a show network without internet it says it could not reach GitHub.</li></ol></details><details id="serato"><summary data-de="Serato-Decks haben keinen Abspielkopf">Serato decks have no playhead</summary><ol><li data-de="Das ist eine Grenze von Serato: Es gibt die Abspielposition nicht heraus. LJ Link zeigt den geladenen Track mit BPM, Tonart, Waveform-Übersicht und Beatgrid aus der Datei. FLAC- und M4A-Dateien werden noch nicht gelesen.">That is a limit of Serato: it does not reveal the play position. LJ Link shows the loaded track with BPM, key, waveform overview and beat grid from the file. FLAC and M4A files are not read yet.</li></ol></details>
-
-  </section>
-  <section id="report-section" class="help">
-<h2 id="report" data-de="Ein Problem melden">Report a problem</h2>
-<div class="card">
-  <ol>
-    <li data-de="LJ Link offen lassen, während das Problem auftritt (die Geräte angeschlossen lassen).">Keep LJ Link open while the problem happens (leave the gear connected).</li>
-    <li data-de="Im Programm: Menü (☰) → „Problem melden“, oder im Menü des Programm-Symbols „Problem melden …“.">In the program: menu (☰) → “Report a problem”, or “Report a problem …” in the menu of the program icon.</li>
-    <li data-de="Beschreiben, was passiert: welche Geräte, welche Firmware, Windows oder Mac, was du siehst.">Describe what happens: which gear, which firmware, Windows or Mac, what you see.</li>
-    <li data-de="„Diagnosedaten mitsenden“ angehakt lassen. Darin stehen Version, Netzwerkadapter, gefundene Geräte und ihr Verbindungsstatus, was jedes Deck empfängt und die letzten Log-Zeilen – keine Tracktitel, keine Cover, keine Passwörter. Mit „Diagnosedaten ansehen“ siehst du vorher alles.">Leave “Include diagnostic data” ticked. It holds the version, network adapters, the devices found and their connection state, what each deck receives and the last log lines – no track titles, no covers, no passwords. “Show diagnostic data” shows everything before you send it.</li>
-    <li data-de="„Per E-Mail senden“ öffnet dein Mailprogramm mit einer fertigen Mail an fehlermelden@nextphilm.de (lange Diagnosedaten werden als Datei zum Anhängen gespeichert). Oder „Auf GitHub melden“ (GitHub-Konto nötig).">“Send by email” opens your mail program with a ready mail to fehlermelden@nextphilm.de (long diagnostics are saved as a file to attach). Or “Report on GitHub” (GitHub account needed).</li>
-  </ol>
-</div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap">
-    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
-    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://discord.gg/N6DMca4Bjk" rel="noopener">Discord</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
-    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
-  </div>
-</footer>
-
 <script>
+  // The old help page: send its links (also those in older LJ Link versions) to the same problem in the wiki.
   (function () {
-    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
-    var lang = document.documentElement.lang === "de" ? "de" : "en";
-    var saved = null;
-    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
-    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
-    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
-    document.getElementById("lang").addEventListener("click", function () {
-      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
-    });
-
-    // Phone menu.
-    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
-    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
-    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+    var map = { "no-track": "no-waveform", "direct-cable": "direct-wifi", "nothing": "nothing-found", "beatport": "beat-port",
+                "nxs2": "jumps", "ma": "desk", "report-section": "report", "problems": "" };
+    var id = location.hash.slice(1), to = id in map ? map[id] : id;
+    location.replace("wiki-troubleshooting.html" + (to ? "#" + to : ""));
   })();
 </script>
-<script>
-  // Opens the problem a link points to (help.html#twice).
-  (function () { if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; } })();
-</script>
+</head>
+<body>
+<main class="wrap article">
+  <h1><span class="kicker" data-de="Hilfe">Help</span><span data-de="Die Hilfe ist umgezogen">Help has moved</span></h1>
+  <p><a href="wiki-troubleshooting.html" data-de="Weiter zur Fehlersuche im Wiki →">Go to troubleshooting in the wiki →</a></p>
+</main>
 </body>
 </html>

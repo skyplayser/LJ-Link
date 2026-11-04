@@ -156,7 +156,7 @@ def main():
         de = structured_data(pictures(to_german(source, site), site), "de", BASE + "de/" + path, BASE + "de/")
         (site / name).write_text(finish(en), encoding="utf-8")
         (site / "de" / name).write_text(finish(de), encoding="utf-8")
-    sitemap(site, pages)
+    sitemap(site, [(n, s) for n, s in pages if 'name="robots" content="noindex' not in s])  # not the redirects
 
 
 if __name__ == "__main__":
