@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="grandMA2 und grandMA2 onPC – Tempo vom DJ | LJ Link">grandMA2 and grandMA2 onPC – tempo from the DJ | LJ Link</title>
+<meta name="description" content="Send the DJ tempo to a grandMA2 or grandMA2 onPC with LJ Link over Telnet: switch Telnet on, set up a user, prepare the speed master, set it up in LJ Link." data-de-content="Das DJ-Tempo mit LJ Link per Telnet an ein grandMA2 oder grandMA2 onPC schicken: Telnet einschalten, Benutzer anlegen, Speedmaster vorbereiten, in LJ Link einrichten.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-grandma2.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-grandma2.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-grandma2.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-grandma2.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-grandma2.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link – grandMA2 and grandMA2 onPC – tempo from the DJ" data-de-content="LJ Link – grandMA2 und grandMA2 onPC – Tempo vom DJ">
+<meta property="og:description" content="Send the DJ tempo to a grandMA2 or grandMA2 onPC with LJ Link over Telnet: switch Telnet on, set up a user, prepare the speed master, set it up in LJ Link." data-de-content="Das DJ-Tempo mit LJ Link per Telnet an ein grandMA2 oder grandMA2 onPC schicken: Telnet einschalten, Benutzer anlegen, Speedmaster vorbereiten, in LJ Link einrichten.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-grandma2.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-grandma2.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./#features" data-de="Funktionen">Features</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a>
+      <a href="lightjockey-waveforms.html">Waveforms</a>
+      <a href="denon-stagelinq-lighting.html">Denon</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-grandma2.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-grandma2.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article wiki">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./" data-de="LJ Link">LJ Link</a> › <a href="wiki.html" data-de="Wiki">Wiki</a> › <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a> › <span data-de="grandMA2">grandMA2</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Lichtpult">Light desk</span><span data-de="grandMA2 und onPC">grandMA2 and onPC</span></h1>
+    <p class="tag" data-de="Das Tempo der DJs auf einem Speedmaster deiner Show. An einem echten grandMA2 onPC getestet.">The tempo of the DJs on a speed master of your show. Tested on a real grandMA2 onPC.</p>
+  </div>
+<section><h2 id="status" data-de="Stand">Status</h2><p><span class="badge stable" data-de="Stabil">Stable</span></p><ul><li data-de="Suche, Login und der Befehl SpecialMaster 3.16 At 128 wurden an einem echten grandMA2 onPC bestätigt.">Found by the search, login and the command SpecialMaster 3.16 At 128 were confirmed on a real grandMA2 onPC.</li><li data-de="Ein Hardware-Pult haben wir noch nicht ausprobiert. Es nutzt dieselbe Fernsteuer-Kommandozeile.">A hardware console has not been tried by us yet. It uses the same remote command line.</li></ul></section><section><h2 id="how" data-de="So funktioniert es">How it works</h2><p data-de="Das grandMA2 hat keinen OSC-Eingang. LJ Link verbindet sich deshalb wie ein Telnet-Programm mit der Kommandozeile des Pults (TCP-Port 30000), meldet sich als Benutzer der Show an und tippt den Befehl für den Speedmaster.">The grandMA2 has no OSC input. So LJ Link connects to the command line of the desk like a Telnet program (TCP port 30000), logs in as a user of the show and types the command for the speed master.</p></section><section><h2 id="telnet" data-de="1. Am Pult: Telnet einschalten">1. On the desk: switch Telnet on</h2><ol><li data-de="Am grandMA2 (oder in grandMA2 onPC) Setup drücken.">Press Setup on the grandMA2 (or in grandMA2 onPC).</li><li data-de="Console antippen, dann Global Settings.">Tap Console, then Global Settings.</li><li data-de="Den Eintrag Telnet suchen und auf Login Enabled stellen.">Find the entry Telnet and set it to Login Enabled.</li></ol><p data-de="Solange Telnet aus ist (Login Disabled), findet die Suche das Pult zwar, aber es nimmt keine Befehle an.">As long as Telnet is off (Login Disabled) the search still finds the desk, but it takes no commands.</p></section><section><h2 id="user" data-de="2. Am Pult: ein Benutzer für LJ Link">2. On the desk: a user for LJ Link</h2><p data-de="Jede Telnet-Verbindung meldet sich als Benutzer der Show an. Benutzername und Passwort unterscheiden Groß- und Kleinschreibung. MA Lighting empfiehlt einen eigenen Benutzer für die Fernsteuerung:">Every Telnet connection logs in as a user of the show. User name and password are case sensitive. MA Lighting recommends a user of its own for remote control:</p><ol><li data-de="In der Benutzerverwaltung der Show (Setup → Console → User &amp; Profiles) einen neuen Benutzer anlegen, zum Beispiel lj.">Create a new user in the user management of the show (Setup → Console → User & Profiles), for example lj.</li><li data-de="Ein Passwort vergeben, zum Beispiel link.">Give it a password, for example link.</li><li data-de="Der Benutzer braucht das Recht, Speedmaster zu ändern (mindestens Playback, im Zweifel Program). Sonst antwortet das Pult mit Error #44 INSUFFICIENT USER RIGHTS.">The user needs the right to change speed masters (at least Playback, if in doubt Program). Otherwise the desk answers Error #44 INSUFFICIENT USER RIGHTS.</li><li data-de="Die Show speichern. Benutzer stehen in der Show.">Save the show. Users are stored in the show.</li></ol><p data-de="Es geht auch ohne eigenen Benutzer: Jede Show hat die Benutzer Administrator mit dem Passwort admin und Guest. LJ Link trägt administrator / admin als Vorgabe ein. Wurde das Passwort in deiner Show geändert, das richtige eintragen. Weil dieses Passwort öffentlich bekannt ist, sollte man es in Shows ändern, die in einem offenen Netz laufen.">It also works without your own user: every show has the users Administrator with the password admin, and Guest. LJ Link enters administrator / admin as the default. If the password was changed in your show, enter the right one. Because this default is public, change it in shows that run in an open network.</p></section><section><h2 id="master" data-de="3. Am Pult: den Speedmaster vorbereiten">3. On the desk: prepare the speed master</h2><ol><li data-de="Entscheiden, welcher Speedmaster das Tempo bekommt. Das grandMA2 hat Speed 1 bis 15 und Speed 16 = BPM. In der Kommandozeile heißen sie SpecialMaster 3.1 bis SpecialMaster 3.16. Effekte und Chaser, die im Takt laufen sollen, diesem Speedmaster zuordnen.">Decide which speed master gets the tempo. The grandMA2 has Speed 1 to 15 and Speed 16 = BPM. In the command line they are SpecialMaster 3.1 to SpecialMaster 3.16. Assign the effects and chasers that should run in time to this speed master.</li><li data-de="Von Hand testen: Das hier in die Kommandozeile tippen und Enter drücken.">Test by hand: type this into the command line and press Enter.</li></ol><pre>SpecialMaster 3.16 At 120</pre><p data-de="Der Speedmaster sollte jetzt 120 BPM anzeigen (im Masters-Fenster) und der zugeordnete Effekt im Takt laufen.">The speed master should now show 120 BPM (see the Masters window) and the assigned effect should run in time.</p></section><section><h2 id="setup" data-de="4. In LJ Link">4. In LJ Link</h2><ol><li data-de="Das Menü (☰) öffnen → Lichtpult-Link (Tempo senden), oder oben den Reiter LINK anklicken.">Open the menu (☰) → Light desk link (send tempo), or click the tab LINK at the top.</li><li data-de="grandMA2 / grandMA2 onPC (Telnet) wählen.">Choose grandMA2 / grandMA2 onPC (Telnet).</li><li data-de="Pult suchen drücken und das gefundene grandMA2 anklicken, oder die IP-Adresse von Hand eintragen (onPC auf demselben Computer: 127.0.0.1).">Press Search for the desk and click the grandMA2 that was found, or enter the IP address by hand (onPC on the same computer: 127.0.0.1).</li><li data-de="Der Port bleibt 30000.">The port stays 30000.</li><li data-de="Benutzer und Passwort: Vorgegeben ist administrator / admin. Nur ändern, wenn deine Show einen anderen nutzt.">User and password: administrator / admin is entered by default. Change it only if your show uses another one.</li><li data-de="Den Speedmaster wählen: Speed 16 (BPM) ist die Vorgabe, oder Speed 1 bis 15.">Choose the speed master: Speed 16 (BPM) is the default, or Speed 1 to 15.</li><li data-de="Der Befehl ist standardmäßig SpecialMaster 3.16 At {bpm}. Das Tempo ersetzt {bpm} als ganze Zahl, denn die Kommandozeile nimmt keine Kommazahlen (At 128.0 bewirkt nichts).">The command is SpecialMaster 3.16 At {bpm} by default. The tempo replaces {bpm} as a whole number, because the command line takes no decimals (At 128.0 does nothing).</li><li data-de="Speichern drücken, dann Test senden (120 BPM). Der Speedmaster sollte auf 120 springen.">Press Save, then Send test (120 BPM). The speed master should jump to 120.</li></ol></section><section><h2 id="notes" data-de="Gut zu wissen">Good to know</h2><ul><li data-de="Jeder Befehl landet in der Befehlshistorie des Pults. Deshalb wird ein gleichbleibendes Tempo nur alle 15 Sekunden wiederholt.">Every command lands in the command history of the desk. That is why an unchanged tempo is repeated only every 15 seconds.</li><li data-de="Über Telnet nicht ins Fixture-Setup oder den Zeitplan gehen: Laut MA sperrt das den Zugriff für andere Benutzer ohne Warnung. LJ Link schickt nur den eingetragenen Befehl.">Do not go into the fixture setup or the schedule over Telnet: according to MA that locks access for other users without warning. LJ Link only sends the command you entered.</li></ul></section><section><h2 id="problems" data-de="Probleme">Problems</h2><details id="p-nothing"><summary data-de="Das Pult reagiert nicht">The desk does not react</summary><ol><li data-de="Ist Telnet an (Login Enabled)? Stimmt die IP-Adresse, und ist der Computer im selben Netz?">Is Telnet on (Login Enabled)? Is the IP address right, and is the computer in the same network?</li><li data-de="Ist der Effekt dem Speedmaster zugeordnet, an den gesendet wird (Vorgabe Speed 16)?">Is the effect assigned to the speed master you send to (Speed 16 by default)?</li><li data-de="Klappt der manuelle Test SpecialMaster 3.16 At 120 in der Kommandozeile des Pults?">Does the manual test SpecialMaster 3.16 At 120 work in the command line of the desk?</li></ol></details><details id="p-44"><summary data-de="Error #44 INSUFFICIENT USER RIGHTS">Error #44 INSUFFICIENT USER RIGHTS</summary><ol><li data-de="Der Benutzer darf keine Master ändern. Dem Benutzer am Pult mehr Rechte geben, zum Beispiel Admin, und die Show speichern.">The user may not change masters. Give the user more rights on the desk, for example Admin, and save the show.</li></ol></details><details id="p-login"><summary data-de="Anmeldung fehlgeschlagen">Login failed</summary><ol><li data-de="Benutzername und Passwort unterscheiden Groß- und Kleinschreibung. In der Benutzerverwaltung der Show prüfen.">User name and password are case sensitive. Check them in the user management of the show.</li></ol></details><details id="p-decimals"><summary data-de="Das Tempo wirkt nicht, obwohl der Befehl ankommt">The tempo has no effect, although the command arrives</summary><ol><li data-de="Das grandMA2 nimmt nur ganze BPM. LJ Link 1.3.0 und neuer sendet sie so.">The grandMA2 takes whole BPM only. LJ Link 1.3.0 and newer send them that way.</li></ol></details></section><section><h2 id="report" data-de="Ausprobiert? Sag uns Bescheid">Tried it? Tell us</h2><p data-de="Jede Rückmeldung hilft, aus einer Beta oder Alpha eine geprüfte Funktion zu machen, auch wenn es nicht klappt. In LJ Link das Menü (☰) öffnen → „Problem melden“ und per E-Mail oder auf GitHub senden. Bitte Gerät, Firmware, Software-Version und das Gesehene dazuschreiben.">Every report helps to turn a beta or alpha into a tested feature, also when it does not work. In LJ Link open the menu (☰) → “Report a problem” and send it by email or on GitHub. Please add your device, its firmware, the software version and what you saw.</p><p><a href="help.html#report" data-de="So meldest du ein Problem">How to report a problem</a></p></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+<script>
+  // Opens the entry a link points to (wiki-...html#something).
+  (function () { if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; } })();
+</script>
+</body>
+</html>

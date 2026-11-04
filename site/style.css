@@ -136,3 +136,18 @@ pre { background: var(--panel); border: 1px solid var(--line); border-radius: 10
 .help summary { cursor: pointer; font-weight: 600; }
 .help details ol, .help .card ol { color: var(--muted); margin: 10px 0 0; padding-left: 22px; }
 .help li { margin: 6px 0; }
+
+/* Wiki */
+.badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid; vertical-align: middle; white-space: nowrap; }
+.badge.stable { color: #34d399; border-color: #14532d; background: #0c1f17; }
+.badge.beta { color: #fbbf24; border-color: #5c4a14; background: #1e1a0c; }
+.badge.alpha { color: #fb923c; border-color: #7c2d12; background: #231208; }
+.badge.unk { color: #c4b5fd; border-color: #4c3d8f; background: #17132b; }
+.badge.gen { color: var(--accent-2); border-color: #1e3a6e; background: #0d1a30; }
+.badge.no { color: #f87171; border-color: #7f1d1d; background: #260d0d; }
+.note.alpha { border-color: #7c2d12; background: #231208; color: #fdba74; }
+.note.beta { border-color: #5c4a14; background: #1e1a0c; color: #f3dc9a; }
+.wiki .table { margin-top: 14px; }
+.wiki details ol { margin: 10px 0 0; }
+.wiki pre { margin: 14px 0 0; }
+.wiki .small { margin: 14px 0 0; }

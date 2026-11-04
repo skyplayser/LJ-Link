@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Lichtpulte – das DJ-Tempo ans Lichtpult schicken | LJ Link">Light desks – send the DJ tempo to your lighting console | LJ Link</title>
+<meta name="description" content="Which light desks LJ Link can send the DJ tempo to: grandMA2 (tested), grandMA3 (beta), Wolfmix (alpha), Daslight, any OSC program – and what is not possible (dot2)." data-de-content="An welche Lichtpulte LJ Link das DJ-Tempo schicken kann: grandMA2 (getestet), grandMA3 (Beta), Wolfmix (Alpha), Daslight, jedes OSC-Programm – und was nicht geht (dot2).">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-lighting-desks.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-lighting-desks.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link – Light desks – send the DJ tempo to your lighting console" data-de-content="LJ Link – Lichtpulte – das DJ-Tempo ans Lichtpult schicken">
+<meta property="og:description" content="Which light desks LJ Link can send the DJ tempo to: grandMA2 (tested), grandMA3 (beta), Wolfmix (alpha), Daslight, any OSC program – and what is not possible (dot2)." data-de-content="An welche Lichtpulte LJ Link das DJ-Tempo schicken kann: grandMA2 (getestet), grandMA3 (Beta), Wolfmix (Alpha), Daslight, jedes OSC-Programm – und was nicht geht (dot2).">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-lighting-desks.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./#features" data-de="Funktionen">Features</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a>
+      <a href="lightjockey-waveforms.html">Waveforms</a>
+      <a href="denon-stagelinq-lighting.html">Denon</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-lighting-desks.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-lighting-desks.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article wiki">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./" data-de="LJ Link">LJ Link</a> › <a href="wiki.html" data-de="Wiki">Wiki</a> › <span data-de="Lichtpulte">Light desks</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Wiki">Wiki</span><span data-de="Lichtpulte">Light desks</span></h1>
+    <p class="tag" data-de="Das Tempo des führenden Decks ans Pult schicken, damit Chaser und Effekte im Takt laufen. Stand: LJ Link 1.5.0.">Send the tempo of the leading deck to your desk, so chasers and effects run in time. Status as of LJ Link 1.5.0.</p>
+  </div>
+<section><h2 id="overview" data-de="Übersicht">Overview</h2><div class="table"><table><thead><tr><th data-de="Pult">Desk</th><th data-de="Stand">Status</th><th data-de="Wie das Tempo ankommt">How the tempo gets there</th><th data-de="Anleitung">Guide</th></tr></thead><tbody><tr><td>grandMA2 / grandMA2 onPC</td><td><span class="badge stable" data-de="Stabil">Stable</span></td><td data-de="Telnet (TCP 30000), Kommandozeile, ganze BPM">Telnet (TCP 30000), command line, whole BPM</td><td><a href="wiki-grandma2.html" data-de="grandMA2-Anleitung">grandMA2 guide</a></td></tr><tr><td>grandMA3 / grandMA3 onPC</td><td><span class="badge beta" data-de="Beta">Beta</span></td><td data-de="OSC an /cmd, Kommandozeile">OSC to /cmd, command line</td><td><a href="wiki-grandma3.html" data-de="grandMA3-Anleitung">grandMA3 guide</a></td></tr><tr><td>Wolfmix (via WTOOLS)</td><td><span class="badge alpha" data-de="Alpha">Alpha</span></td><td data-de="OS2L über TCP: Tempo und jeder Beat">OS2L over TCP: tempo and every beat</td><td><a href="wiki-wolfmix.html" data-de="Wolfmix-Anleitung">Wolfmix guide</a></td></tr><tr><td>Daslight</td><td><span class="badge unk" data-de="Unbestätigt">Unconfirmed</span></td><td data-de="OSC-Zahl">OSC number</td><td><a href="wiki-other-desks.html#daslight" data-de="Daslight">Daslight</a></td></tr><tr><td data-de="Resolume, QLC+, MagicQ, eigene Skripte …">Resolume, QLC+, MagicQ, own scripts …</td><td><span class="badge gen" data-de="Allgemein">Generic</span></td><td data-de="OSC-Zahl (float) an eine frei wählbare Adresse">OSC number (float) to an address you choose</td><td><a href="wiki-other-desks.html#osc" data-de="Eigenes OSC-Ziel">Custom OSC</a></td></tr><tr><td>dot2</td><td><span class="badge no" data-de="Nicht möglich">Not possible</span></td><td data-de="Der dot2 nimmt kein Telnet und kein OSC aus dem Netzwerk an">The dot2 takes no Telnet or OSC from the network</td><td><a href="wiki-other-desks.html#dot2" data-de="dot2">dot2</a></td></tr></tbody></table></div></section><section><h2 id="status" data-de="Was der Stand bedeutet">What the status means</h2><div class="table"><table><thead><tr><th data-de="Stand">Status</th><th data-de="Bedeutung">Meaning</th></tr></thead><tbody><tr><td><span class="badge stable" data-de="Stabil">Stable</span></td><td data-de="Am echten Gerät getestet.">Tested on the real device.</td></tr><tr><td><span class="badge beta" data-de="Beta">Beta</span></td><td data-de="Nach dem Handbuch des Herstellers gebaut und gegen eine Simulation getestet, aber noch nicht am echten Gerät bestätigt. Bitte melde uns, wie es lief.">Built from the maker’s manual and tested against a simulation, but not yet confirmed on a real device. Please report how it went.</td></tr><tr><td><span class="badge alpha" data-de="Alpha">Alpha</span></td><td data-de="Neu und noch nie am echten Gerät ausprobiert. Es kann sein, dass es gar nicht funktioniert. Nicht bei einer wichtigen Veranstaltung darauf verlassen.">New and never tried on the real device. It may not work at all. Do not rely on it at an important event.</td></tr><tr><td><span class="badge unk" data-de="Unbestätigt">Unconfirmed</span></td><td data-de="LJ Link sendet, aber es ist nicht bekannt, ob das Programm es verwenden kann.">LJ Link sends, but it is not known whether the program can use it.</td></tr><tr><td><span class="badge no" data-de="Nicht möglich">Not possible</span></td><td data-de="Das Gerät kann das nicht aus dem Netzwerk empfangen.">The device cannot receive this from a network.</td></tr></tbody></table></div></section><section><h2 id="what" data-de="Was gesendet wird und wann">What is sent, and when</h2><ul><li data-de="LJ Link sendet nur das Tempo (beim Wolfmix die Beats). Es startet keine Cues, ändert keine Show und schickt nichts an die DJ-Geräte.">LJ Link only sends the tempo (or, for Wolfmix, the beats). It starts no cues, changes no show and sends nothing to the DJ gear.</li><li data-de="Per OSC wird das Tempo gesendet, sobald es sich um 0,1 BPM oder mehr ändert, und alle 2 Sekunden wiederholt. Zum grandMA2 wird es alle 15 Sekunden wiederholt, damit die Kommandozeile nicht vollläuft.">Over OSC the tempo is sent when it changes by 0.1 BPM or more, and repeated every 2 seconds. To a grandMA2 it is repeated every 15 seconds so the command line does not fill up.</li><li data-de="Ein Speedmaster bewegt nur Effekte und Chaser, die ihm zugewiesen sind. Bewegt sich nichts, obwohl das Tempo ankommt, ist der Effekt fast immer keinem Speedmaster zugeordnet.">A speed master only moves effects and chasers that are assigned to it. If nothing moves although the tempo arrives, the effect is almost always not assigned to the speed master.</li><li data-de="Der Demo-Modus sendet nie etwas an ein Pult.">The demo mode never sends anything to a desk.</li></ul></section><section><h2 id="sendbpm" data-de="Welches Deck gibt das Tempo (SEND BPM)">Which deck gives the tempo (SEND BPM)</h2><p data-de="Oben in LJ Link legt der Reiter SEND BPM fest, woher das Tempo kommt:">At the top of LJ Link the tab SEND BPM says where the tempo comes from:</p><ul><li data-de="Auto: das Deck, das Master und/oder live ist (am Mixer auf Sendung). Bei zwei Systemen, etwa CDJs und ein Denon, gewinnt der Master, der auch live ist und spielt.">Auto: the deck that is master and/or live (on air at the mixer). With two systems, say CDJs and a Denon, the master that is also live and playing wins.</li><li data-de="Ein bestimmtes Deck: immer dieses Deck, auch wenn ein anderes live ist. Hat es keinen Track, wird nichts gesendet.">One chosen deck: always this deck, even if another one is live. Without a track on it nothing is sent.</li><li data-de="Das sendende Deck zeigt neben dem Faderbalken ein grünes SEND BPM.">The deck that sends shows a green SEND BPM next to its fader bar.</li></ul></section><section><h2 id="network" data-de="Vorbereitung: das Netzwerk">Before you start: the network</h2><ol><li data-de="Computer und Pult müssen sich erreichen. Am einfachsten am selben Netzwerk-Switch wie die DJ-Player. Läuft das Pult in einem eigenen Licht-Netzwerk, braucht der Computer eine zweite Netzwerkkarte (zum Beispiel ein USB-Adapter) in diesem Netz.">Computer and desk must reach each other. The simplest is the same network switch as the DJ players. If the desk is in its own lighting network, the computer needs a second network card (for example a USB adapter) in that network.</li><li data-de="Die IP-Adresse des Pults herausfinden. grandMA2: Setup → Network → Network Interface. grandMA3: Menu → Network → Interfaces. onPC auf demselben Computer wie LJ Link: einfach 127.0.0.1.">Find the IP address of the desk. grandMA2: Setup → Network → Network Interface. grandMA3: Menu → Network → Interfaces. onPC on the same computer as LJ Link: simply 127.0.0.1.</li><li data-de="Gleiches Netz? Bei der üblichen Maske 255.255.255.0 müssen die ersten drei Zahlengruppen gleich sein: 192.168.1.10 und 192.168.1.50 passen, 10.0.0.5 passt nicht.">Same network? With the usual mask 255.255.255.0 the first three groups of numbers must match: 192.168.1.10 and 192.168.1.50 fit, 10.0.0.5 does not.</li><li data-de="onPC auf einem anderen Rechner: in der Windows-Firewall „Private Netzwerke“ erlauben, wenn onPC fragt. Wurde das abgelehnt: Windows-Sicherheit → Firewall → App durch die Firewall zulassen → grandMA onPC.">onPC on another computer: allow “Private networks” in the Windows firewall when onPC asks. If you declined: Windows Security → Firewall → Allow an app through the firewall → grandMA onPC.</li></ol></section><section><h2 id="report" data-de="Ausprobiert? Sag uns Bescheid">Tried it? Tell us</h2><p data-de="Jede Rückmeldung hilft, aus einer Beta oder Alpha eine geprüfte Funktion zu machen, auch wenn es nicht klappt. In LJ Link das Menü (☰) öffnen → „Problem melden“ und per E-Mail oder auf GitHub senden. Bitte Gerät, Firmware, Software-Version und das Gesehene dazuschreiben.">Every report helps to turn a beta or alpha into a tested feature, also when it does not work. In LJ Link open the menu (☰) → “Report a problem” and send it by email or on GitHub. Please add your device, its firmware, the software version and what you saw.</p><p><a href="help.html#report" data-de="So meldest du ein Problem">How to report a problem</a></p></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+<script>
+  // Opens the entry a link points to (wiki-...html#something).
+  (function () { if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; } })();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="Daslight, dot2 und andere Programme – Tempo über OSC | LJ Link">Daslight, dot2 and other programs – tempo over OSC | LJ Link</title>
+<meta name="description" content="Daslight (unconfirmed), custom OSC targets such as Resolume, QLC+ and MagicQ, and why the dot2 does not work: what LJ Link can send to other desks and programs." data-de-content="Daslight (unbestätigt), eigene OSC-Ziele wie Resolume, QLC+ und MagicQ, und warum der dot2 nicht geht: was LJ Link an andere Pulte und Programme senden kann.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-other-desks.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-other-desks.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-other-desks.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-other-desks.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-other-desks.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link – Daslight, dot2 and other programs – tempo over OSC" data-de-content="LJ Link – Daslight, dot2 und andere Programme – Tempo über OSC">
+<meta property="og:description" content="Daslight (unconfirmed), custom OSC targets such as Resolume, QLC+ and MagicQ, and why the dot2 does not work: what LJ Link can send to other desks and programs." data-de-content="Daslight (unbestätigt), eigene OSC-Ziele wie Resolume, QLC+ und MagicQ, und warum der dot2 nicht geht: was LJ Link an andere Pulte und Programme senden kann.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-other-desks.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-other-desks.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./#features" data-de="Funktionen">Features</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a>
+      <a href="lightjockey-waveforms.html">Waveforms</a>
+      <a href="denon-stagelinq-lighting.html">Denon</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-other-desks.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-other-desks.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article wiki">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./" data-de="LJ Link">LJ Link</a> › <a href="wiki.html" data-de="Wiki">Wiki</a> › <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a> › <span data-de="Weitere Pulte">Other desks</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Lichtpult">Light desk</span><span data-de="Weitere Pulte und Programme">Other desks and programs</span></h1>
+    <p class="tag" data-de="Daslight, jedes Programm mit OSC-Eingang, und der dot2.">Daslight, any program that takes OSC, and the dot2.</p>
+  </div>
+<section><h2 id="daslight" data-de="Daslight">Daslight</h2><p><span class="badge unk" data-de="Unbestätigt">Unconfirmed</span></p><p data-de="Daslight synchronisiert sein Tempo offiziell über Tap-Tempo, MIDI-Clock und Ableton Link. Außerdem hat es ein OSC-Mapping, das eingehende OSC-Nachrichten Bedienelementen zuordnet. LJ Link sendet das Tempo als Zahl über OSC (zum Beispiel 128.0 an /ljlinkpro/bpm). Ob sich damit in deiner Daslight-Version das BPM setzen lässt, ist noch nicht bestätigt. So probierst du es aus:">Daslight officially syncs its tempo by tap tempo, MIDI clock and Ableton Link. It also has an OSC mapping that assigns incoming OSC messages to controls. LJ Link sends the tempo as a number over OSC (for example 128.0 to /ljlinkpro/bpm). Whether this can set the BPM in your Daslight version is not confirmed yet. How to try:</p><ol><li data-de="In Daslight die OSC-Eingabe einschalten und den Port notieren (in den Einstellungen oder im OSC-Mapping).">In Daslight switch the OSC input on and note the port (in the settings or in the OSC mapping).</li><li data-de="In LJ Link Daslight wählen, die IP-Adresse des Daslight-Rechners (gleicher Computer: 127.0.0.1) und den Port eintragen, die Adresse /ljlinkpro/bpm lassen, Speichern und Test senden drücken.">In LJ Link choose Daslight, enter the IP address of the Daslight computer (same computer: 127.0.0.1) and the port, keep the address /ljlinkpro/bpm, press Save and Send test.</li><li data-de="Im MIDI/OSC-Monitor von Daslight nachsehen, ob /ljlinkpro/bpm ankommt.">In the MIDI/OSC monitor of Daslight check whether /ljlinkpro/bpm arrives.</li><li data-de="Im OSC-Mapping die Adresse dem BPM- oder Speed-Regler zuordnen, sofern deine Version das anbietet.">In the OSC mapping assign the address to the BPM or speed control, if your version offers that.</li></ol><p data-de="Kommt die Nachricht an, lässt sich aber kein BPM zuordnen, bleibt im Moment nur Tap-Tempo oder MIDI-Clock von einer anderen Quelle. Eine MIDI-Clock direkt aus LJ Link ist vorgemerkt.">If the message arrives but no BPM can be assigned, only tap tempo or MIDI clock from another source is left for now. A MIDI clock straight from LJ Link is planned.</p></section><section><h2 id="osc" data-de="Eigenes OSC-Ziel (Resolume, QLC+, MagicQ …)">Custom OSC target (Resolume, QLC+, MagicQ …)</h2><p><span class="badge gen" data-de="Allgemein">Generic</span></p><p data-de="Eigenes OSC-Ziel schickt das Tempo als Zahl (float) an eine frei wählbare Adresse und einen Port, zum Beispiel für Resolume, QLC+, Chamsys MagicQ, TouchDesigner oder eigene Skripte. Im Zielprogramm diese Adresse einem Tempo-Regler zuordnen.">Custom OSC target sends the tempo as a number (float) to an address and port you choose, for example for Resolume, QLC+, Chamsys MagicQ, TouchDesigner or your own scripts. In the target program assign this address to a tempo control.</p><p data-de="Ob es klappt, hängt vom empfangenden Programm ab. Für Programme, die OS2L verstehen, etwa QLC+ mit dem OS2L-Plugin, siehe auch die Wolfmix-Seite: Derselbe OS2L-Ausgang lässt sich darauf richten (Alpha).">Whether it works depends on the receiving program. For programs that understand OS2L, such as QLC+ with its OS2L plugin, see also the Wolfmix page: the same OS2L output can be pointed at them (alpha).</p><p><a href="wiki-wolfmix.html" data-de="Wolfmix-Seite">Wolfmix page</a></p></section><section><h2 id="dot2" data-de="dot2">dot2</h2><p><span class="badge no" data-de="Nicht möglich">Not possible</span></p><p data-de="Der dot2 lässt sich über das Netzwerk weder per Telnet noch per OSC steuern. Laut Handbuch nimmt er von außen nur MIDI, DMX (auch Art-Net und sACN) und Schaltkontakte an, deshalb kann LJ Link ihm das Tempo heute nicht schicken. Was du stattdessen tun kannst:">The dot2 cannot be controlled over the network, neither by Telnet nor by OSC. According to its manual it takes only MIDI, DMX (also Art-Net and sACN) and switch contacts from outside, so LJ Link cannot send it the tempo today. What you can do instead:</p><ul><li data-de="Tap-Tempo: Speed-Taste halten und im Takt auf die Taste eines Executors tippen. Das große BPM-Feld in LJ Link hilft beim Mitzählen.">Tap tempo: hold the Speed key and tap in time on the key of an executor. The big BPM display in LJ Link helps to count along.</li><li data-de="Sound-to-Light: Der dot2 hat einen Audio-Eingang mit BPM-Erkennung (Fenster Sound Input).">Sound to light: the dot2 has an audio input with BPM detection (window Sound Input).</li></ul><p data-de="Ein Weg über MIDI ist für eine spätere Version vorgemerkt.">A way over MIDI is planned for a later version.</p></section><section><h2 id="report" data-de="Ausprobiert? Sag uns Bescheid">Tried it? Tell us</h2><p data-de="Jede Rückmeldung hilft, aus einer Beta oder Alpha eine geprüfte Funktion zu machen, auch wenn es nicht klappt. In LJ Link das Menü (☰) öffnen → „Problem melden“ und per E-Mail oder auf GitHub senden. Bitte Gerät, Firmware, Software-Version und das Gesehene dazuschreiben.">Every report helps to turn a beta or alpha into a tested feature, also when it does not work. In LJ Link open the menu (☰) → “Report a problem” and send it by email or on GitHub. Please add your device, its firmware, the software version and what you saw.</p><p><a href="help.html#report" data-de="So meldest du ein Problem">How to report a problem</a></p></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+<script>
+  // Opens the entry a link points to (wiki-...html#something).
+  (function () { if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; } })();
+</script>
+</body>
+</html>

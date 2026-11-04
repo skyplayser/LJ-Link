@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-de="grandMA3 und grandMA3 onPC (Beta) – Tempo vom DJ | LJ Link">grandMA3 and grandMA3 onPC (beta) – tempo from the DJ | LJ Link</title>
+<meta name="description" content="Send the DJ tempo to a grandMA3 or grandMA3 onPC with LJ Link over OSC (beta): set up the OSC input, check the speed master, set it up in LJ Link." data-de-content="Das DJ-Tempo mit LJ Link per OSC an ein grandMA3 oder grandMA3 onPC schicken (Beta): OSC-Eingang einrichten, Speedmaster prüfen, in LJ Link einrichten.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="SKYPLAYSER / NEXTPHILM">
+<link rel="canonical" href="https://skyplayser.github.io/LJ-Link/wiki-grandma3.html" data-de-href="https://skyplayser.github.io/LJ-Link/de/wiki-grandma3.html">
+<link rel="alternate" hreflang="en" href="https://skyplayser.github.io/LJ-Link/wiki-grandma3.html">
+<link rel="alternate" hreflang="de" href="https://skyplayser.github.io/LJ-Link/de/wiki-grandma3.html">
+<link rel="alternate" hreflang="x-default" href="https://skyplayser.github.io/LJ-Link/wiki-grandma3.html">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="images/logo.png">
+<meta name="theme-color" content="#07090c">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LJ Link">
+<meta property="og:locale" content="en_US" data-de-content="de_DE">
+<meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
+<meta property="og:title" content="LJ Link – grandMA3 and grandMA3 onPC (beta) – tempo from the DJ" data-de-content="LJ Link – grandMA3 und grandMA3 onPC (Beta) – Tempo vom DJ">
+<meta property="og:description" content="Send the DJ tempo to a grandMA3 or grandMA3 onPC with LJ Link over OSC (beta): set up the OSC input, check the speed master, set it up in LJ Link." data-de-content="Das DJ-Tempo mit LJ Link per OSC an ein grandMA3 oder grandMA3 onPC schicken (Beta): OSC-Eingang einrichten, Speedmaster prüfen, in LJ Link einrichten.">
+<meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://skyplayser.github.io/LJ-Link/wiki-grandma3.html" data-de-content="https://skyplayser.github.io/LJ-Link/de/wiki-grandma3.html">
+<meta name="twitter:card" content="summary_large_image">
+<!-- structured-data -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a href="./" class="brand" style="display:flex;align-items:center;gap:10px"><img src="images/logo.png" alt="" width="32" height="32"><span>LJ Link</span></a>
+    <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav id="nav">
+      <a href="./#features" data-de="Funktionen">Features</a>
+      <a href="wiki.html">Wiki</a>
+      <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a>
+      <a href="lightjockey-waveforms.html">Waveforms</a>
+      <a href="denon-stagelinq-lighting.html">Denon</a>
+      <a href="./#download">Download</a>
+      <a href="help.html" data-de="Hilfe">Help</a>
+      <a href="https://github.com/skyplayser/LJ-Link">GitHub</a>
+      <a class="lang" id="lang" href="de/wiki-grandma3.html" hreflang="de" lang="de" title="Deutsch" data-de-href="../wiki-grandma3.html" data-de-hreflang="en" data-de-lang="en" data-de-title="English" data-de="EN" style="text-decoration:none">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article wiki">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./" data-de="LJ Link">LJ Link</a> › <a href="wiki.html" data-de="Wiki">Wiki</a> › <a href="wiki-lighting-desks.html" data-de="Lichtpulte">Light desks</a> › <span data-de="grandMA3">grandMA3</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Lichtpult">Light desk</span><span data-de="grandMA3 und onPC">grandMA3 and onPC</span></h1>
+    <p class="tag" data-de="Das Tempo der DJs auf einem Speedmaster deiner Show, über OSC.">The tempo of the DJs on a speed master of your show, over OSC.</p>
+  </div>
+<section><h2 id="status" data-de="Stand">Status</h2><p><span class="badge beta" data-de="Beta">Beta</span></p><p class="note beta" data-de="Beta: Die OSC-Einstellungen und der Befehl Master 3.1 At BPM {bpm} stammen aus dem grandMA3-Handbuch und wurden gegen eine Simulation getestet. An einem echten grandMA3 oder onPC sind sie noch nicht bestätigt. Wenn du es ausprobierst, sag uns bitte, wie es lief.">Beta: the OSC settings and the command Master 3.1 At BPM {bpm} come from the grandMA3 manual and were tested against a simulation. They have not been confirmed on a real grandMA3 or onPC yet. If you try it, please tell us how it went.</p></section><section><h2 id="how" data-de="So funktioniert es">How it works</h2><p data-de="Das grandMA3 nimmt Befehle für die Kommandozeile per OSC an (Adresse /cmd, Text). LJ Link schickt dorthin den Befehl für den Speedmaster.">The grandMA3 takes commands for its command line over OSC (address /cmd, text). LJ Link sends the command for the speed master there.</p></section><section><h2 id="osc" data-de="1. Am Pult: den OSC-Eingang einrichten">1. On the desk: set up the OSC input</h2><ol><li data-de="Menu → In &amp; Out → Reiter OSC öffnen.">Open Menu → In & Out → tab OSC.</li><li data-de="Oben bei Interface die Netzwerkkarte wählen, über die der Computer mit LJ Link erreichbar ist.">At Interface choose the network card through which the computer with LJ Link can be reached.</li><li data-de="In der Tabelle eine Zeile anlegen (oder eine vorhandene nehmen) und die Werte unten einstellen.">In the table create a row (or use an existing one) with the values below.</li><li data-de="Enable Input einschalten. Kommt OSC an, leuchtet die Titelleiste von Enable Input gelb auf.">Switch Enable Input on. When OSC arrives, the title bar of Enable Input lights up yellow.</li></ol><div class="table"><table><thead><tr><th data-de="Feld">Field</th><th data-de="Wert">Value</th></tr></thead><tbody><tr><td>Mode</td><td>UDP</td></tr><tr><td>Port</td><td data-de="8000 oder ein anderer freier Port; er muss in LJ Link gleich sein">8000, or another free port; it must be the same in LJ Link</td></tr><tr><td>Prefix</td><td data-de="leer lassen">leave empty</td></tr><tr><td>Receive Command</td><td data-de="Yes (sonst werden Befehle ignoriert)">Yes (otherwise commands are ignored)</td></tr><tr><td>Receive</td><td data-de="egal (betrifft nur Daten an Fader und Tasten)">does not matter (only for data to faders and keys)</td></tr><tr><td>EchoInput</td><td data-de="Yes zum Testen: eingehende Nachrichten erscheinen im System Monitor">Yes for testing: incoming messages show in the System Monitor</td></tr></tbody></table></div><p data-de="Zum Prefix: Steht dort zum Beispiel gma3, erwartet das Pult /gma3/cmd statt /cmd. LJ Link sendet an /cmd, also das Feld leer lassen.">About the prefix: if it says gma3, the desk expects /gma3/cmd instead of /cmd. LJ Link sends to /cmd, so leave the field empty.</p></section><section><h2 id="master" data-de="2. Am Pult: den Speedmaster prüfen">2. On the desk: check the speed master</h2><ol><li data-de="Den Effekt oder die Sequenz einem Speedmaster zuordnen (der erste heißt Master 3.1).">Assign the effect or sequence to a speed master (the first is Master 3.1).</li><li data-de="In der Kommandozeile testen: Das hier tippen und Enter drücken. Der Speedmaster sollte auf 120 BPM stehen.">Test in the command line: type this and press Enter. The speed master should be at 120 BPM.</li></ol><pre>Master 3.1 At BPM 120</pre></section><section><h2 id="setup" data-de="3. In LJ Link">3. In LJ Link</h2><ol><li data-de="Das Menü (☰) → Lichtpult-Link (Tempo senden) oder den Reiter LINK öffnen.">Open the menu (☰) → Light desk link (send tempo), or the tab LINK.</li><li data-de="grandMA3 / grandMA3 onPC (OSC) wählen.">Choose grandMA3 / grandMA3 onPC (OSC).</li><li data-de="Die IP-Adresse des Pults eintragen (onPC auf demselben Computer: 127.0.0.1). Die Suche findet ein grandMA3 noch nicht, also von Hand eintragen.">Enter the IP address of the desk (onPC on the same computer: 127.0.0.1). The search does not find a grandMA3 yet, so enter it by hand.</li><li data-de="Port wie am Pult, zum Beispiel 8000.">Port as on the desk, for example 8000.</li><li data-de="Der Befehl ist standardmäßig Master 3.1 At BPM {bpm}.">The command is Master 3.1 At BPM {bpm} by default.</li><li data-de="Speichern drücken, dann Test senden (120 BPM). Mit EchoInput siehst du die Nachricht im System Monitor.">Press Save, then Send test (120 BPM). With EchoInput on you see the message in the System Monitor.</li></ol></section><section><h2 id="problems" data-de="Probleme">Problems</h2><details id="p-nothing"><summary data-de="Das Pult reagiert nicht">The desk does not react</summary><ol><li data-de="In &amp; Out → OSC: Steht Receive Command auf Yes und ist Enable Input an? Ist der Prefix leer? Passen die Ports?">In & Out → OSC: is Receive Command Yes and Enable Input on? Is the prefix empty? Do the ports match?</li><li data-de="Ist der Computer im selben Netz, und ist die richtige Netzwerkkarte als Interface gewählt?">Is the computer in the same network, and the right network card chosen as Interface?</li><li data-de="Klappt der manuelle Test Master 3.1 At BPM 120? Und ist der Effekt diesem Speedmaster zugeordnet?">Does the manual test Master 3.1 At BPM 120 work? And is the effect assigned to that speed master?</li></ol></details></section><section><h2 id="report" data-de="Ausprobiert? Sag uns Bescheid">Tried it? Tell us</h2><p data-de="Jede Rückmeldung hilft, aus einer Beta oder Alpha eine geprüfte Funktion zu machen, auch wenn es nicht klappt. In LJ Link das Menü (☰) öffnen → „Problem melden“ und per E-Mail oder auf GitHub senden. Bitte Gerät, Firmware, Software-Version und das Gesehene dazuschreiben.">Every report helps to turn a beta or alpha into a tested feature, also when it does not work. In LJ Link open the menu (☰) → “Report a problem” and send it by email or on GitHub. Please add your device, its firmware, the software version and what you saw.</p><p><a href="help.html#report" data-de="So meldest du ein Problem">How to report a problem</a></p></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p data-de="Open Source unter der Eclipse Public License 2.0, gebaut auf beat-link von Deep Symmetry. LJ Link ist kein offizielles Produkt von AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton oder Native Instruments und hat nichts mit der Software LightJockey von Martin zu tun. Alle Produktnamen gehören ihren Inhabern und dienen nur der Beschreibung der Kompatibilität.">Open source under the Eclipse Public License 2.0, built on beat-link by Deep Symmetry. LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton or Native Instruments and is not related to the LightJockey software by Martin. All product names belong to their owners and are used only to describe compatibility.</p>
+    <p><a href="https://github.com/skyplayser/LJ-Link">GitHub</a> · <a href="https://github.com/skyplayser/LJ-Link/releases">Releases</a> · <a href="https://github.com/skyplayser/LJ-Link/issues">Issues</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html" data-de="Datenschutz">Privacy</a></p>
+    <p class="credit">Idea SKYPLAYSER/NEXTPHILM<br>Prompted with ❤️ made by Claude</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Language: English at /, German at /de/. A saved choice wins, otherwise a German browser gets /de/ on the first visit.
+    var lang = document.documentElement.lang === "de" ? "de" : "en";
+    var saved = null;
+    try { saved = localStorage.getItem("lj-lang"); } catch (e) { /* private mode */ }
+    var want = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    if (want !== lang && (saved || lang === "en")) { location.replace(document.getElementById("lang").href + location.hash); return; }
+    document.getElementById("lang").addEventListener("click", function () {
+      try { localStorage.setItem("lj-lang", lang === "de" ? "en" : "de"); } catch (e) { /* private mode */ }
+    });
+
+    // Phone menu.
+    var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+    menu.onclick = function () { var open = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", open); };
+    nav.addEventListener("click", function (e) { if (e.target.tagName === "A") nav.classList.remove("open"); });
+  })();
+</script>
+<script>
+  // Opens the entry a link points to (wiki-...html#something).
+  (function () { if (location.hash) { var d = document.querySelector(location.hash); if (d && d.tagName === "DETAILS") d.open = true; } })();
+</script>
+</body>
+</html>
