@@ -261,7 +261,34 @@ async function loadLink() {
   } catch (e) { /* link settings are only available on the computer itself */
     $("link-setting").classList.add("hidden");
   }
+  loadAbleton();
 }
+
+async function loadAbleton() {
+  try {
+    const s = await (await fetch("/api/ableton")).json();
+    $("abl-on").checked = s.enabled;
+    $("abl-phase").checked = s.phase;
+    $("abl-phase").disabled = !s.enabled;
+    let text = "";
+    if (s.enabled) {
+      const peers = s.peers === 1 ? t("1 other program") : t("{n} other programs", { n: s.peers });
+      text = t("Session: {bpm} BPM, {peers}", { bpm: s.bpm == null ? "–" : s.bpm.toFixed(2), peers });
+      if (s.note) text += " · " + t(s.note);
+    }
+    $("abl-status").textContent = text;
+  } catch (e) { /* only available on the computer itself */
+    $("abl-setting").classList.add("hidden");
+  }
+}
+
+async function saveAbleton() {
+  await fetch("/api/ableton", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled: $("abl-on").checked, phase: $("abl-phase").checked }) });
+  loadAbleton();
+}
+$("abl-on").onchange = saveAbleton;
+$("abl-phase").onchange = saveAbleton;
 
 function linkBody() {
   const preset = $("link-target").value;
@@ -387,6 +414,7 @@ function createDeck(n) {
       <div class="chan">
         <div class="fader binary" title=""><i></i></div>
         <span class="chip send hidden">SEND BPM</span>
+        <span class="chip abl hidden">LINK</span>
         <div class="knobs hidden">
           <span class="knob" data-eq="hi">HI<span class="dial"></span></span>
           <span class="knob" data-eq="mid">MID<span class="dial"></span></span>
@@ -501,6 +529,7 @@ function updateDeck(m) {
   setText(d, "num", d.q(".deck-num"), m.label);
   setText(d, "dev", d.q(".dev-name"), m.groupName || "");
   d.q(".chip.send").classList.toggle("hidden", !m.sendingBpm);
+  d.q(".chip.abl").classList.toggle("hidden", !m.sendingLink);
   setText(d, "kind", d.q(".box.player small"), m.kind === "denon" || m.kind === "serato" ? "DECK" : m.kind === "link" ? "LINK" : "PLAYER");
   if (isNew || d.order !== m.order) { d.order = m.order; sortDecks(); }
   d.el.classList.toggle("hidden", hiddenGroups.has(m.group));

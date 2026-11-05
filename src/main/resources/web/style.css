@@ -189,6 +189,7 @@ select, input {
 .chip.sync { border-color: #2f7bff; color: #6ea2ff; }
 .chip.pause { border-color: #555; color: #888; }
 .chip.send { border-color: #22c55e; color: #22c55e; font-size: 11px; padding: 0 6px; white-space: nowrap; }
+.chip.abl { border-color: #e0e0e0; color: #e0e0e0; font-size: 11px; padding: 0 6px; white-space: nowrap; }
 .key-box { margin-left: auto; font-size: 14px; color: var(--text); }
 .key-box small { font-size: 9px; letter-spacing: .12em; color: var(--muted); margin-right: 6px; }
 .deck-waves { opacity: .75; }

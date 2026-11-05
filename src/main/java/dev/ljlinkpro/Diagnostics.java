@@ -17,7 +17,7 @@ import java.util.Map;
 final class Diagnostics {
     private Diagnostics() {}
 
-    static String report(Hub hub, Session session, LinkService link) {
+    static String report(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton) {
         List<String> out = new ArrayList<>();
         out.add("== LJ Link diagnostics ==");
         out.add("Version " + Updater.currentVersion() + ", " + ZonedDateTime.now());
@@ -40,6 +40,13 @@ final class Diagnostics {
         out.add("Type " + c.type() + ", target " + c.host() + ":" + c.port() + ", command " + c.command()
                 + ", user " + (c.user() == null || c.user().isBlank() ? "none" : "set") + ", source " + st.source()
                 + ", sent " + st.sentCount() + (st.error() == null ? "" : ", error: " + st.error()));
+        out.add("");
+        out.add("== Ableton Link (send) ==");
+        AbletonLinkPeer.Status ab = ableton.status();
+        out.add("Enabled " + ab.enabled() + ", phase " + ab.phase() + ", peers in session " + ab.peers()
+                + (ab.bpm() == null ? "" : String.format(java.util.Locale.ROOT, ", session %.2f BPM", ab.bpm()))
+                + ", leading deck " + (ab.sendingDeck() == null ? "none" : ab.sendingDeck())
+                + (ab.note().isEmpty() ? "" : ", note: " + ab.note()));
         out.add("");
         out.add("== Log (last lines) ==");
         List<String> log = LogBuffer.lines();

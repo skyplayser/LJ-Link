@@ -31,6 +31,8 @@ final class Deck {
     volatile boolean coarsePosition;
     /** True while the light desk link takes its tempo from this deck. */
     volatile boolean sendingBpm;
+    /** True while LJ Link leads the Ableton Link session with this deck's tempo. */
+    volatile boolean sendingLink;
     volatile long durationMs;
     /** Last known track position in ms, or -1 if unknown; valid at the moment of the latest {@link #toJson} call. */
     volatile long positionMs = -1;
@@ -187,6 +189,7 @@ final class Deck {
         m.put("label", label);
         m.put("coarse", coarsePosition);
         m.put("sendingBpm", sendingBpm);
+        m.put("sendingLink", sendingLink);
         m.put("name", name);
         m.put("address", address);
         m.put("hasTrack", hasTrack);

@@ -33,6 +33,9 @@ final class AbletonLink {
 
     private record Peer(double bpm, Boolean playing, long seen) {}
 
+    /** The peer id of LJ Link's own Link peer ({@link AbletonLinkPeer}), which is not one of the programs it shows. */
+    static volatile String ignoredPeer;
+
     private final Map<String, Peer> peers = new ConcurrentHashMap<>();
     private volatile boolean stopped;
     private MulticastSocket socket;
@@ -120,6 +123,9 @@ final class AbletonLink {
                     continue;
                 }
                 String id = (String) m[0];
+                if (id.equals(ignoredPeer)) {
+                    continue;
+                }
                 if ((Boolean) m[3]) {
                     peers.remove(id);
                 } else if (m[1] != null) {

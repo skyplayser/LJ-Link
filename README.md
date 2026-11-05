@@ -178,6 +178,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
 | Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |
+| Ableton Link out (lead the session with the deck's tempo, beats and bars) | **untested alpha**: checked against Ableton's Link library only, never tried with Live, Resolume or real players |
 | Traktor | planned |
 
 The goal is to cover every common DJ standard.
