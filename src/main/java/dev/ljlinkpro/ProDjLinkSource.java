@@ -5,6 +5,8 @@ import org.deepsymmetry.beatlink.DeviceAnnouncement;
 import org.deepsymmetry.beatlink.DeviceAnnouncementListener;
 import org.deepsymmetry.beatlink.DeviceFinder;
 import org.deepsymmetry.beatlink.DeviceUpdate;
+import org.deepsymmetry.beatlink.LifecycleListener;
+import org.deepsymmetry.beatlink.LifecycleParticipant;
 import org.deepsymmetry.beatlink.VirtualCdj;
 import org.deepsymmetry.beatlink.data.ArtFinder;
 import org.deepsymmetry.beatlink.data.BeatGridFinder;
@@ -36,6 +38,25 @@ final class ProDjLinkSource implements DeckSource {
     private Thread thread;
     private ScheduledExecutorService positions;
     private boolean virtualCdjStarted;
+    /** Unexpected shutdowns of the virtual CDJ in a row, and the last reason, for the automatic rejoin and the diagnostics. */
+    private volatile int lostInARow;
+    private volatile int lostTotal;
+    private volatile String lostReason;
+    private volatile long joinedAt;
+
+    /** beat-link shuts the virtual CDJ down when another device defends our player number; then we rejoin by ourselves. */
+    private final LifecycleListener virtualCdjLifecycle = new LifecycleListener() {
+        @Override
+        public void started(LifecycleParticipant sender) {
+        }
+
+        @Override
+        public void stopped(LifecycleParticipant sender) {
+            if (!stopped) {
+                onVirtualCdjLost();
+            }
+        }
+    };
 
     private final DeviceAnnouncementListener announcementListener = new DeviceAnnouncementListener() {
         @Override
@@ -75,7 +96,7 @@ final class ProDjLinkSource implements DeckSource {
         try {
             List<Hub.DeviceInfo> list = DeviceFinder.getInstance().getCurrentDevices().stream()
                     .sorted(Comparator.comparingInt(DeviceAnnouncement::getDeviceNumber))
-                    .map(a -> new Hub.DeviceInfo(a.getDeviceNumber(), a.getDeviceName(), a.getAddress().getHostAddress()))
+                    .map(a -> new Hub.DeviceInfo(a.getDeviceNumber(), a.getDeviceName(), ip(a.getAddress())))
                     .toList();
             hub.setDevices(list);
         } catch (IllegalStateException e) {
@@ -106,15 +127,8 @@ final class ProDjLinkSource implements DeckSource {
             VirtualCdj vcdj = VirtualCdj.getInstance();
             vcdj.setUseStandardPlayerNumber(false);
             vcdj.addUpdateListener(this::onUpdate);
-            if (!vcdj.start()) {
-                hub.setState("error", "live", "Connection to the DJ network failed. Please try again.");
-                return;
-            }
-            virtualCdjStarted = true;
-
+            vcdj.addLifecycleListener(virtualCdjLifecycle);
             MetadataFinder.getInstance().addTrackMetadataListener(u -> onMetadata(u.player, u.metadata));
-            MetadataFinder.getInstance().start();
-            CrateDigger.getInstance().start();
             ArtFinder.getInstance().addAlbumArtListener(u -> {
                 java.nio.ByteBuffer raw = u.art == null ? null : u.art.getRawBytes();
                 byte[] bytes = null;
@@ -124,7 +138,6 @@ final class ProDjLinkSource implements DeckSource {
                 }
                 hub.deck(u.player).setArt(bytes);
             });
-            ArtFinder.getInstance().start();
             BeatGridFinder.getInstance().addBeatGridListener(u -> {
                 var grid = u.beatGrid;
                 if (grid == null) {
@@ -139,7 +152,6 @@ final class ProDjLinkSource implements DeckSource {
                 }
                 hub.deck(u.player).setBeats(times, bars);
             });
-            BeatGridFinder.getInstance().start();
             WaveformFinder wf = WaveformFinder.getInstance();
             wf.setFindDetails(true);
             wf.setPreferredStyle(WaveformFinder.WaveformStyle.RGB);
@@ -162,15 +174,9 @@ final class ProDjLinkSource implements DeckSource {
                     dk.setDetail(u.detail == null ? null : WaveformEncoder.encodeDetail(u.detail));
                 }
             });
-            wf.start();
-            String note = "Connected";
-            try {
-                TimeFinder.getInstance().start();
-            } catch (Exception e) {
-                // Usually UDP port 50001 is taken (another program listens for beats). Positions then come from the
-                // beat grid and the beat number in the player status, which is coarser but keeps everything else working.
-                System.err.println("Beat packets unavailable, positions are estimated: " + e);
-                note = "Beat port 50001 is in use by another program; positions are estimated.";
+            String note = join();
+            if (note == null) {
+                return;
             }
 
             positions = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -180,7 +186,9 @@ final class ProDjLinkSource implements DeckSource {
             });
             positions.scheduleAtFixedRate(this::pollPositions, 20, 20, TimeUnit.MILLISECONDS);
 
-            hub.setState("monitoring", "live", note);
+            if (lostInARow == 0) {
+                hub.setState("monitoring", "live", note);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
@@ -195,10 +203,111 @@ final class ProDjLinkSource implements DeckSource {
         }
     }
 
+    /**
+     * Starts the virtual CDJ and the finders; the listeners were registered once before. Returns the status note,
+     * or null when joining failed (the error is already shown).
+     */
+    private String join() throws Exception {
+        if (!VirtualCdj.getInstance().start()) {
+            hub.setState("error", "live", "Connection to the DJ network failed. Please try again.");
+            return null;
+        }
+        virtualCdjStarted = true;
+        joinedAt = System.currentTimeMillis();
+        MetadataFinder.getInstance().start();
+        CrateDigger.getInstance().start();
+        ArtFinder.getInstance().start();
+        BeatGridFinder.getInstance().start();
+        WaveformFinder.getInstance().start();
+        try {
+            TimeFinder.getInstance().start();
+        } catch (Exception e) {
+            // Usually UDP port 50001 is taken (another program listens for beats). Positions then come from the
+            // beat grid and the beat number in the player status, which is coarser but keeps everything else working.
+            System.err.println("Beat packets unavailable, positions are estimated: " + e);
+            return "Beat port 50001 is in use by another program; positions are estimated.";
+        }
+        return "Connected";
+    }
+
+    /** The virtual CDJ was shut down by beat-link (another device defended our player number): explain it and rejoin. */
+    private void onVirtualCdjLost() {
+        // A connection that held for a minute counts as healthy again; only quick repeats are a conflict.
+        if (System.currentTimeMillis() - joinedAt > 60_000) {
+            lostInARow = 0;
+        }
+        lostInARow++;
+        lostTotal++;
+        String local = localBeatLinkDevice();
+        lostReason = local != null
+                ? "another Pro DJ Link program on this computer (" + local + ")"
+                : "another device claimed LJ Link's player number";
+        System.err.println("Virtual CDJ was shut down (" + lostInARow + " in a row): " + lostReason);
+        if (lostInARow > 3) {
+            hub.setState("error", "live", local != null
+                    ? "Another program on this computer keeps taking over the Pioneer connection (a second LJ Link, Beat Link Trigger, rekordbox …). Close it and search again."
+                    : "Another device on the network keeps taking LJ Link's player number. Check that no second LJ Link or Beat Link program is running, then search again.");
+            return;
+        }
+        hub.setState("searching", "live", local != null
+                ? "Another program on this computer uses Pro DJ Link (a second LJ Link, Beat Link Trigger, rekordbox …). Reconnecting …"
+                : "The connection to the players was taken over. Reconnecting …");
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(3000L * lostInARow);
+                if (stopped || VirtualCdj.getInstance().isRunning()) {
+                    return;
+                }
+                String note = join();
+                if (note != null && !stopped) {
+                    hub.setState("monitoring", "live", note);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                if (!stopped) {
+                    hub.setState("error", "live", "Pro DJ Link: " + e.getMessage());
+                }
+            }
+        }, "prodjlink-rejoin");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** A device announcing itself from one of this computer's own addresses (another beat-link program), or null. */
+    private static String localBeatLinkDevice() {
+        try {
+            java.util.Set<String> own = new java.util.HashSet<>();
+            for (var ni : java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces())) {
+                for (var ia : ni.getInterfaceAddresses()) {
+                    own.add(ip(ia.getAddress()));
+                }
+            }
+            for (DeviceAnnouncement a : DeviceFinder.getInstance().getCurrentDevices()) {
+                if (own.contains(ip(a.getAddress()))) {
+                    return "\"" + a.getDeviceName() + "\" as player " + a.getDeviceNumber() + " at " + ip(a.getAddress());
+                }
+            }
+        } catch (Exception e) {
+            // Only used for the explanation.
+        }
+        return null;
+    }
+
+    /** The plain IPv4 text of an address, also when the system hands it over as IPv4-mapped IPv6 (::ffff:a.b.c.d). */
+    static String ip(java.net.InetAddress a) {
+        byte[] b = a.getAddress();
+        boolean mapped = b.length == 16 && (b[10] & 0xff) == 0xff && (b[11] & 0xff) == 0xff;
+        for (int i = 0; mapped && i < 10; i++) {
+            mapped = b[i] == 0;
+        }
+        return mapped ? (b[12] & 0xff) + "." + (b[13] & 0xff) + "." + (b[14] & 0xff) + "." + (b[15] & 0xff) : a.getHostAddress();
+    }
+
     private void onUpdate(DeviceUpdate update) {
         if (update instanceof org.deepsymmetry.beatlink.MixerStatus m) {
             hub.setMixer(java.util.Map.of("present", true, "name", m.getDeviceName(), "number", m.getDeviceNumber(),
-                    "address", m.getAddress().getHostAddress(), "bpm", m.getBpm() / 100.0, "master", m.isTempoMaster(),
+                    "address", ip(m.getAddress()), "bpm", m.getBpm() / 100.0, "master", m.isTempoMaster(),
                     "simulated", false, "levels", false));
             return;
         }
@@ -296,7 +405,7 @@ final class ProDjLinkSource implements DeckSource {
                     continue; // mixers and other non-player devices
                 }
                 Deck d = hub.deck(n);
-                d.address = a.getAddress().getHostAddress();
+                d.address = ip(a.getAddress());
                 if (d.name.isEmpty()) {
                     d.name = a.getDeviceName();
                 }
@@ -320,6 +429,7 @@ final class ProDjLinkSource implements DeckSource {
     @Override
     public void stop() {
         stopped = true;
+        stopQuietly(() -> VirtualCdj.getInstance().removeLifecycleListener(virtualCdjLifecycle));
         if (thread != null) {
             thread.interrupt();
         }
@@ -357,6 +467,9 @@ final class ProDjLinkSource implements DeckSource {
         } catch (RuntimeException e) {
             out.add("VirtualCdj: " + e);
         }
+        if (lostTotal > 0) {
+            out.add("WARNING: the virtual CDJ was shut down " + lostTotal + " times, last because of " + lostReason);
+        }
         out.add("Finders running: DeviceFinder " + DeviceFinder.getInstance().isRunning()
                 + ", MetadataFinder " + MetadataFinder.getInstance().isRunning()
                 + ", WaveformFinder " + WaveformFinder.getInstance().isRunning()
@@ -366,7 +479,7 @@ final class ProDjLinkSource implements DeckSource {
             java.util.Map<Integer, Integer> perNumber = new java.util.HashMap<>();
             for (DeviceAnnouncement a : DeviceFinder.getInstance().getCurrentDevices()) {
                 perNumber.merge(a.getDeviceNumber(), 1, Integer::sum);
-                out.add("Device " + a.getDeviceNumber() + ": " + a.getDeviceName() + " at " + a.getAddress().getHostAddress()
+                out.add("Device " + a.getDeviceNumber() + ": " + a.getDeviceName() + " at " + ip(a.getAddress())
                         + ", peers " + a.getPeerCount());
             }
             perNumber.forEach((n, c) -> {

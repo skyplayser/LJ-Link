@@ -18,6 +18,9 @@ public final class Main {
     private static volatile boolean appWindow = true;
 
     public static void main(String[] args) {
+        // Pro DJ Link is IPv4 only. On some Windows systems the dual-stack sockets report senders as IPv4-mapped IPv6
+        // addresses; beat-link then no longer recognises its own announcements and shuts itself down as an "invader".
+        System.setProperty("java.net.preferIPv4Stack", "true");
         LogBuffer.install();
         int port = 8080;
         boolean openBrowser = true;

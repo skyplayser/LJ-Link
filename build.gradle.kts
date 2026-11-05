@@ -77,7 +77,7 @@ application {
     applicationName = "ljlinkpro"
 }
 
-version = "1.5.0"
+version = "1.5.1"
 
 // Builds a native installer with a bundled Java runtime: .dmg on macOS, .exe on Windows.
 // jpackage can only build installers for the OS it runs on, so each OS is built on its own (see CI).
@@ -115,6 +115,8 @@ tasks.register<Exec>("packageApp") {
     if (icon.exists()) {
         cmd += listOf("--icon", icon.absolutePath)
     }
+    // Same as in Main.main, but set before the JVM starts (see the comment there).
+    cmd += listOf("--java-options", "-Djava.net.preferIPv4Stack=true")
     if (os.isMacOsX) {
         // Menu bar app: no Dock icon.
         cmd += listOf("--java-options", "-Dapple.awt.UIElement=true", "--mac-package-name", "LJ Link", "--mac-app-category", "public.app-category.music")
