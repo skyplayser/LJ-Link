@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - name: macOS (Apple Silicon)
-            os: macos-14
+            os: macos-15
             suffix: macos-arm64
             ext: dmg
           - name: macOS (Intel)

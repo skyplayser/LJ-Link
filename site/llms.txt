@@ -6,7 +6,7 @@
 - Pioneer and Denon at the same time; devices are added and removed automatically.
 - Any tablet, phone or second screen in the network can open the same view.
 - Older gear works too, not only CDJ-3000 and DJM-A9: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-700 and DJM-900NXS are expected to work (not tested yet).
-- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight is not confirmed yet; the Wolfmix (OS2L via WTOOLS) is an untested alpha. Serato DJ Pro works on the same computer without play position. Ableton Link gives a session tempo; leading a Link session with the tempo, beats and bars of a Pioneer or Denon deck is an untested alpha (since 1.6.0). Traktor, VirtualDJ and rekordbox are planned.
+- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight is not confirmed yet; the Wolfmix (OS2L via WTOOLS) is an untested alpha. Serato DJ Pro works on the same computer without play position. Ableton Link gives a session tempo; leading a Link session with the tempo, beats and bars of a Pioneer or Denon deck is an untested alpha (since 1.6.1). Traktor, VirtualDJ and rekordbox are planned.
 - Not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight or Wolfmix.
 
 ## Guides
