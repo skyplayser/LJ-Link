@@ -34,7 +34,7 @@ def _():
               ("🎧", "wiki-sources.html", "DJ sources", "DJ-Quellen", "Pioneer, Denon, Serato and Ableton Link: what each one shows.", "Pioneer, Denon, Serato und Ableton Link: was jede Quelle zeigt."),
               ("💡", "wiki-lighting-desks.html", "Light desks", "Lichtpulte", "grandMA2, grandMA3, Wolfmix, Daslight and OSC programs, step by step.", "grandMA2, grandMA3, Wolfmix, Daslight und OSC-Programme, Schritt für Schritt."),
               ("🎛️", "wiki-use-cases.html", "Use cases", "Anwendungsfälle", "Complete setups for club, festival, mobile, livestream and more.", "Komplette Aufbauten für Club, Festival, mobil, Livestream und mehr."),
-              ("🛟", "wiki-troubleshooting.html", "Help", "Hilfe", "Troubleshooting by symptom, glossary and reference.", "Fehlersuche nach Symptom, Glossar und Referenz.")),
+              ("🛟", "wiki-troubleshooting.html", "Help", "Hilfe", "Troubleshooting by symptom, known issues, glossary and reference.", "Fehlersuche nach Symptom, bekannte Fehler, Glossar und Referenz.")),
         H2("What the status means", "Was der Stand bedeutet"),
         P("Every device and program in this wiki carries one of these labels. We only call something stable when it ran on the real device.",
           "Jedes Gerät und Programm in diesem Wiki trägt eines dieser Zeichen. Stabil nennen wir etwas nur, wenn es am echten Gerät lief."),

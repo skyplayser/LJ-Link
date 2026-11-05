@@ -40,10 +40,16 @@ def _():
         H2("Tracks and waveforms", "Tracks und Waveforms"),
         SYM("no-waveform", "“No track loaded” or no waveform", "„No track loaded“ oder keine Waveform", [
             [("LJ Link older than 1.4.1", "LJ Link älter als 1.4.1"), ("update", "aktualisieren")],
+            [("waveform only sometimes, BPM frozen (Windows, 1.5.0 or older)", "Waveform nur manchmal, BPM steht (Windows, 1.5.0 oder älter)"), ("update to 1.5.1, see [known issues](wiki-known-issues.html#windows-shutdown)", "auf 1.5.1 aktualisieren, siehe [Bekannte Fehler](wiki-known-issues.html#windows-shutdown)")],
             [("track not from a rekordbox export (streaming, CD, never analysed)", "Track nicht aus einem rekordbox-Export (Streaming, CD, nie analysiert)"), ("export with rekordbox, analysed", "mit rekordbox exportieren, analysiert")],
             [("CDJ-3000 with new firmware, old export", "CDJ-3000 mit neuer Firmware, alter Export"), ("export again with rekordbox 6 or 7", "mit rekordbox 6 oder 7 neu exportieren")],
             [("rekordbox on this computer", "rekordbox auf diesem Computer"), ("quit it", "beenden")],
             [("Denon: track not analysed", "Denon: Track nicht analysiert"), ("analyse in Engine DJ or on the device", "in Engine DJ oder am Gerät analysieren")],
+        ]),
+        SYM("frozen", "BPM stays frozen, play is not shown, waveform only sometimes", "BPM bleibt stehen, Play wird nicht angezeigt, Waveform nur manchmal", [
+            [("LJ Link 1.5.0 or older on Windows: the Pioneer connection keeps shutting itself down (known bug, fixed)", "LJ Link 1.5.0 oder älter unter Windows: die Pioneer-Verbindung schaltet sich immer wieder selbst ab (bekannter Fehler, behoben)"),
+             ("update to 1.5.1 or newer; details in [known issues](wiki-known-issues.html#windows-shutdown)", "auf 1.5.1 oder neuer aktualisieren; Details unter [Bekannte Fehler](wiki-known-issues.html#windows-shutdown)")],
+            [("a second LJ Link, Beat Link Trigger or rekordbox on this computer", "ein zweites LJ Link, Beat Link Trigger oder rekordbox auf diesem Computer"), ("close it; LJ Link reconnects by itself", "schließen; LJ Link verbindet sich von selbst neu")],
         ]),
         SYM("beat-port", "Yellow note “Beat port 50001 is in use”", "Gelber Hinweis „Beat port 50001 is in use“", [
             [("rekordbox, Beat Link Trigger, SoundSwitch or a second LJ Link", "rekordbox, Beat Link Trigger, SoundSwitch oder ein zweites LJ Link"), ("close it, search again; until then positions are estimated", "schließen, erneut suchen; bis dahin werden Positionen geschätzt")],
@@ -90,6 +96,56 @@ def _():
              "LJ-Link-Fehlersuche nach Symptom: nichts gefunden, Player doppelt, Direktkabel-Fehler, keine Waveform, Port belegt, Denon verbindet neu, Pult reagiert nicht, Symbol und Updates, wie man meldet."),
             ("Help", "Hilfe"), ("Troubleshooting", "Fehlersuche"),
             ("Find the cause by what you see.", "Finde die Ursache über das, was du siehst."), body)
+
+
+@page("wiki-known-issues.html", "Known issues", "Bekannte Fehler")
+def _():
+    body = SEC(
+        ADM("info", ("Bugs we know about, what you see and how to fix or avoid them. The newest version is always on the [releases page](https://github.com/skyplayser/LJ-Link/releases/latest). Found something that is not listed? [Report it](wiki-troubleshooting.html#report) or tell us on [Discord](" + DISCORD + ").",
+                     "Fehler, die wir kennen, woran man sie erkennt und wie man sie behebt oder umgeht. Die neueste Version gibt es immer auf der [Release-Seite](https://github.com/skyplayser/LJ-Link/releases/latest). Etwas gefunden, das hier fehlt? [Melde es](wiki-troubleshooting.html#report) oder schreib uns auf [Discord](" + DISCORD + ").")),
+        H2("Overview", "Übersicht"),
+        TABLE([("Problem", "Problem"), ("Affects", "Betrifft"), ("Status", "Stand")], [
+            [("[Pioneer connection keeps shutting itself down](#windows-shutdown)", "[Pioneer-Verbindung schaltet sich immer wieder ab](#windows-shutdown)"), ("Windows, Pioneer, 1.5.0 and older", "Windows, Pioneer, 1.5.0 und älter"), BADGE("ok", "Fixed in 1.5.1", "Behoben in 1.5.1")],
+            [("[Direct cable and Wi-Fi: players twice or not at all](#direct-wifi)", "[Direktkabel und WLAN: Player doppelt oder gar nicht](#direct-wifi)"), ("direct cable without router, Wi-Fi on", "Direktkabel ohne Router, WLAN an"), BADGE("bad", "Open, workaround", "Offen, Umgehung")],
+        ]),
+
+        H2("Pioneer connection keeps shutting itself down (Windows)", "Pioneer-Verbindung schaltet sich immer wieder ab (Windows)", "windows-shutdown"),
+        TABLE(None, [
+            [("**Status**", "**Stand**"), BADGE("ok", "Fixed in 1.5.1", "Behoben in 1.5.1")],
+            [("**Affects**", "**Betrifft**"), ("LJ Link 1.5.0 and older on some Windows PCs, Pioneer players (CDJ, XDJ)", "LJ Link 1.5.0 und älter auf manchen Windows-PCs, Pioneer-Player (CDJ, XDJ)")],
+        ]),
+        H3("What you see", "Woran man es erkennt"),
+        UL(("The players are found, but the waveform loads only sometimes or only for one player.", "Die Player werden gefunden, aber die Waveform lädt nur manchmal oder nur bei einem Player."),
+           ("The BPM is shown once and then stays frozen. Play, pitch and tempo changes on the CDJ are not shown.", "Das BPM wird einmal angezeigt und bleibt dann stehen. Play, Pitch und Tempoänderungen am CDJ werden nicht angezeigt."),
+           ("In the device list the players have the address `0.0.0.0` or a long address like `0:0:0:0:0:ffff:a9fe:…`.", "In der Geräteliste haben die Player die Adresse `0.0.0.0` oder eine lange Adresse wie `0:0:0:0:0:ffff:a9fe:…`."),
+           ("In the diagnostic data: `VirtualCdj running: false`, devices named `beat-link` with changing numbers (7, 8, 9 …) at the computer’s own address, and the log line `Another device has claimed it owns our device number, shutting down`.", "In den Diagnosedaten: `VirtualCdj running: false`, Geräte namens `beat-link` mit wechselnden Nummern (7, 8, 9 …) an der eigenen Adresse des Computers und die Log-Zeile `Another device has claimed it owns our device number, shutting down`.")),
+        H3("Why it happens", "Warum es passiert"),
+        P("On some Windows PCs the network hands incoming packets over with an IPv6 form of the sender’s address (`::ffff:169.254.1.1` instead of `169.254.1.1`). LJ Link then did not recognise its own announcements, took itself for a second device with the same player number, defended the number against itself and shut its connection down. A few seconds later it joined again with a new number, and the same thing happened. While the connection was down, no status, waveforms or metadata came in.",
+          "Auf manchen Windows-PCs liefert das Netzwerk eingehende Pakete mit einer IPv6-Form der Absenderadresse (`::ffff:169.254.1.1` statt `169.254.1.1`). LJ Link hat dann seine eigenen Ansagen nicht erkannt, sich selbst für ein zweites Gerät mit derselben Player-Nummer gehalten, die Nummer gegen sich selbst verteidigt und die Verbindung abgeschaltet. Ein paar Sekunden später kam es mit einer neuen Nummer zurück, und alles ging von vorn los. Solange die Verbindung weg war, kamen kein Status, keine Waveforms und keine Metadaten an."),
+        P("It is not your network, your cables or your rekordbox export. rekordbox and the USB stick are fine.", "Es liegt nicht an deinem Netzwerk, deinen Kabeln oder deinem rekordbox-Export. rekordbox und USB-Stick sind in Ordnung."),
+        H3("How to fix it", "So behebst du es"),
+        STEPS(("Install LJ Link **1.5.1 or newer** from the [releases page](https://github.com/skyplayser/LJ-Link/releases/latest), or in LJ Link: Menu (☰) → **Check for updates**.", "LJ Link **1.5.1 oder neuer** von der [Release-Seite](https://github.com/skyplayser/LJ-Link/releases/latest) installieren, oder in LJ Link: Menü (☰) → **Nach Updates suchen**."),
+              ("Quit LJ Link completely (icon next to the clock → Quit) and start it again.", "LJ Link ganz beenden (Symbol neben der Uhr → Beenden) und neu starten."),
+              ("Load a track and press play: BPM, play state and waveform now follow the player. The players show a normal address like `169.254.7.232` or `192.168.1.20`.", "Einen Track laden und Play drücken: BPM, Play-Zustand und Waveform folgen jetzt dem Player. Die Player zeigen eine normale Adresse wie `169.254.7.232` oder `192.168.1.20`.")),
+        ADM("tip", ("Since 1.5.1 LJ Link also reconnects by itself if another program takes over its player number, and names it when it runs on the same computer (a second LJ Link, Beat Link Trigger, rekordbox). Then close that program.",
+                    "Seit 1.5.1 verbindet sich LJ Link auch von selbst neu, wenn ein anderes Programm seine Player-Nummer übernimmt, und nennt es, wenn es auf demselben Computer läuft (ein zweites LJ Link, Beat Link Trigger, rekordbox). Dann dieses Programm schließen.")),
+        P("Still happening with 1.5.1? Please [send a report](wiki-troubleshooting.html#report) right after starting LJ Link, with the gear connected.", "Passiert es mit 1.5.1 immer noch? Bitte direkt nach dem Start von LJ Link [einen Bericht senden](wiki-troubleshooting.html#report), mit angeschlossenen Geräten."),
+
+        H2("Direct cable and Wi-Fi: players twice or not at all", "Direktkabel und WLAN: Player doppelt oder gar nicht", "direct-wifi"),
+        TABLE(None, [
+            [("**Status**", "**Stand**"), BADGE("bad", "Open, workaround", "Offen, Umgehung")],
+            [("**Affects**", "**Betrifft**"), ("one player straight into the computer without a router, Wi-Fi on", "ein Player direkt am Computer ohne Router, WLAN an")],
+        ]),
+        P("Without a router, computer and players give themselves `169.254.x.x` addresses. With Wi-Fi on, the computer may send on the wrong adapter or receive every packet twice.", "Ohne Router geben sich Computer und Player `169.254.x.x`-Adressen. Mit eingeschaltetem WLAN sendet der Computer eventuell über den falschen Anschluss oder bekommt jedes Paket doppelt."),
+        STEPS(("Switch Wi-Fi off on the computer.", "WLAN am Computer ausschalten."),
+              ("Quit LJ Link and start it again.", "LJ Link beenden und neu starten."),
+              ("Better: put a small switch or router in between, see [network setups](wiki-network-setups.html#b-router).", "Besser: einen kleinen Switch oder Router dazwischen, siehe [Netzwerk-Aufbauten](wiki-network-setups.html#b-router).")),
+    )
+    return (("Known issues", "Bekannte Fehler"),
+            ("Known LJ Link bugs, how to recognise them and how to fix them: Pioneer connection shutting itself down on Windows (fixed in 1.5.1), direct cable with Wi-Fi.",
+             "Bekannte Fehler von LJ Link, woran man sie erkennt und wie man sie behebt: Pioneer-Verbindung schaltet sich unter Windows ab (behoben in 1.5.1), Direktkabel mit WLAN."),
+            ("Help", "Hilfe"), ("Known issues", "Bekannte Fehler"),
+            ("Bugs we know about and how to get around them.", "Fehler, die wir kennen, und wie man sie umgeht."), body)
 
 
 @page("wiki-glossary.html", "Glossary", "Glossar")
