@@ -245,6 +245,7 @@ def _():
             [("grandMA2", "grandMA2"), "TCP 30000 (Telnet)", ("out", "raus")],
             [("grandMA3", "grandMA3"), ("UDP, as set on the desk (e.g. 8000)", "UDP, wie am Pult eingestellt (z. B. 8000)"), ("out", "raus")],
             [("Daslight, own OSC target", "Daslight, eigenes OSC-Ziel"), ("UDP, as set", "UDP, wie eingestellt"), ("out", "raus")],
+            [("ChamSys MagicQ (OSC taps)", "ChamSys MagicQ (OSC-Taps)"), ("UDP, as set on the desk (e.g. 8000)", "UDP, wie am Pult eingestellt (z. B. 8000)"), ("out", "raus")],
             [("Wolfmix / OS2L", "Wolfmix / OS2L"), ("TCP 5000 (WTOOLS default)", "TCP 5000 (Vorgabe von WTOOLS)"), ("out", "raus")],
             [("Web interface (browser, tablet)", "Weboberfläche (Browser, Tablet)"), ("TCP 8080, change with `--port`", "TCP 8080, änderbar mit `--port`"), ("in", "rein")],
             [("Update check", "Update-Prüfung"), ("HTTPS to github.com", "HTTPS zu github.com"), ("out", "raus")],

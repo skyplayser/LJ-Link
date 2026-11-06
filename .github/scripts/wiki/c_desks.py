@@ -15,6 +15,7 @@ def _():
             [("[grandMA2, grandMA2 onPC](wiki-grandma2.html)", "[grandMA2, grandMA2 onPC](wiki-grandma2.html)"), BADGE("stable"), "Telnet, TCP 30000", "<code>SpecialMaster 3.16 At 128</code>"],
             [("[grandMA3, grandMA3 onPC](wiki-grandma3.html)", "[grandMA3, grandMA3 onPC](wiki-grandma3.html)"), BADGE("beta"), ("OSC, UDP (e.g. 8000)", "OSC, UDP (z. B. 8000)"), "<code>Master 3.1 At BPM 128</code>"],
             [("[Wolfmix (WTOOLS)](wiki-wolfmix.html)", "[Wolfmix (WTOOLS)](wiki-wolfmix.html)"), BADGE("alpha"), "OS2L, TCP 5000", ("every beat with its number and the tempo", "jeder Beat mit Nummer und das Tempo")],
+            [("[ChamSys MagicQ](wiki-chamsys.html)", "[ChamSys MagicQ](wiki-chamsys.html)"), BADGE("alpha"), ("OSC taps, UDP (e.g. 8000)", "OSC-Taps, UDP (z. B. 8000)"), ("an OSC message without value on every beat, for Tap to Time", "eine OSC-Nachricht ohne Wert auf jedem Beat, für Tap to Time")],
             [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("unk"), "OSC, UDP", ("a number `128.0` at `/ljlinkpro/bpm`", "eine Zahl `128.0` an `/ljlinkpro/bpm`")],
             [("[Own OSC target](wiki-other-desks.html#osc)", "[Eigenes OSC-Ziel](wiki-other-desks.html#osc)"), BADGE("gen"), "OSC, UDP", ("a number at your address", "eine Zahl an deine Adresse")],
             [("[QLC+ and other OS2L programs](wiki-other-desks.html#os2l)", "[QLC+ und andere OS2L-Programme](wiki-other-desks.html#os2l)"), BADGE("alpha"), "OS2L, TCP", ("beats and tempo", "Beats und Tempo")],
@@ -196,6 +197,57 @@ def _():
             ("Every beat over OS2L through WTOOLS. Untested.", "Jeder Beat über OS2L durch WTOOLS. Ungetestet."), body)
 
 
+@page("wiki-chamsys.html", "ChamSys MagicQ", "ChamSys MagicQ")
+def _():
+    body = SEC(
+        ADM("alpha", ("**Never tried on a real MagicQ.** Built from ChamSys’ published OSC documentation and checked against a test receiver: with decks at 126 BPM one tap arrived every 476 ms, which is exactly 126.00 BPM. It may not work at all. Do not rely on it at an important event, and keep tap tempo as a fallback.",
+                      "**Noch nie an einem echten MagicQ ausprobiert.** Nach der veröffentlichten OSC-Dokumentation von ChamSys gebaut und gegen einen Test-Empfänger geprüft: Mit Decks bei 126 BPM kam alle 476 ms ein Tap an, das sind genau 126,00 BPM. Es kann sein, dass es gar nicht funktioniert. Nicht bei einer wichtigen Veranstaltung darauf verlassen und Tap-Tempo als Rückfall bereithalten.")),
+        H2("How it works", "So funktioniert es"),
+        P("MagicQ has **no OSC address that sets a BPM**. What it does take is a **tap**: an OSC message that you map to *Tap to Time* in the macro window. So LJ Link taps for you: on **every beat** of the deck under [SEND BPM](wiki-lighting-desks.html#send-bpm) it sends an OSC message without a value to the address you choose. MagicQ works out the tempo from the taps, like a DJ tapping, but exactly on the beat grid of the player, with pitch included.",
+          "MagicQ hat **keine OSC-Adresse, die ein BPM setzt**. Was es annimmt, ist ein **Tap**: eine OSC-Nachricht, die du im Macro-Fenster auf *Tap to Time* legst. LJ Link tippt deshalb für dich: Auf **jedem Beat** des Decks unter [SEND BPM](wiki-lighting-desks.html#send-bpm) schickt es eine OSC-Nachricht ohne Wert an die Adresse, die du wählst. MagicQ errechnet das Tempo aus den Taps, wie bei einem DJ, der tippt, aber genau auf dem Beatgrid des Players und mit Pitch."),
+        DIAGRAM(720, 150, {"dj": (100, 75, 120, 50, "dj", ("DJ gear", "DJ-Geräte"), None),
+                           "pc": (360, 75, 190, 60, "pc", ("Computer", "Computer"), ("LJ Link", "LJ Link")),
+                           "q": (620, 75, 120, 50, "desk", ("MagicQ", "MagicQ"), None)},
+                [("dj", "pc", "cable", ("network", "Netzwerk")), ("pc", "q", "cable", ("OSC tap per beat", "OSC-Tap pro Beat"))],
+                ("LJ Link reads the DJ gear and taps to MagicQ on every beat. MagicQ on the same computer: address 127.0.0.1.", "LJ Link liest die DJ-Geräte und tippt bei jedem Beat an MagicQ. MagicQ auf demselben Computer: Adresse 127.0.0.1.")),
+        H2("Step by step", "Schritt für Schritt"),
+        H3("1. On the MagicQ desk or PC", "1. Am MagicQ-Pult oder -PC"),
+        STEPS(("OSC needs a **fully unlocked** MagicQ (consoles except MQ40 and MQ40N, and MagicQ PC).", "OSC braucht ein **voll freigeschaltetes** MagicQ (Pulte außer MQ40 und MQ40N, und MagicQ PC)."),
+              ("**Setup** → **View Settings** → **Network**: set **OSC Mode** to *Rx* (or *Tx and Rx*) and note the **OSC Rx Port**. Port `8000` is a good choice.", "**Setup** → **View Settings** → **Network**: **OSC Mode** auf *Rx* (oder *Tx and Rx*) stellen und den **OSC Rx Port** notieren. Port `8000` ist eine gute Wahl."),
+              ("Open the **Macro** window and switch to the **Autom** view. Add a row: type **OSC Message**, in the column **P1** the address `/tap` (up to **15 characters**).", "Das **Macro**-Fenster öffnen und in die Ansicht **Autom** wechseln. Eine Zeile anlegen: Typ **OSC Message**, in der Spalte **P1** die Adresse `/tap` (bis zu **15 Zeichen**)."),
+              ("Set the action of that row to **Tap to Time** for the playback whose speed should follow, or to **Global Tap to Time**, if your software version offers it.", "Die Aktion dieser Zeile auf **Tap to Time** für das Playback stellen, dessen Tempo folgen soll, oder auf **Global Tap to Time**, wenn deine Softwareversion es anbietet.")),
+        ADM("note", ("The menu names above follow the ChamSys manual for version 1.9.9; they can differ a little between versions and desks. If you find them different on yours, [tell us](" + DISCORD + ") and we correct this page.",
+                     "Die Menünamen oben folgen dem ChamSys-Handbuch für Version 1.9.9; sie können je nach Version und Pult ein wenig abweichen. Findest du sie bei dir anders, [sag es uns](" + DISCORD + ") und wir korrigieren diese Seite.")),
+        H3("2. In LJ Link", "2. In LJ Link"),
+        STEPS(("Menu (☰) → **Light desk link** → **ChamSys MagicQ (OSC taps) – Alpha**.", "Menü (☰) → **Lichtpult-Link** → **ChamSys MagicQ (OSC-Taps) – Alpha**."),
+              ("Address of the MagicQ computer or desk (same computer: `127.0.0.1`), the port from step 1 (`8000`).", "Adresse des MagicQ-Computers oder -Pults (gleicher Computer: `127.0.0.1`), der Port aus Schritt 1 (`8000`)."),
+              ("The OSC address is the one from the Autom row: `/tap`. For **several** playbacks or actions enter several addresses separated by commas, for example `/tap1, /tap2, /tap3`: each beat then sends one message to each, because MagicQ uses one OSC message for one action only. Add one Autom row per address.", "Die OSC-Adresse ist die aus der Autom-Zeile: `/tap`. Für **mehrere** Playbacks oder Aktionen mehrere Adressen mit Komma trennen, zum Beispiel `/tap1, /tap2, /tap3`: Jeder Beat schickt dann eine Nachricht an jede, denn MagicQ nutzt eine OSC-Nachricht nur für eine Aktion. Für jede Adresse eine Autom-Zeile anlegen."),
+              ("**Save**, then **Send test**: eight taps at 120 BPM, one every half second. In MagicQ the speed should settle at 120 BPM after a few taps.", "**Speichern**, dann **Test senden**: acht Taps mit 120 BPM, einer alle halbe Sekunde. In MagicQ sollte sich das Tempo nach ein paar Taps auf 120 BPM einstellen."),
+              ("Load a track, play: the deck under SEND BPM taps on every beat.", "Einen Track laden und spielen: Das Deck unter SEND BPM tippt auf jedem Beat.")),
+        H2("What is sent", "Was gesendet wird"),
+        TABLE([("", ""), ("Sent", "Gesendet")], [
+            [("**Tap**", "**Tap**"), ("one OSC message without value to each address, on every beat of the deck under SEND BPM", "eine OSC-Nachricht ohne Wert an jede Adresse, auf jedem Beat des Decks unter SEND BPM")],
+            [("**Tempo as a number**", "**Tempo als Zahl**"), BADGE("no", "No", "Nein")],
+            [("**Beat position**", "**Beat-Position**"), ("pioneer and Denon: from the beat grid and position; Serato and Ableton Link have no position, the taps run freely at the tempo", "Pioneer und Denon: aus Beatgrid und Position; Serato und Ableton Link haben keine Position, die Taps laufen frei im Tempo")],
+        ]),
+        UL(("A standing deck sends no taps. MagicQ keeps its last tempo.", "Ein stehendes Deck sendet keine Taps. MagicQ behält sein letztes Tempo."),
+           ("After a cue, loop or track change the taps resume on the next beat; MagicQ needs a few taps to settle again.", "Nach Cue, Loop oder Trackwechsel geht es auf dem nächsten Beat weiter; MagicQ braucht ein paar Taps, um sich neu einzupendeln."),
+           ("The **demo never sends** anything.", "Die **Demo sendet nie** etwas."),
+           ("OSC goes by UDP: nothing is reported if MagicQ is not listening. Check **OSC Rx** and the port on the desk.", "OSC läuft über UDP: Hört MagicQ nicht zu, wird nichts gemeldet. **OSC Rx** und den Port am Pult prüfen.")),
+        H2("What is not known yet", "Was noch unbekannt ist"),
+        UL(("Whether **Tap to Time** and **Global Tap to Time** can be put on an OSC message in your version, and which action is best for a speed master.", "Ob sich **Tap to Time** und **Global Tap to Time** in deiner Version auf eine OSC-Nachricht legen lassen und welche Aktion für einen Speedmaster am besten ist."),
+           ("How many taps MagicQ needs to follow a tempo change, and how it reacts to taps that stop.", "Wie viele Taps MagicQ braucht, um einer Tempoänderung zu folgen, und wie es reagiert, wenn die Taps aufhören."),
+           ("Whether another action of MagicQ takes a BPM directly, for example through the remote command `/rpc`. If you know one, please tell us.", "Ob eine andere Aktion von MagicQ ein BPM direkt annimmt, zum Beispiel über den Fernbefehl `/rpc`. Wenn du eine kennst, sag es uns bitte.")),
+        P("Idea and first draft of this output: [soiza on GitHub](https://github.com/soiza/LJ-Link). Thank you!", "Idee und erster Entwurf dieses Ausgangs: [soiza auf GitHub](https://github.com/soiza/LJ-Link). Danke!"),
+        REPORT,
+    )
+    return (("ChamSys MagicQ over OSC taps (alpha)", "ChamSys MagicQ über OSC-Taps (Alpha)"),
+            ("Send the DJ tempo to a ChamSys MagicQ as an OSC tap on every beat, mapped to Tap to Time. Untested alpha feature: setup on the desk and in LJ Link, what is sent and what is not known yet.",
+             "Das DJ-Tempo als OSC-Tap auf jedem Beat an ein ChamSys MagicQ schicken, auf Tap to Time gelegt. Ungetestetes Alpha-Feature: Einrichtung am Pult und in LJ Link, was gesendet wird und was noch unbekannt ist."),
+            ("Light desks · alpha", "Lichtpulte · Alpha"), ("ChamSys MagicQ", "ChamSys MagicQ"),
+            ("A tap on every beat for Tap to Time. Untested.", "Ein Tap auf jedem Beat für Tap to Time. Ungetestet."), body)
+
+
 @page("wiki-daslight.html", "Daslight", "Daslight")
 def _():
     body = SEC(
@@ -226,8 +278,8 @@ def _():
 def _():
     body = SEC(
         H2("Own OSC target", "Eigenes OSC-Ziel", "osc"),
-        P("**Own OSC target** sends the tempo as a number (float) to an address and port of your choice. That fits Resolume, QLC+, ChamSys MagicQ, TouchDesigner, Max, Node-RED or own scripts: map the address to a tempo control in the target program.",
-          "**Eigenes OSC-Ziel** schickt das Tempo als Zahl (Float) an eine frei wählbare Adresse und einen Port. Das passt zu Resolume, QLC+, ChamSys MagicQ, TouchDesigner, Max, Node-RED oder eigenen Skripten: im Zielprogramm die Adresse einem Tempo-Regler zuordnen."),
+        P("**Own OSC target** sends the tempo as a number (float) to an address and port of your choice. That fits Resolume, QLC+, TouchDesigner, Max, Node-RED or own scripts: map the address to a tempo control in the target program.",
+          "**Eigenes OSC-Ziel** schickt das Tempo als Zahl (Float) an eine frei wählbare Adresse und einen Port. Das passt zu Resolume, QLC+, TouchDesigner, Max, Node-RED oder eigenen Skripten: im Zielprogramm die Adresse einem Tempo-Regler zuordnen."),
         TABLE([("Field", "Feld"), ("Example", "Beispiel")], [
             [("Address of the target computer", "Adresse des Zielcomputers"), "<code>127.0.0.1</code>"],
             ["Port", "<code>7000</code>"],
@@ -245,11 +297,11 @@ def _():
            ("**Sound to light**: the dot2 has an audio input with BPM detection (window *Sound Input*).", "**Sound-to-Light**: Der dot2 hat einen Audio-Eingang mit BPM-Erkennung (Fenster *Sound Input*)."),
            ("A way over MIDI is planned.", "Ein Weg über MIDI ist geplant.")),
         H2("Your desk is missing?", "Dein Pult fehlt?"),
-        P("ChamSys, Avolites, Hog, Onyx, Chauvet, Lightkey, Freestyler … Tell us on [Discord](" + DISCORD + ") which desk you use and how it takes a tempo from outside (OSC, MIDI, Art-Net, Telnet). Often the own OSC target already does it.",
-          "ChamSys, Avolites, Hog, Onyx, Chauvet, Lightkey, Freestyler … Sag uns auf [Discord](" + DISCORD + "), welches Pult du nutzt und wie es ein Tempo von außen annimmt (OSC, MIDI, Art-Net, Telnet). Oft reicht schon das eigene OSC-Ziel."),
+        P("Avolites, Hog, Onyx, Chauvet, Lightkey, Freestyler … Tell us on [Discord](" + DISCORD + ") which desk you use and how it takes a tempo from outside (OSC, MIDI, Art-Net, Telnet). Often the own OSC target already does it.",
+          "Avolites, Hog, Onyx, Chauvet, Lightkey, Freestyler … Sag uns auf [Discord](" + DISCORD + "), welches Pult du nutzt und wie es ein Tempo von außen annimmt (OSC, MIDI, Art-Net, Telnet). Oft reicht schon das eigene OSC-Ziel."),
     )
     return (("Own OSC target, OS2L programs and dot2", "Eigenes OSC-Ziel, OS2L-Programme und dot2"),
-            ("Send the DJ tempo to Resolume, QLC+, MagicQ, TouchDesigner or any OSC program, to OS2L programs, and why the dot2 cannot receive it.",
-             "Das DJ-Tempo an Resolume, QLC+, MagicQ, TouchDesigner oder jedes OSC-Programm schicken, an OS2L-Programme, und warum der dot2 es nicht empfangen kann."),
+            ("Send the DJ tempo to Resolume, QLC+, TouchDesigner or any OSC program, to OS2L programs, and why the dot2 cannot receive it.",
+             "Das DJ-Tempo an Resolume, QLC+, TouchDesigner oder jedes OSC-Programm schicken, an OS2L-Programme, und warum der dot2 es nicht empfangen kann."),
             ("Light desks", "Lichtpulte"), ("OSC, OS2L and dot2", "OSC, OS2L und dot2"),
-            ("Everything that is not grandMA, Wolfmix or Daslight.", "Alles, was nicht grandMA, Wolfmix oder Daslight ist."), body)
+            ("Everything that is not grandMA, MagicQ, Wolfmix or Daslight.", "Alles, was nicht grandMA, MagicQ, Wolfmix oder Daslight ist."), body)

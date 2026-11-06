@@ -16,13 +16,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Sends the tempo of the leading deck to a lighting desk or software: to a grandMA2 as a command line over Telnet, to a
  * grandMA3 as a command line over OSC, to anything else as an OSC number, to the Wolfmix software (WTOOLS) and other
- * OS2L receivers as a beat on every beat. Output only: LJ Link never receives from or controls the DJ gear through this.
+ * OS2L receivers as a beat on every beat, and to a ChamSys MagicQ as an OSC tap on every beat. Output only: LJ Link never
+ * receives from or controls the DJ gear through this.
  */
 final class LinkService {
     /**
      * {@code type}: "off", "ma2" (grandMA2 / onPC command line over Telnet, with {@code user} and {@code password}),
      * "ma" (grandMA3 / onPC command line over OSC {@code /cmd}), "osc" (the tempo as an OSC number to {@code address})
-     * or "os2l" (beats and tempo as OS2L messages over TCP, for the Wolfmix software WTOOLS).
+     * "os2l" (beats and tempo as OS2L messages over TCP, for the Wolfmix software WTOOLS) or "chamsys" (an OSC message
+     * without argument on every beat to each address in {@code address}, a comma separated list; MagicQ maps it to Tap to Time).
      */
     record Config(String type, String host, int port, String address, String command, String user, String password) {
         static Config off() {
@@ -30,6 +32,7 @@ final class LinkService {
         }
     }
 
+    static final String CHAMSYS_ADDRESS = "/tap";
     static final String MA2_COMMAND = "SpecialMaster 3.16 At {bpm}";
     /** Every grandMA2 show has these users: "Administrator" with the password "admin", and "Guest". */
     static final String MA2_DEFAULT_USER = "administrator";
@@ -98,12 +101,13 @@ final class LinkService {
     }
 
     void setConfig(Config c) throws IOException {
-        String type = java.util.List.of("off", "ma2", "ma", "osc", "os2l").contains(c.type()) ? c.type() : "off";
+        String type = java.util.List.of("off", "ma2", "ma", "osc", "os2l", "chamsys").contains(c.type()) ? c.type() : "off";
         Config clean = new Config(
                 type,
                 c.host() == null ? "127.0.0.1" : c.host().trim(),
                 c.port() < 1 || c.port() > 65535 ? ("ma2".equals(type) ? Ma2Telnet.PORT : "os2l".equals(type) ? Os2lClient.PORT : 8000) : c.port(),
-                c.address() == null || c.address().isBlank() ? "/ljlinkpro/bpm" : c.address().trim(),
+                "chamsys".equals(type) ? String.join(",", tapAddresses(c.address()))
+                        : c.address() == null || c.address().isBlank() ? "/ljlinkpro/bpm" : c.address().trim(),
                 c.command() == null || c.command().isBlank() ? ("ma2".equals(type) ? MA2_COMMAND : MA3_COMMAND) : c.command().trim(),
                 "ma2".equals(type) && (c.user() == null || c.user().isBlank()) ? MA2_DEFAULT_USER : c.user() == null ? "" : c.user().trim(),
                 "ma2".equals(type) && (c.user() == null || c.user().isBlank()) && (c.password() == null || c.password().isEmpty())
@@ -159,23 +163,27 @@ final class LinkService {
     /** Sends a fixed tempo once so the user can check the connection and the mapping on the desk. */
     void sendTest() {
         Config c = config;
-        if (c.type().equals("os2l")) {
+        if (c.type().equals("os2l") || c.type().equals("chamsys")) {
             // Eight beats at 120 BPM, off the beat thread so the call returns at once.
             Thread t = new Thread(() -> {
                 try {
                     for (int i = 0; i < 8; i++) {
-                        os2l.beat(c.host(), c.port(), i == 0, i, 120.0);
+                        if (c.type().equals("chamsys")) {
+                            sendTaps(c);
+                        } else {
+                            os2l.beat(c.host(), c.port(), i == 0, i, 120.0);
+                        }
                         sentCount++;
                         lastBpm = 120.0;
                         error = null;
                         Thread.sleep(500);
                     }
                 } catch (IOException e) {
-                    error = os2lError(c, e);
+                    error = c.type().equals("chamsys") ? tapError(c, e) : os2lError(c, e);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-            }, "os2l-test");
+            }, c.type().equals("chamsys") ? "chamsys-test" : "os2l-test");
             t.setDaemon(true);
             t.start();
             return;
@@ -188,11 +196,51 @@ final class LinkService {
                 + "). Is the lighting program running with OS2L switched on?";
     }
 
-    /** OS2L: sends a beat when one of the leading deck passes. Runs every few milliseconds, so it must stay cheap. */
+    private static String tapError(Config c, IOException e) {
+        return "Sending to " + c.host() + ":" + c.port() + " failed: " + e.getMessage();
+    }
+
+    /** The OSC addresses of a ChamSys tap list ("/tap1, /tap2"): only entries that start with a slash, "/tap" when none. */
+    static java.util.List<String> tapAddresses(String list) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        if (list != null) {
+            for (String a : list.split("[,;\\s]+")) {
+                if (a.startsWith("/") && a.length() > 1 && !out.contains(a)) {
+                    out.add(a);
+                }
+            }
+        }
+        if (out.isEmpty()) {
+            out.add(CHAMSYS_ADDRESS);
+        }
+        return out;
+    }
+
+    /** One OSC message without argument to every address of the tap list: what ChamSys MagicQ maps to Tap to Time. */
+    void sendTaps(Config c) throws IOException {
+        java.util.List<String> addresses = tapAddresses(c.address());
+        try (DatagramSocket socket = new DatagramSocket()) {
+            InetAddress target = InetAddress.getByName(c.host());
+            for (String address : addresses) {
+                byte[] packet = oscTap(address);
+                socket.send(new DatagramPacket(packet, packet.length, target, c.port()));
+            }
+        }
+    }
+
+    /** An OSC message with an empty type tag: address and no argument. */
+    static byte[] oscTap(String address) {
+        byte[] a = padded(address);
+        byte[] t = padded(",");
+        return ByteBuffer.allocate(a.length + t.length).put(a).put(t).array();
+    }
+
+    /** OS2L and ChamSys: sends a beat when one of the leading deck passes. Runs every few milliseconds, so it must stay cheap. */
     private void beatTick() {
         try {
             Config c = config;
-            if (!c.type().equals("os2l")) {
+            boolean chamsys = c.type().equals("chamsys");
+            if (!c.type().equals("os2l") && !chamsys) {
                 return;
             }
             Deck lead = leadingDeck();
@@ -208,15 +256,19 @@ final class LinkService {
                 return;
             }
             try {
-                os2l.beat(c.host(), c.port(), beat.change(), beat.pos(), beat.bpm());
+                if (chamsys) {
+                    sendTaps(c);
+                } else {
+                    os2l.beat(c.host(), c.port(), beat.change(), beat.pos(), beat.bpm());
+                }
                 sentCount++;
                 lastBpm = beat.bpm();
                 lastSentAt = now;
-                if (error != null && error.startsWith("No OS2L")) {
+                if (error != null && (error.startsWith("No OS2L") || error.startsWith("Sending to"))) {
                     error = null;
                 }
             } catch (IOException e) {
-                error = os2lError(c, e);
+                error = chamsys ? tapError(c, e) : os2lError(c, e);
                 beatRetryAt = now + 5000;
             }
         } catch (RuntimeException e) {
@@ -302,7 +354,7 @@ final class LinkService {
             if (error != null && (error.startsWith("The chosen deck") || error.startsWith("Demo mode"))) {
                 error = null;
             }
-            if (c.type().equals("os2l")) {
+            if (c.type().equals("os2l") || c.type().equals("chamsys")) {
                 return; // beats go out from beatTick()
             }
             double bpm = lead.effectiveBpm;

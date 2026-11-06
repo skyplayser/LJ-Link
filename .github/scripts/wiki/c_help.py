@@ -71,6 +71,7 @@ def _():
             [("grandMA2: Telnet off", "grandMA2: Telnet aus"), ("Setup → Console → Global Settings → Telnet: Login Enabled", "Setup → Console → Global Settings → Telnet: Login Enabled")],
             [("grandMA2: Error #44", "grandMA2: Error #44"), ("user needs more rights", "Benutzer braucht mehr Rechte")],
             [("grandMA3: Receive Command off, prefix set", "grandMA3: Receive Command aus, Prefix gesetzt"), ("Receive Command Yes, prefix empty, Enable Input", "Receive Command Yes, Prefix leer, Enable Input")],
+            [("ChamSys MagicQ: no reaction (alpha)", "ChamSys MagicQ: keine Reaktion (Alpha)"), ("OSC Mode Rx and the same port on the desk, an Autom row of type OSC Message with exactly the address from LJ Link; see [ChamSys MagicQ](wiki-chamsys.html)", "OSC Mode Rx und derselbe Port am Pult, eine Autom-Zeile vom Typ OSC Message mit genau der Adresse aus LJ Link; siehe [ChamSys MagicQ](wiki-chamsys.html)")],
             [("effect not on that speed master", "Effekt nicht auf diesem Speedmaster"), ("assign it", "zuordnen")],
             [("desk in another network", "Pult in einem anderen Netz"), ("[network setups](wiki-network-setups.html#desk)", "[Netzwerk-Aufbauten](wiki-network-setups.html#desk)")],
             [("tempo jumps between two values", "Tempo springt zwischen zwei Werten"), ("SEND BPM on one deck", "SEND BPM auf ein Deck")],

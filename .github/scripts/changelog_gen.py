@@ -1,0 +1,179 @@
+"""Writes site/changelog.html (the What's new page) from the list R below, newest version first.
+
+    python3 .github/scripts/changelog_gen.py site
+
+Add every new version at the top of R (English and German, "What's new" and "Fixes"), run this, commit the page.
+It takes head and footer from site/pioneer-bpm-grandma.html; build_site.py then makes the German page.
+"""
+import html, sys, re
+from pathlib import Path
+site = Path(sys.argv[1])
+E = lambda s: html.escape(s, quote=True)
+
+R = [
+ ("1.7.0", "6 November 2026", "6. November 2026", [
+   ("ChamSys MagicQ (alpha, not tested on a real desk yet): LJ Link sends an OSC tap on every beat of the SEND BPM deck, which MagicQ maps to Tap to Time. One or several addresses can be set.",
+    "ChamSys MagicQ (Alpha, noch nicht an einem echten Pult getestet): LJ Link sendet auf jedem Beat des SEND-BPM-Decks einen OSC-Tap, den MagicQ auf Tap to Time legt. Eine oder mehrere Adressen sind möglich."),
+   ("New wiki page ChamSys MagicQ with the setup on the desk, step by step.",
+    "Neue Wiki-Seite ChamSys MagicQ mit der Einrichtung am Pult, Schritt für Schritt."),
+   ("Idea and first draft: soiza on GitHub. Thank you!",
+    "Idee und erster Entwurf: soiza auf GitHub. Danke!"),
+ ], []),
+ ("1.6.1", "5 November 2026", "5. November 2026", [
+   ("Everything from 1.6.0, now as a download: Ableton Link out (alpha) with tempo, beats and bars.",
+    "Alles aus 1.6.0, jetzt als Download: Ableton Link senden (Alpha) mit Tempo, Beats und Takten."),
+ ], [
+   ("1.6.0 never appeared as a download because the build for Macs with Apple Silicon failed. 1.6.1 is the same version with a working build.",
+    "1.6.0 ist nie als Download erschienen, weil der Build für Macs mit Apple Silicon scheiterte. 1.6.1 ist dieselbe Version mit funktionierendem Build."),
+ ]),
+ ("1.6.0", "5 November 2026", "5. November 2026", [
+   ("Ableton Link out (alpha, not tested with real gear yet): LJ Link can lead the Link session with the tempo of the SEND BPM deck, so Ableton Live, Resolume, Traktor and Link apps run at the DJ's tempo.",
+    "Ableton Link senden (Alpha, noch nicht mit echten Geräten getestet): LJ Link kann die Link-Session mit dem Tempo des SEND-BPM-Decks führen, damit laufen Ableton Live, Resolume, Traktor und Link-Apps im Tempo des DJs."),
+   ("Optionally also beats and bars: with Pioneer and Denon decks the beat and the start of the bar follow the beat grid of the deck.",
+    "Auf Wunsch auch Beats und Takte: Bei Pioneer- und Denon-Decks folgen Beat und Taktanfang dem Beatgrid des Decks."),
+   ("New section Ableton Link in the settings, with the session tempo and how many programs follow.",
+    "Neuer Abschnitt Ableton Link in den Einstellungen, mit dem Tempo der Session und wie viele Programme folgen."),
+   ("The deck that leads Link wears a white LINK mark; the diagnostic data show the Link state.",
+    "Das Deck, das Link führt, trägt ein weißes LINK; die Diagnosedaten zeigen den Link-Zustand."),
+ ], [
+   ("The Ableton Link deck no longer counts LJ Link itself as one of the programs.",
+    "Das Ableton-Link-Deck zählt LJ Link nicht mehr selbst als eines der Programme."),
+ ]),
+ ("1.5.1", "5 November 2026", "5. November 2026", [
+   ("If another program takes over the Pioneer connection, LJ Link reconnects by itself and names it when it runs on the same computer (a second LJ Link, Beat Link Trigger, rekordbox).",
+    "Übernimmt ein anderes Programm die Pioneer-Verbindung, verbindet sich LJ Link von selbst neu und nennt es, wenn es auf demselben Computer läuft (ein zweites LJ Link, Beat Link Trigger, rekordbox)."),
+   ("The diagnostic data count how often the Pioneer connection was shut down and why.",
+    "Die Diagnosedaten zählen, wie oft die Pioneer-Verbindung abgeschaltet wurde und warum."),
+ ], [
+   ("Windows: the Pioneer connection kept shutting itself down on some PCs. Waveforms loaded only sometimes, BPM and play state froze. Details on the known issues page.",
+    "Windows: Die Pioneer-Verbindung schaltete sich auf manchen PCs immer wieder selbst ab. Waveforms luden nur manchmal, BPM und Play-Zustand blieben stehen. Details auf der Seite Bekannte Fehler."),
+   ("Players are shown with their real address instead of 0.0.0.0.",
+    "Player werden mit ihrer echten Adresse angezeigt statt mit 0.0.0.0."),
+ ]),
+ ("1.5.0", "4 November 2026", "4. November 2026", [
+   ("Wolfmix via OS2L (alpha, untested): every beat of the leading deck goes to WTOOLS, with bar-aligned beat numbers and the tempo.",
+    "Wolfmix über OS2L (Alpha, ungetestet): Jeder Beat des führenden Decks geht an WTOOLS, mit taktgenauer Beat-Nummer und dem Tempo."),
+   ("OS2L also works with other OS2L receivers such as QLC+.",
+    "OS2L funktioniert auch mit anderen OS2L-Empfängern wie QLC+."),
+ ], []),
+ ("1.4.4", "3 November 2026", "3. November 2026", [], [
+   ("1.4.3 was built from an incomplete state. 1.4.4 contains all changes of 1.4.1 and 1.4.2.",
+    "1.4.3 wurde aus einem unvollständigen Stand gebaut. 1.4.4 enthält alle Änderungen von 1.4.1 und 1.4.2."),
+ ]),
+ ("1.4.2", "3 November 2026", "3. November 2026", [
+   ("New name: LJ Link. Links, the website address and updates keep working.",
+    "Neuer Name: LJ Link. Links, Website-Adresse und Updates funktionieren weiter."),
+   ("Open source under the Eclipse Public License 2.0; Settings → About LJ Link → Licenses shows the licenses of all libraries.",
+    "Open Source unter der Eclipse Public License 2.0; Einstellungen → Über LJ Link → Lizenzen zeigt die Lizenzen aller Bibliotheken."),
+ ], [
+   ("The Windows installer replaces installations under the old name.",
+    "Der Windows-Installer ersetzt Installationen unter dem alten Namen."),
+ ]),
+ ("1.4.1", "3 November 2026", "3. November 2026", [
+   ("Report a problem: describe what happens and send it with diagnostic data (network, devices, decks, log) by email or on GitHub.",
+    "Problem melden: beschreiben, was passiert, und mit Diagnosedaten (Netzwerk, Geräte, Decks, Log) per E-Mail oder auf GitHub senden."),
+   ("The search starts with Pioneer; a failed Pioneer search is shown with a hint when another program holds Pro DJ Link.",
+    "Die Suche beginnt mit Pioneer; eine gescheiterte Pioneer-Suche wird angezeigt, mit Hinweis, wenn ein anderes Programm Pro DJ Link belegt."),
+ ], [
+   ("Tracks without rekordbox analysis (CDs, streaming, unanalysed files) are shown as loaded instead of “No track loaded”.",
+    "Tracks ohne rekordbox-Analyse (CDs, Streaming, nicht analysierte Dateien) werden als geladen angezeigt statt „No track loaded“."),
+ ]),
+ ("1.4.0", "3 November 2026", "3. November 2026", [
+   ("Serato DJ Pro on the same computer: title, BPM, key, waveform overview, beat grid and cues of the loaded tracks.",
+    "Serato DJ Pro auf demselben Computer: Titel, BPM, Tonart, Waveform-Übersicht, Beatgrid und Cues der geladenen Tracks."),
+   ("Ableton Link: the tempo of a Link session (Serato, Traktor, Live) shows up as a deck and can go to the light desk.",
+    "Ableton Link: Das Tempo einer Link-Session (Serato, Traktor, Live) erscheint als Deck und kann ans Lichtpult gehen."),
+ ], []),
+ ("1.3.1", "2 November 2026", "2. November 2026", [], [
+   ("Denon: after a lost connection LJ Link pauses before it reconnects instead of reconnecting in a loop.",
+    "Denon: Nach einem Verbindungsabbruch wartet LJ Link kurz, statt sich in einer Schleife neu zu verbinden."),
+   ("When the light desk refuses a command (for example missing user rights), the reason is shown.",
+    "Lehnt das Lichtpult einen Befehl ab (zum Beispiel fehlende Benutzerrechte), wird der Grund angezeigt."),
+ ]),
+ ("1.3.0", "2 November 2026", "2. November 2026", [
+   ("grandMA2 over Telnet with login; every show has the user administrator with the password admin, which is filled in.",
+    "grandMA2 über Telnet mit Login; jede Show hat den Benutzer administrator mit dem Passwort admin, das wird vorausgefüllt."),
+   ("Choose the speed master on the grandMA (Speed 1–15, or Speed 16 = BPM).",
+    "Speedmaster am grandMA wählen (Speed 1–15, oder Speed 16 = BPM)."),
+   ("grandMA3 command line from the manual.", "grandMA3-Befehl nach Handbuch."),
+ ], [
+   ("The update check works in the installed app.", "Die Update-Prüfung funktioniert in der installierten App."),
+   ("grandMA2 gets whole BPM, its command line takes no fractions.", "Der grandMA2 bekommt ganze BPM, seine Kommandozeile nimmt keine Kommazahlen."),
+   ("Switched-off Telnet and a failed login on the grandMA2 are reported.", "Ausgeschaltetes Telnet und ein fehlgeschlagener Login am grandMA2 werden gemeldet."),
+   ("Devices that are not DJ players no longer show up in the Denon search.", "Geräte, die keine DJ-Player sind, erscheinen nicht mehr in der Denon-Suche."),
+ ]),
+ ("1.2.1", "2 November 2026", "2. November 2026", [
+   ("Clearer start page.", "Übersichtlichere Startseite."),
+ ], [
+   ("The demo never sends a tempo to the light desk.", "Die Demo sendet nie ein Tempo ans Lichtpult."),
+   ("Pioneer keeps working when another program uses the beat port 50001; positions are then estimated and a note is shown.",
+    "Pioneer läuft weiter, wenn ein anderes Programm den Beat-Port 50001 belegt; die Positionen werden dann geschätzt und ein Hinweis erscheint."),
+   ("The settings close when the connection is ended.", "Die Einstellungen schließen sich, wenn die Verbindung getrennt wird."),
+ ]),
+ ("1.2.0", "2 November 2026", "2. November 2026", [
+   ("SEND BPM: choose which deck gives the tempo to the light desk, Auto or one deck.",
+    "SEND BPM: wählen, welches Deck dem Lichtpult das Tempo gibt, Auto oder ein festes Deck."),
+   ("Update check: LJ Link tells you about a new version and installs it from the program icon.",
+    "Update-Prüfung: LJ Link meldet eine neue Version und installiert sie über das Programm-Symbol."),
+ ], [
+   ("Smoother waveform on the CDJ-2000NXS2 and older players.", "Ruhigere Waveform beim CDJ-2000NXS2 und älteren Playern."),
+   ("Player model names are shown correctly.", "Die Modellnamen der Player werden richtig angezeigt."),
+   ("Denon players reconnect after a short interruption.", "Denon-Player verbinden sich nach einer kurzen Unterbrechung wieder."),
+ ]),
+]
+
+def li(en, de): return f'<li data-de="{E(de)}">{E(en)}</li>'
+def block(cls, en, de, items):
+    if not items:
+        body = f'<p class="none" data-de="Keine in dieser Version.">None in this version.</p>'
+    else:
+        body = "<ul>" + "".join(li(*i) for i in items) + "</ul>"
+    return f'<div class="rel-part {cls}"><h3 data-de="{de}">{en}</h3>{body}</div>'
+
+latest = R[0][0]
+out = []
+toc = []
+for i, (v, den, dde, new, fix) in enumerate(R):
+    vid = "v" + v.replace(".", "-")
+    toc.append(f'<a href="#{vid}">{v}</a>')
+    badge = '<span class="badge stable" data-de="Aktuell">Latest</span>' if i == 0 else ""
+    out.append(f'''    <section class="release" id="{vid}">
+      <div class="rel-head"><h2>LJ Link {v}</h2>{badge}<span class="rel-date" data-de="{dde}">{den}</span></div>
+      {block("new", "What's new", "Neu", new)}
+      {block("fix", "Fixes", "Behoben", fix)}
+    </section>''')
+
+guide = (site / "pioneer-bpm-grandma.html").read_text(encoding="utf-8")
+head = guide[:guide.index("<main")]
+footer = guide[guide.index("<footer>"):]
+rep = [
+ (r'<title[^>]*>.*?</title>', '<title data-de="Neuigkeiten und Änderungen – alle Versionen | LJ Link">What\'s new – patch notes of every version | LJ Link</title>'),
+ (r'<meta name="description"[^>]*>', '<meta name="description" content="What is new and what was fixed in every LJ Link version, newest first: Ableton Link out, Wolfmix, Serato, grandMA2 and grandMA3, Pioneer and Denon." data-de-content="Was in jeder LJ-Link-Version neu ist und was behoben wurde, die neueste zuerst: Ableton Link senden, Wolfmix, Serato, grandMA2 und grandMA3, Pioneer und Denon.">'),
+ (r'<meta property="og:title"[^>]*>', '<meta property="og:title" content="LJ Link – what\'s new" data-de-content="LJ Link – was ist neu">'),
+ (r'<meta property="og:description"[^>]*>', '<meta property="og:description" content="Patch notes of every LJ Link version, newest first." data-de-content="Die Änderungen jeder LJ-Link-Version, die neueste zuerst.">'),
+]
+for pat, new in rep:
+    head, n = re.subn(pat, lambda m: new, head, count=1, flags=re.S)
+    assert n == 1, pat
+head = head.replace("pioneer-bpm-grandma.html", "changelog.html")
+head = head.replace('<meta property="og:type" content="article">', '<meta property="og:type" content="website">')
+print([l[:160] for l in head.splitlines() if "ioneer" in l])
+
+main = f'''<main class="wrap article changelog">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="./">LJ Link</a> › <span data-de="Neuigkeiten">What's new</span></nav>
+  <div class="hero">
+    <h1><span class="kicker" data-de="Änderungen · alle Versionen">Patch notes · every version</span><span data-de="Was ist neu in LJ Link">What's new in LJ Link</span></h1>
+    <p class="tag" data-de="Jede Version mit ihren Neuerungen und Fehlerbehebungen, die neueste oben. Aktuell ist LJ Link {latest}.">Every version with what is new and what was fixed, newest at the top. The latest is LJ Link {latest}.</p>
+    <div class="cta" style="justify-content:flex-start">
+      <a class="btn primary" href="https://github.com/skyplayser/LJ-Link/releases/latest" data-de="LJ Link {latest} herunterladen">Download LJ Link {latest}</a>
+      <a class="btn" href="wiki-known-issues.html" data-de="Bekannte Fehler">Known issues</a>
+    </div>
+    <p class="rel-toc"><span data-de="Zu Version:">Jump to:</span> {" ".join(toc)}</p>
+  </div>
+{chr(10).join(out)}
+    <p class="rel-more" data-de="Ältere Testversionen vor 1.2.0 sind nicht aufgeführt. Jede Version mit Download findest du auf GitHub unter Releases.">Test builds before 1.2.0 are not listed. Every version with its download is on GitHub under Releases.</p>
+</main>
+
+'''
+(site / "changelog.html").write_text(head + main + footer, encoding="utf-8")
+print("ok", len(R))

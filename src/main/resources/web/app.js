@@ -196,6 +196,8 @@ const LINK_PRESETS = {
               hint: "Daslight receives this address as a number over OSC; map it in Daslight's OSC mapping. Whether your Daslight version can set the BPM this way is not confirmed yet, see the light desk guide." },
   osc:      { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
               hint: "The tempo is sent as a number (float) to this address." },
+  chamsys:  { type: "chamsys", port: 8000, text: "/tap", label: "OSC address of the tap (several: separate by comma)",
+              hint: "ALPHA, UNTESTED: never tried on a real MagicQ, do not rely on it yet. ChamSys MagicQ has no OSC address for a BPM, so LJ Link sends a tap (an OSC message without value) on every beat of the leading deck. On the desk: Setup, View Settings, Network: OSC Mode Rx, OSC Rx Port as here. Then in the Macro window, Autom view, add a row of type OSC Message with this address (up to 15 characters) and the action Tap to Time (or Global Tap to Time). See the ChamSys guide, and please report how it went." },
   wolfmix:  { type: "os2l", port: 5000, text: "", noText: true, noScan: true,
               hint: "ALPHA, UNTESTED: never tried on a real Wolfmix, do not rely on it yet. Wolfmix (WTOOLS) and other OS2L software. Start WTOOLS on the computer the Wolfmix is plugged into, switch OS2L on there and enter that computer's address (127.0.0.1 if it is this one). LJ Link sends the tempo and every beat. On the Wolfmix, push the first encoder in an FX rack so it follows the BPM. See the Wolfmix guide, and please report how it went." },
 };
@@ -225,6 +227,7 @@ function linkPresetFromConfig(c) {
   if (c.type === "osc") return ui.linkPreset === "daslight" ? "daslight" : "osc";
   if (c.type === "ma2") return "grandma2";
   if (c.type === "os2l") return "wolfmix";
+  if (c.type === "chamsys") return "chamsys";
   return "grandma";
 }
 
@@ -298,7 +301,7 @@ function linkBody() {
     type: p.type,
     host: $("link-host").value || "127.0.0.1",
     port: Number($("link-port").value) || 8000,
-    address: p.type === "osc" ? text : "/ljlinkpro/bpm",
+    address: p.type === "osc" || p.type === "chamsys" ? text : "/ljlinkpro/bpm",
     command: p.type === "ma" || p.type === "ma2" ? text : "",
     user: p.login ? $("link-user").value : "",
     password: p.login ? $("link-pass").value : "",

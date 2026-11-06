@@ -174,6 +174,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 | Pioneer Pro DJ Link | done |
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
 | grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC), Daslight (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
+| ChamSys MagicQ (OSC tap on every beat, for Tap to Time) | **untested alpha**: checked against a test receiver only, never tried on a real MagicQ |
 | Wolfmix / OS2L (beats and tempo) | **untested alpha**: built and tested against a test receiver only, never tried on a real Wolfmix |
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
