@@ -557,7 +557,7 @@ final class AbletonLinkPeer {
             if (sending == null) {
                 return;
             }
-            double bpm = Math.max(20, Math.min(999, sending.effectiveBpm));
+            double bpm = Math.max(20, Math.min(999, sending.stableBpm(System.nanoTime())));
             long microsPerBeat = Math.round(60e6 / bpm);
             long nowNanos = System.nanoTime();
             long ghost = hostMicros() + intercept;

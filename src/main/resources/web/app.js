@@ -194,6 +194,8 @@ const LINK_PRESETS = {
               hint: "grandMA3 console or onPC, over OSC. On the desk: Menu, In & Out, OSC: a line with this port, Mode UDP, Receive Command Yes, then Enable Input. {bpm} is replaced by the tempo. Step by step: see the light desk guide." },
   daslightLink: { type: "ableton", noTarget: true, noText: true, noScan: true, noTest: true,
               hint: "Recommended for Daslight: LJ Link leads the Ableton Link session with the tempo, beats and bars of the deck chosen in SEND BPM, and switches Ableton Link on below if it is off. In Daslight: Settings, MIDI / Audio / BPM, BPM source Ableton Link Sync. Both computers must be in the same network. See the Daslight guide." },
+  wolfmixLink: { type: "ableton", noTarget: true, noText: true, noScan: true, noTest: true,
+              hint: "Recommended for Wolfmix: LJ Link leads the Ableton Link session with the tempo, beats and bars of the deck chosen in SEND BPM, and switches Ableton Link on below if it is off. On the Wolfmix side choose Ableton Link as the BPM source (in WTOOLS). Both computers must be in the same network. See the Wolfmix guide." },
   daslight: { type: "daslight", port: 7000, text: "/ljlink/tap", label: "OSC address of the tap (several: separate by comma)",
               hint: "Daslight cannot take the BPM as a number over OSC, so LJ Link sends a tap (an OSC message with the value 255, then 0) on every beat of the leading deck. In Daslight: Settings, OSC, OSC Input on, Incoming Port as here; then map this address to BPM Tap (target Global) in the OSC mappings. Ableton Link is more exact, see the Daslight guide." },
   osc:      { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
@@ -201,7 +203,7 @@ const LINK_PRESETS = {
   chamsys:  { type: "chamsys", port: 8000, text: "/tap", label: "OSC address of the tap (several: separate by comma)",
               hint: "ALPHA, UNTESTED: never tried on a real MagicQ, do not rely on it yet. ChamSys MagicQ has no OSC address for a BPM, so LJ Link sends a tap (an OSC message with the value 255, then 0) on every beat of the leading deck. On the desk: Setup, View Settings, Network: OSC Mode Rx, OSC Rx Port as here. Then in the Macro window, Autom view, add a row of type OSC Message with this address (up to 15 characters) and the action Tap to Time (or Global Tap to Time). See the ChamSys guide, and please report how it went." },
   wolfmix:  { type: "os2l", port: 5000, text: "", noText: true, noScan: true,
-              hint: "ALPHA, UNTESTED: never tried on a real Wolfmix, do not rely on it yet. Wolfmix (WTOOLS) and other OS2L software. Start WTOOLS on the computer the Wolfmix is plugged into, switch OS2L on there and enter that computer's address (127.0.0.1 if it is this one). LJ Link sends the tempo and every beat. On the Wolfmix, push the first encoder in an FX rack so it follows the BPM. See the Wolfmix guide, and please report how it went." },
+              hint: "BETA: tried on a Wolfmix W1; Ableton Link is more exact. Wolfmix (WTOOLS) and other OS2L software. Start WTOOLS on the computer the Wolfmix is plugged into, switch OS2L on there and enter that computer's address (127.0.0.1 if it is this one). LJ Link sends the tempo and every beat. On the Wolfmix, push the first encoder in an FX rack so it follows the BPM. See the Wolfmix guide, and please report how it went." },
 };
 
 /* Speed masters of the grandMA: 1 to 15, and 16, which is the BPM master. The choice is written into the command. */
@@ -231,7 +233,7 @@ function linkPresetFromConfig(c) {
   if (c.type === "os2l") return "wolfmix";
   if (c.type === "chamsys") return "chamsys";
   if (c.type === "daslight") return "daslight";
-  if (c.type === "ableton") return "daslightLink";
+  if (c.type === "ableton") return ui.linkPreset === "wolfmixLink" ? "wolfmixLink" : "daslightLink";
   return "grandma";
 }
 

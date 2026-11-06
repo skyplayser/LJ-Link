@@ -443,13 +443,13 @@ final class LinkService {
                 error = null;
             }
             if (c.type().equals("ableton")) {
-                lastBpm = lead.effectiveBpm; // the tempo goes out through the Ableton Link peer, which follows the same deck
+                lastBpm = lead.stableBpm(System.nanoTime()); // the tempo goes out through the Ableton Link peer, which follows the same deck
                 return;
             }
             if (c.type().equals("os2l") || isTap(c.type())) {
                 return; // beats go out from beatTick()
             }
-            double bpm = lead.effectiveBpm;
+            double bpm = lead.stableBpm(System.nanoTime());
             if (c.type().equals("ma2")) {
                 // The grandMA2 command line takes no fractional values ("At 174.0" does nothing), so whole BPM only.
                 bpm = Math.round(bpm);

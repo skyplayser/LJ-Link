@@ -1,5 +1,7 @@
 package dev.ljlinkpro;
 
+import org.deepsymmetry.beatlink.Beat;
+import org.deepsymmetry.beatlink.BeatFinder;
 import org.deepsymmetry.beatlink.CdjStatus;
 import org.deepsymmetry.beatlink.DeviceAnnouncement;
 import org.deepsymmetry.beatlink.DeviceAnnouncementListener;
@@ -38,6 +40,7 @@ final class ProDjLinkSource implements DeckSource {
     private Thread thread;
     private ScheduledExecutorService positions;
     private boolean virtualCdjStarted;
+    private boolean beatListenerAdded;
     /** Unexpected shutdowns of the virtual CDJ in a row, and the last reason, for the automatic rejoin and the diagnostics. */
     private volatile int lostInARow;
     private volatile int lostTotal;
@@ -221,6 +224,10 @@ final class ProDjLinkSource implements DeckSource {
         WaveformFinder.getInstance().start();
         try {
             TimeFinder.getInstance().start();
+            if (!beatListenerAdded) {
+                BeatFinder.getInstance().addBeatListener(this::onBeat);
+                beatListenerAdded = true;
+            }
         } catch (Exception e) {
             // Usually UDP port 50001 is taken (another program listens for beats). Positions then come from the
             // beat grid and the beat number in the player status, which is coarser but keeps everything else working.
@@ -348,6 +355,18 @@ final class ProDjLinkSource implements DeckSource {
         d.trackNumber = s.getTrackNumber();
         d.loopBeats = s.isLooping() ? s.getActiveLoopBeats() : 0;
         d.loop = s.isLooping() && s.getLoopEnd() > s.getLoopStart() ? new long[] {s.getLoopStart(), s.getLoopEnd()} : null;
+    }
+
+    /** A player sent a beat packet: it is exactly on the beat, so the light desk outputs can take their beats from it. */
+    private void onBeat(Beat b) {
+        int player = b.getDeviceNumber();
+        if (player < 1 || player > 6) {
+            return; // mixers send beat packets too
+        }
+        Deck d = hub.deck(player);
+        d.beatPacketInBar = b.isBeatWithinBarMeaningful() ? b.getBeatWithinBar() : 0;
+        d.beatPacketNanos = System.nanoTime();
+        d.beatPacketCount++;
     }
 
     private void onMetadata(int player, TrackMetadata md) {

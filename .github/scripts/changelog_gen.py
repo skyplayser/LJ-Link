@@ -11,6 +11,15 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.3", "6 November 2026", "6. November 2026", [
+   ("Wolfmix over Ableton Link, the recommended way after a test on a Wolfmix W1: choose Wolfmix (Ableton Link) under Light desk link, LJ Link switches Ableton Link on, and WTOOLS takes the tempo from Link. Wolfmix is now beta.",
+    "Wolfmix über Ableton Link, nach einem Test an einem Wolfmix W1 der empfohlene Weg: Unter Lichtpult-Link Wolfmix (Ableton Link) wählen, LJ Link schaltet Ableton Link ein, und WTOOLS nimmt das Tempo von Link. Wolfmix ist jetzt Beta."),
+ ], [
+   ("Tempo jitter: players report their pitched tempo with a jitter of a tenth (137.9, 138.0, 137.9 …). The tempo for light desks and Ableton Link is now rounded to 0.1 BPM, and a change of only a tenth counts when it lasts 2 seconds. Real tempo changes go through at once.",
+    "Tempo-Zittern: Player melden ihr gepitchtes Tempo mit einem Zittern von einem Zehntel (137,9, 138,0, 137,9 …). Das Tempo für Lichtpulte und Ableton Link wird jetzt auf 0,1 BPM gerundet, eine Änderung um nur ein Zehntel zählt erst, wenn sie 2 Sekunden anhält. Echte Tempoänderungen gehen sofort durch."),
+   ("Double flashes and gaps over OS2L and the OSC taps: with Pioneer players the beats now come straight from the players' beat packets instead of an estimated position, so no beat is sent twice or dropped, even with older players or tracks without rekordbox data.",
+    "Doppelblitze und Aussetzer über OS2L und die OSC-Taps: Bei Pioneer-Playern kommen die Beats jetzt direkt aus den Beat-Paketen der Player statt aus einer geschätzten Position, kein Beat wird mehr doppelt gesendet oder verschluckt, auch nicht bei älteren Playern oder Tracks ohne rekordbox-Daten."),
+ ]),
  ("1.7.2", "6 November 2026", "6. November 2026", [
    ("Daslight over Ableton Link, the recommended way: choose Daslight (Ableton Link) under Light desk link, and LJ Link switches Ableton Link on and leads the session with the tempo, beats and bars of the SEND BPM deck. In Daslight set the BPM source to Ableton Link Sync.",
     "Daslight über Ableton Link, der empfohlene Weg: Unter Lichtpult-Link Daslight (Ableton Link) wählen, LJ Link schaltet Ableton Link ein und führt die Session mit Tempo, Beats und Takten des SEND-BPM-Decks. In Daslight die BPM Source auf Ableton Link Sync stellen."),

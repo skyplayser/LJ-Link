@@ -14,7 +14,7 @@ def _():
         TABLE([("Desk", "Pult"), ("Status", "Stand"), ("Way", "Weg"), ("What arrives", "Was ankommt")], [
             [("[grandMA2, grandMA2 onPC](wiki-grandma2.html)", "[grandMA2, grandMA2 onPC](wiki-grandma2.html)"), BADGE("stable"), "Telnet, TCP 30000", "<code>SpecialMaster 3.16 At 128</code>"],
             [("[grandMA3, grandMA3 onPC](wiki-grandma3.html)", "[grandMA3, grandMA3 onPC](wiki-grandma3.html)"), BADGE("beta"), ("OSC, UDP (e.g. 8000)", "OSC, UDP (z. B. 8000)"), "<code>Master 3.1 At BPM 128</code>"],
-            [("[Wolfmix (WTOOLS)](wiki-wolfmix.html)", "[Wolfmix (WTOOLS)](wiki-wolfmix.html)"), BADGE("alpha"), "OS2L, TCP 5000", ("every beat with its number and the tempo", "jeder Beat mit Nummer und das Tempo")],
+            [("[Wolfmix (WTOOLS)](wiki-wolfmix.html)", "[Wolfmix (WTOOLS)](wiki-wolfmix.html)"), BADGE("beta"), ("Ableton Link (recommended) or OS2L, TCP 5000", "Ableton Link (empfohlen) oder OS2L, TCP 5000"), ("tempo, beats and bars over Link; or every beat with its number over OS2L", "Tempo, Beats und Takte über Link; oder jeder Beat mit Nummer über OS2L")],
             [("[ChamSys MagicQ](wiki-chamsys.html)", "[ChamSys MagicQ](wiki-chamsys.html)"), BADGE("alpha"), ("OSC taps, UDP (e.g. 8000)", "OSC-Taps, UDP (z. B. 8000)"), ("an OSC message without value on every beat, for Tap to Time", "eine OSC-Nachricht ohne Wert auf jedem Beat, für Tap to Time")],
             [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("stable", "Tested", "Getestet"), ("Ableton Link (recommended) or OSC tap, UDP 7000", "Ableton Link (empfohlen) oder OSC-Tap, UDP 7000"), ("tempo, beats and bars over Link; or a tap on every beat for BPM Tap", "Tempo, Beats und Takte über Link; oder ein Tap auf jedem Beat für BPM Tap")],
             [("[Own OSC target](wiki-other-desks.html#osc)", "[Eigenes OSC-Ziel](wiki-other-desks.html#osc)"), BADGE("gen"), "OSC, UDP", ("a number at your address", "eine Zahl an deine Adresse")],
@@ -162,8 +162,13 @@ def _():
 @page("wiki-wolfmix.html", "Wolfmix", "Wolfmix")
 def _():
     body = SEC(
-        ADM("alpha", ("**Never tried on a real Wolfmix.** Built from the OS2L protocol and tested against a test receiver (beats in time, on average 1.5 ms off). It may not work at all. Do not rely on it at an important event, and keep tap or the microphone as a fallback.",
-                      "**Noch nie an einem echten Wolfmix ausprobiert.** Nach dem OS2L-Protokoll gebaut und gegen einen Test-Empfänger geprüft (Beats im Takt, im Schnitt 1,5 ms Abweichung). Es kann sein, dass es gar nicht funktioniert. Nicht bei einer wichtigen Veranstaltung darauf verlassen und Tap oder Mikrofon als Rückfall bereithalten.")),
+        ADM("beta", ("**Tried on a Wolfmix W1** with two XDJ-1000MK2. **Ableton Link** worked better there than OS2L and is the recommended way. Over OS2L the tempo jittered by a tenth and the Wolfmix sometimes restarted its beat (double flashes, gaps); 1.7.3 fixes that (beats straight from the players’ beat packets, a steadied tempo), but the fix has not been tried on the Wolfmix yet.",
+                     "**An einem Wolfmix W1 ausprobiert** mit zwei XDJ-1000MK2. **Ableton Link** lief dort besser als OS2L und ist der empfohlene Weg. Über OS2L schwankte das Tempo um ein Zehntel, und der Wolfmix startete seinen Beat manchmal neu (Doppelblitze, Aussetzer); 1.7.3 behebt das (Beats direkt aus den Beat-Paketen der Player, ein beruhigtes Tempo), die Korrektur ist am Wolfmix aber noch nicht ausprobiert."), title=("Status", "Stand")),
+        H2("Ableton Link (recommended)", "Ableton Link (empfohlen)", "link"),
+        STEPS(("In LJ Link: Menu (☰) → **Light desk link** → **Wolfmix (Ableton Link) – recommended**. It switches on **Ableton Link** further down in the menu if it is off.", "In LJ Link: Menü (☰) → **Lichtpult-Link** → **Wolfmix (Ableton Link) – empfohlen**. Es schaltet weiter unten im Menü **Ableton Link** ein, falls es aus ist."),
+              ("In WTOOLS choose **Ableton Link** as the source of the tempo. WTOOLS and LJ Link must be in the same network or on the same computer.", "In WTOOLS **Ableton Link** als Quelle für das Tempo wählen. WTOOLS und LJ Link müssen im selben Netzwerk oder auf demselben Computer sein."),
+              ("Under **SEND BPM** choose the deck (or Auto). The BPM on the Wolfmix follows it, with beat and bar.", "Unter **SEND BPM** das Deck wählen (oder Auto). Das BPM am Wolfmix folgt ihm, mit Beat und Takt.")),
+        H2("OS2L", "OS2L", "os2l"),
         H2("How it works", "So funktioniert es"),
         P("The Wolfmix has **no network**, only USB and DMX. The tempo comes through the maker’s app **WTOOLS** on the computer the Wolfmix is plugged into. LJ Link talks to WTOOLS over **OS2L** (Open Sound to Light, the way VirtualDJ does it) and sends **every beat** with its number, not only the tempo. Every fourth beat is the one of the bar, matching the beat grid of the player.",
           "Der Wolfmix hat **kein Netzwerk**, nur USB und DMX. Das Tempo kommt über die Hersteller-App **WTOOLS** auf dem Computer, an dem der Wolfmix hängt. LJ Link spricht mit WTOOLS über **OS2L** (Open Sound to Light, so macht es auch VirtualDJ) und schickt **jeden Beat** mit Nummer, nicht nur das Tempo. Jeder vierte Beat ist die Eins des Takts, passend zum Beatgrid des Players."),
@@ -174,27 +179,28 @@ def _():
                 ("Best setup: LJ Link and WTOOLS on the same computer, the Wolfmix by USB.", "Bester Aufbau: LJ Link und WTOOLS auf demselben Computer, der Wolfmix per USB.")),
         H2("Step by step", "Schritt für Schritt"),
         STEPS(("Plug the Wolfmix into the computer by USB and start **WTOOLS**. Switch on **OS2L** there.", "Den Wolfmix per USB an den Computer anschließen und **WTOOLS** starten. Dort **OS2L** einschalten."),
-              ("In LJ Link: **Light desk link** → **Wolfmix (OS2L, WTOOLS) – Alpha**.", "In LJ Link: **Lichtpult-Link** → **Wolfmix (OS2L, WTOOLS) – Alpha**."),
+              ("In LJ Link: **Light desk link** → **Wolfmix (OS2L, WTOOLS) – Beta**.", "In LJ Link: **Lichtpult-Link** → **Wolfmix (OS2L, WTOOLS) – Beta**."),
               ("Address `127.0.0.1` if WTOOLS runs on the same computer, otherwise the address of the WTOOLS computer. Port `5000`. **Save**.", "Adresse `127.0.0.1`, wenn WTOOLS auf demselben Computer läuft, sonst die Adresse des WTOOLS-Computers. Port `5000`. **Speichern**."),
               ("**Send test**: eight beats at 120 BPM.", "**Test senden**: acht Beats mit 120 BPM."),
               ("On the Wolfmix **push the first encoder** in the FX rack, so the effects follow the BPM.", "Am Wolfmix im FX-Rack den **ersten Drehregler drücken**, damit die Effekte dem BPM folgen.")),
         H2("What is sent", "Was gesendet wird"),
-        UL(("A beat message for every beat of the deck under SEND BPM, with beat number and tempo.", "Eine Beat-Nachricht für jeden Beat des Decks unter SEND BPM, mit Beat-Nummer und Tempo."),
-           ("**change** after start, a jump (cue, loop), a track or deck change or a tempo step, so the desk finds the phase again.", "**change** nach Start, Sprung (Cue, Loop), Track- oder Deckwechsel oder Tempo-Sprung, damit das Pult die Phase neu findet."),
+        UL(("A beat message for every beat of the deck under SEND BPM, with beat number and tempo. With Pioneer players the beat comes straight from their beat packets, so it is exactly on the beat even without rekordbox data.", "Eine Beat-Nachricht für jeden Beat des Decks unter SEND BPM, mit Beat-Nummer und Tempo. Bei Pioneer-Playern kommt der Beat direkt aus ihren Beat-Paketen und liegt damit genau auf dem Beat, auch ohne rekordbox-Daten."),
+           ("The tempo is rounded to 0.1 BPM, and a change of only a tenth counts when it lasts 2 seconds; the players’ jitter (137.9, 138.0, 137.9 …) no longer reaches the Wolfmix.", "Das Tempo wird auf 0,1 BPM gerundet, eine Änderung um nur ein Zehntel zählt erst, wenn sie 2 Sekunden anhält; das Zittern der Player (137,9, 138,0, 137,9 …) erreicht den Wolfmix nicht mehr."),
+           ("**change** after start, a jump (cue, loop), a track or deck change or a tempo step of at least 0.5 BPM, so the desk finds the phase again.", "**change** nach Start, Sprung (Cue, Loop), Track- oder Deckwechsel oder einem Tempo-Sprung ab 0,5 BPM, damit das Pult die Phase neu findet."),
            ("A standing deck sends no beats. Serato and Ableton Link have no position: there the beats run freely at the tempo.", "Ein stehendes Deck sendet keine Beats. Serato und Ableton Link haben keine Position: Dort laufen die Beats frei im Tempo."),
            ("If WTOOLS is not running, LJ Link shows it in the status and tries again every 5 seconds.", "Läuft WTOOLS nicht, zeigt LJ Link das im Status und versucht es alle 5 Sekunden neu.")),
         H2("What is not known yet", "Was noch unbekannt ist"),
-        UL(("Whether WTOOLS reads the messages exactly as sent.", "Ob WTOOLS die Nachrichten genau so liest, wie sie gesendet werden."),
+        UL(("Whether the fix of 1.7.3 removes the double flashes on the Wolfmix.", "Ob die Korrektur aus 1.7.3 die Doppelblitze am Wolfmix beseitigt."),
            ("Whether WTOOLS accepts connections from another computer.", "Ob WTOOLS Verbindungen von einem anderen Computer annimmt."),
            ("How much delay USB adds between WTOOLS and the Wolfmix.", "Wie viel Verzögerung USB zwischen WTOOLS und Wolfmix dazugibt.")),
-        P("The full alpha guide: [Wolfmix guide on GitHub](https://github.com/skyplayser/LJ-Link/blob/main/docs/wolfmix-anleitung.de.md) (German).", "Die ausführliche Alpha-Anleitung: [Wolfmix-Anleitung auf GitHub](https://github.com/skyplayser/LJ-Link/blob/main/docs/wolfmix-anleitung.de.md)."),
+        P("The full guide: [Wolfmix guide on GitHub](https://github.com/skyplayser/LJ-Link/blob/main/docs/wolfmix-anleitung.de.md) (German).", "Die ausführliche Anleitung: [Wolfmix-Anleitung auf GitHub](https://github.com/skyplayser/LJ-Link/blob/main/docs/wolfmix-anleitung.de.md)."),
         REPORT,
     )
-    return (("Wolfmix over OS2L and WTOOLS (alpha)", "Wolfmix über OS2L und WTOOLS (Alpha)"),
-            ("Send DJ beats and tempo from LJ Link to a Wolfmix through WTOOLS over OS2L. Untested alpha feature: setup, what is sent and what is not known yet.",
-             "DJ-Beats und Tempo von LJ Link über WTOOLS per OS2L an einen Wolfmix schicken. Ungetestetes Alpha-Feature: Einrichtung, was gesendet wird und was noch unbekannt ist."),
-            ("Light desks · alpha", "Lichtpulte · Alpha"), ("Wolfmix", "Wolfmix"),
-            ("Every beat over OS2L through WTOOLS. Untested.", "Jeder Beat über OS2L durch WTOOLS. Ungetestet."), body)
+    return (("Wolfmix over Ableton Link or OS2L (beta)", "Wolfmix über Ableton Link oder OS2L (Beta)"),
+            ("Send the DJ tempo from LJ Link to a Wolfmix: recommended over Ableton Link, or every beat over OS2L through WTOOLS. Tried on a Wolfmix W1.",
+             "Das DJ-Tempo von LJ Link an einen Wolfmix schicken: empfohlen über Ableton Link, oder jeder Beat über OS2L durch WTOOLS. An einem Wolfmix W1 ausprobiert."),
+            ("Light desks · beta", "Lichtpulte · Beta"), ("Wolfmix", "Wolfmix"),
+            ("Ableton Link (recommended) or every beat over OS2L.", "Ableton Link (empfohlen) oder jeder Beat über OS2L."), body)
 
 
 @page("wiki-chamsys.html", "ChamSys MagicQ", "ChamSys MagicQ")

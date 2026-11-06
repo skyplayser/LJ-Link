@@ -64,6 +64,45 @@ final class Deck {
     volatile int[] beatTimes;
     volatile byte[] beatBars;
     volatile int beatVersion;
+    /** Beat packets of a Pioneer player: one arrives exactly on every beat it plays, with the beat within the bar (1-4, 0 unknown). */
+    volatile long beatPacketCount;
+    volatile long beatPacketNanos;
+    volatile int beatPacketInBar;
+
+    // The tempo for the outputs, steadied: see stableBpm().
+    private double stable;
+    private double candidate;
+    private long candidateSince;
+    static final double STABLE_JUMP = 0.25;
+    static final long STABLE_HOLD_NANOS = 2_000_000_000L;
+
+    /**
+     * The tempo sent to light desks and Ableton Link: rounded to 0.1 BPM, and a change of only 0.1 counts only when it
+     * lasts {@link #STABLE_HOLD_NANOS}. Players report their pitched tempo with a jitter of a tenth (137.9, 138.0, 137.9 …);
+     * passing that on made the lighting program restart its beat. A real change (0.25 BPM or more) goes through at once.
+     */
+    synchronized double stableBpm(long nowNanos) {
+        double raw = effectiveBpm;
+        if (raw <= 0) {
+            stable = 0;
+            return 0;
+        }
+        double rounded = Math.round(raw * 10) / 10.0;
+        if (stable <= 0 || Math.abs(raw - stable) >= STABLE_JUMP) {
+            stable = rounded;
+            candidate = rounded;
+            candidateSince = nowNanos;
+        } else if (rounded == stable) {
+            candidate = rounded;
+            candidateSince = nowNanos;
+        } else if (rounded != candidate) {
+            candidate = rounded;
+            candidateSince = nowNanos;
+        } else if (nowNanos - candidateSince >= STABLE_HOLD_NANOS) {
+            stable = rounded;
+        }
+        return stable;
+    }
     volatile int artVersion;
     volatile java.util.List<Map<String, Object>> cues = java.util.List.of();
     volatile byte[] detail;

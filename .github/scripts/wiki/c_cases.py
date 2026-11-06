@@ -37,7 +37,7 @@ def _():
             [("Direct cable or router?", "Direktkabel oder Router?"), ("**Router or switch**, always when you can. Direct cable only for one player. [Compared](wiki-network-setups.html)", "**Router oder Switch**, immer wenn es geht. Direktkabel nur für einen Player. [Vergleich](wiki-network-setups.html)")],
             [("Wi-Fi or cable?", "WLAN oder Kabel?"), ("**Cable** for Pioneer and the computer. Wi-Fi is fine for tablets and Denon.", "**Kabel** für Pioneer und den Computer. WLAN geht für Tablets und Denon.")],
             [("Where does LJ Link run?", "Wo läuft LJ Link?"), ("On a computer in the DJ network. With Serato: on the DJ’s laptop.", "Auf einem Computer im DJ-Netz. Mit Serato: auf dem Laptop des DJs.")],
-            [("Which desk works best?", "Welches Pult geht am besten?"), ("grandMA2 and onPC are tested. grandMA3 is beta, Wolfmix alpha.", "grandMA2 und onPC sind getestet. grandMA3 ist Beta, Wolfmix Alpha.")],
+            [("Which desk works best?", "Welches Pult geht am besten?"), ("grandMA2, onPC and Daslight are tested. grandMA3 and Wolfmix are beta.", "grandMA2, onPC und Daslight sind getestet. grandMA3 und Wolfmix sind Beta.")],
             [("Several floors?", "Mehrere Floors?"), ("One LJ Link computer per floor, and under Settings → **Devices** tick only the devices of that floor.", "Ein LJ-Link-Computer pro Floor, und unter Einstellungen → **Geräte** nur die Geräte dieses Floors anhaken.")],
         ]),
     )
@@ -174,10 +174,10 @@ def _():
 @page("wiki-case-mobile.html", "Mobile with Denon and Wolfmix", "Mobil mit Denon und Wolfmix")
 def _():
     body = SEC(
-        ADM("alpha", ("The Wolfmix part is an **untested alpha feature**. Keep the Wolfmix microphone or tap as a fallback.", "Der Wolfmix-Teil ist ein **ungetestetes Alpha-Feature**. Mikrofon oder Tap des Wolfmix als Rückfall bereithalten.")),
+        ADM("beta", ("The Wolfmix part is **beta**: tried on a Wolfmix W1, where Ableton Link worked better than OS2L. Keep the Wolfmix microphone or tap as a fallback.", "Der Wolfmix-Teil ist **Beta**: an einem Wolfmix W1 ausprobiert, dort lief Ableton Link besser als OS2L. Mikrofon oder Tap des Wolfmix als Rückfall bereithalten.")),
         facts([[("**Gear**", "**Geräte**"), ("Denon Prime (or CDJ), one laptop, Wolfmix on USB", "Denon Prime (oder CDJ), ein Laptop, Wolfmix an USB")],
                [("**Network**", "**Netzwerk**"), ("small travel router, or a cable from the Prime to the laptop", "kleiner Reiserouter, oder ein Kabel vom Prime zum Laptop")],
-               [("**Status**", "**Stand**"), BADGE("stable", "Denon stable", "Denon stabil") + " " + BADGE("alpha", "Wolfmix alpha", "Wolfmix Alpha")]]),
+               [("**Status**", "**Stand**"), BADGE("stable", "Denon stable", "Denon stabil") + " " + BADGE("beta", "Wolfmix beta", "Wolfmix Beta")]]),
         DIAGRAM(720, 230, {"r": (300, 70, 160, 50, "net", ("Travel router", "Reiserouter"), ("Wi-Fi", "WLAN")),
                            "d": (90, 175, 140, 50, "dj", ("Denon Prime", "Denon Prime"), None),
                            "pc": (430, 175, 190, 60, "pc", ("Laptop", "Laptop"), ("LJ Link + WTOOLS", "LJ Link + WTOOLS")),
@@ -198,8 +198,8 @@ def _():
         CHECK(("Test beats arrive in WTOOLS.", "Test-Beats kommen in WTOOLS an."), ("Fallback (mic or tap) ready on the Wolfmix.", "Rückfall (Mikro oder Tap) am Wolfmix bereit."), ("Report how it went: [Discord](" + DISCORD + ").", "Berichte, wie es lief: [Discord](" + DISCORD + ").")),
     )
     return (("Use case: mobile with Denon and Wolfmix", "Anwendungsfall: mobil mit Denon und Wolfmix"),
-            ("Small mobile setup with LJ Link: Denon Prime, one laptop with WTOOLS, Wolfmix on USB over OS2L (alpha), travel router and phone view.",
-             "Kleiner mobiler Aufbau mit LJ Link: Denon Prime, ein Laptop mit WTOOLS, Wolfmix an USB über OS2L (Alpha), Reiserouter und Handy-Ansicht."),
+            ("Small mobile setup with LJ Link: Denon Prime, one laptop with WTOOLS, Wolfmix on USB over Ableton Link or OS2L (beta), travel router and phone view.",
+             "Kleiner mobiler Aufbau mit LJ Link: Denon Prime, ein Laptop mit WTOOLS, Wolfmix an USB über Ableton Link oder OS2L (Beta), Reiserouter und Handy-Ansicht."),
             ("Use case", "Anwendungsfall"), ("Mobile with Denon and Wolfmix", "Mobil mit Denon und Wolfmix"),
             ("One laptop, one controller, one Wolfmix.", "Ein Laptop, ein Controller, ein Wolfmix."), body)
 
