@@ -24,7 +24,9 @@ final class LinkService {
      * {@code type}: "off", "ma2" (grandMA2 / onPC command line over Telnet, with {@code user} and {@code password}),
      * "ma" (grandMA3 / onPC command line over OSC {@code /cmd}), "osc" (the tempo as an OSC number to {@code address})
      * "os2l" (beats and tempo as OS2L messages over TCP, for the Wolfmix software WTOOLS) or "chamsys" (an OSC message
-     * without argument on every beat to each address in {@code address}, a comma separated list; MagicQ maps it to Tap to Time).
+     * without argument on every beat to each address in {@code address}, a comma separated list; MagicQ maps it to Tap to Time),
+     * "daslight" (the same taps with the value 255, then 0, for Daslight's BPM TAP) or "ableton" (nothing from here: the
+     * Ableton Link peer leads the session with the deck chosen in SEND BPM; Daslight's recommended way).
      */
     record Config(String type, String host, int port, String address, String command, String user, String password) {
         static Config off() {
@@ -55,6 +57,11 @@ final class LinkService {
     private static final Path FILE = Path.of(System.getProperty("user.home"), ".ljlinkpro", "link.json");
     private static final Path SOURCE_FILE = Path.of(System.getProperty("user.home"), ".ljlinkpro", "link-source.txt");
     static final String AUTO = "auto";
+    /** The source "fixed value": a deck that only exists to send a tempo the user types in (tests, or no DJ gear). */
+    static final String MANUAL = "manual";
+    static final double MANUAL_MIN = 30, MANUAL_MAX = 300;
+    private final Deck manualDeck = new Deck(0);
+    private volatile double manualBpm = 120;
     private static final long KEEPALIVE_MS = 2000;
 
     private final Hub hub;
@@ -101,12 +108,12 @@ final class LinkService {
     }
 
     void setConfig(Config c) throws IOException {
-        String type = java.util.List.of("off", "ma2", "ma", "osc", "os2l", "chamsys").contains(c.type()) ? c.type() : "off";
+        String type = java.util.List.of("off", "ma2", "ma", "osc", "os2l", "chamsys", "daslight", "ableton").contains(c.type()) ? c.type() : "off";
         Config clean = new Config(
                 type,
                 c.host() == null ? "127.0.0.1" : c.host().trim(),
                 c.port() < 1 || c.port() > 65535 ? ("ma2".equals(type) ? Ma2Telnet.PORT : "os2l".equals(type) ? Os2lClient.PORT : 8000) : c.port(),
-                "chamsys".equals(type) ? String.join(",", tapAddresses(c.address()))
+                isTap(type) ? String.join(",", tapAddresses(c.address()))
                         : c.address() == null || c.address().isBlank() ? "/ljlinkpro/bpm" : c.address().trim(),
                 c.command() == null || c.command().isBlank() ? ("ma2".equals(type) ? MA2_COMMAND : MA3_COMMAND) : c.command().trim(),
                 "ma2".equals(type) && (c.user() == null || c.user().isBlank()) ? MA2_DEFAULT_USER : c.user() == null ? "" : c.user().trim(),
@@ -126,6 +133,36 @@ final class LinkService {
 
     String source() {
         return source;
+    }
+
+    /** The key of a deck as SEND BPM names it; the fixed value is "manual". */
+    String keyOf(Deck d) {
+        return d == manualDeck ? MANUAL : d.key();
+    }
+
+    double manualBpm() {
+        return manualBpm;
+    }
+
+    /** Sets the fixed tempo; it is sent when the source "manual" is chosen. */
+    void setManualBpm(double bpm) {
+        manualBpm = Math.max(MANUAL_MIN, Math.min(MANUAL_MAX, Math.round(bpm * 10) / 10.0));
+        manualDeck.effectiveBpm = manualBpm;
+        manualDeck.trackBpm = manualBpm;
+    }
+
+    /** The deck of the fixed value: always there, playing, free-running at the typed tempo (no position, no grid). */
+    private Deck manualDeck() {
+        Deck d = manualDeck;
+        d.label = 1;
+        d.name = "Fixed value";
+        d.hasTrack = true;
+        d.playing = true;
+        d.velocity = 1.0;
+        d.positionMs = -1;
+        d.effectiveBpm = manualBpm;
+        d.trackBpm = manualBpm;
+        return d;
     }
 
     void setSource(String deckKey) throws IOException {
@@ -163,12 +200,15 @@ final class LinkService {
     /** Sends a fixed tempo once so the user can check the connection and the mapping on the desk. */
     void sendTest() {
         Config c = config;
-        if (c.type().equals("os2l") || c.type().equals("chamsys")) {
+        if (c.type().equals("ableton")) {
+            return; // Ableton Link has its own status; there is no test message
+        }
+        if (c.type().equals("os2l") || isTap(c.type())) {
             // Eight beats at 120 BPM, off the beat thread so the call returns at once.
             Thread t = new Thread(() -> {
                 try {
                     for (int i = 0; i < 8; i++) {
-                        if (c.type().equals("chamsys")) {
+                        if (isTap(c.type())) {
                             sendTaps(c);
                         } else {
                             os2l.beat(c.host(), c.port(), i == 0, i, 120.0);
@@ -179,16 +219,30 @@ final class LinkService {
                         Thread.sleep(500);
                     }
                 } catch (IOException e) {
-                    error = c.type().equals("chamsys") ? tapError(c, e) : os2lError(c, e);
+                    error = isTap(c.type()) ? tapError(c, e) : os2lError(c, e);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-            }, c.type().equals("chamsys") ? "chamsys-test" : "os2l-test");
+            }, isTap(c.type()) ? "tap-test" : "os2l-test");
             t.setDaemon(true);
             t.start();
             return;
         }
         send(config, 120.0);
+    }
+
+    /** Off by default each run: the user opts in to let the simulated tempos of the demo decks reach the desk. */
+    private volatile boolean sendDemo;
+
+    boolean sendDemo() {
+        return sendDemo;
+    }
+
+    void setSendDemo(boolean on) {
+        sendDemo = on;
+        if (on && error != null && error.startsWith("Demo mode")) {
+            error = null;
+        }
     }
 
     private static String os2lError(Config c, IOException e) {
@@ -216,15 +270,46 @@ final class LinkService {
         return out;
     }
 
-    /** One OSC message without argument to every address of the tap list: what ChamSys MagicQ maps to Tap to Time. */
+    /** The types that send a tap on every beat: ChamSys (message without value) and Daslight (value 255, then 0). */
+    static boolean isTap(String type) {
+        return "chamsys".equals(type) || "daslight".equals(type);
+    }
+
+    /** Daslight reads a button from the value of an OSC message, so its tap is a press (255) and a release (0). */
+    static final float DASLIGHT_PRESS = 255f;
+    private static final java.util.concurrent.ScheduledExecutorService RELEASES =
+            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "tap-release");
+                t.setDaemon(true);
+                return t;
+            });
+
+    /**
+     * A tap to every address of the list. ChamSys MagicQ maps an OSC message without argument to Tap to Time; Daslight
+     * ignores messages without value, so it gets the value 255 and, a few milliseconds later, 0.
+     */
     void sendTaps(Config c) throws IOException {
         java.util.List<String> addresses = tapAddresses(c.address());
+        boolean daslight = "daslight".equals(c.type());
         try (DatagramSocket socket = new DatagramSocket()) {
             InetAddress target = InetAddress.getByName(c.host());
             for (String address : addresses) {
-                byte[] packet = oscTap(address);
+                byte[] packet = daslight ? osc(address, DASLIGHT_PRESS) : oscTap(address);
                 socket.send(new DatagramPacket(packet, packet.length, target, c.port()));
             }
+        }
+        if (daslight) {
+            RELEASES.schedule(() -> {
+                try (DatagramSocket socket = new DatagramSocket()) {
+                    InetAddress target = InetAddress.getByName(c.host());
+                    for (String address : addresses) {
+                        byte[] packet = osc(address, 0f);
+                        socket.send(new DatagramPacket(packet, packet.length, target, c.port()));
+                    }
+                } catch (IOException ignored) {
+                    // the press went out; a lost release only means the next press counts as a new one
+                }
+            }, 30, java.util.concurrent.TimeUnit.MILLISECONDS);
         }
     }
 
@@ -239,13 +324,13 @@ final class LinkService {
     private void beatTick() {
         try {
             Config c = config;
-            boolean chamsys = c.type().equals("chamsys");
+            boolean chamsys = isTap(c.type());
             if (!c.type().equals("os2l") && !chamsys) {
                 return;
             }
             Deck lead = leadingDeck();
-            if (lead != null && lead.scope != null && "demo".equals(lead.scope.kind)) {
-                return; // the demo tempo never reaches a real receiver; tick() explains it in the status
+            if (lead != null && lead.scope != null && "demo".equals(lead.scope.kind) && !sendDemo) {
+                return; // the demo tempo reaches a receiver only with "Send demo data"; tick() explains it in the status
             }
             Os2lBeats.Beat beat = beats.next(lead, System.nanoTime());
             if (beat == null) {
@@ -293,6 +378,9 @@ final class LinkService {
      */
     Deck leadingDeck() {
         String src = source;
+        if (MANUAL.equals(src)) {
+            return manualDeck();
+        }
         if (!AUTO.equals(src)) {
             for (Deck d : hub.allDecks()) {
                 if (src.equals(d.key())) {
@@ -335,7 +423,7 @@ final class LinkService {
                 return;
             }
             Deck lead = leadingDeck();
-            sendingDeck = lead == null ? null : lead.key();
+            sendingDeck = lead == null ? null : keyOf(lead);
             markSending(lead);
             if (lead == null) {
                 if (AUTO.equals(source) && error != null && error.startsWith("The chosen deck")) {
@@ -346,15 +434,19 @@ final class LinkService {
                 }
                 return;
             }
-            if (lead.scope != null && "demo".equals(lead.scope.kind)) {
-                // Simulated tempos must never reach a real desk.
+            if (lead.scope != null && "demo".equals(lead.scope.kind) && !sendDemo) {
+                // Simulated tempos reach a desk only when the user ticked "Send demo data".
                 error = "Demo mode: nothing is sent to the desk.";
                 return;
             }
             if (error != null && (error.startsWith("The chosen deck") || error.startsWith("Demo mode"))) {
                 error = null;
             }
-            if (c.type().equals("os2l") || c.type().equals("chamsys")) {
+            if (c.type().equals("ableton")) {
+                lastBpm = lead.effectiveBpm; // the tempo goes out through the Ableton Link peer, which follows the same deck
+                return;
+            }
+            if (c.type().equals("os2l") || isTap(c.type())) {
                 return; // beats go out from beatTick()
             }
             double bpm = lead.effectiveBpm;

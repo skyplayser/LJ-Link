@@ -198,13 +198,14 @@
         <option value="off">Off</option>
         <option value="grandma2">grandMA2 / grandMA2 onPC (Telnet)</option>
         <option value="grandma">grandMA3 / grandMA3 onPC (OSC)</option>
+        <option value="daslightLink">Daslight (Ableton Link) – recommended</option>
+        <option value="daslight">Daslight (OSC tap)</option>
         <option value="wolfmix">Wolfmix (OS2L, WTOOLS) – Alpha</option>
         <option value="chamsys">ChamSys MagicQ (OSC taps) – Alpha</option>
-        <option value="daslight">Daslight (OSC taps) – Alpha</option>
         <option value="osc">Custom OSC target</option>
       </select>
       <div id="link-fields" class="hidden">
-        <div class="ip-row">
+        <div class="ip-row" id="link-target-row">
           <input id="link-host" placeholder="IP address of the desk, e.g. 192.168.1.50" inputmode="decimal" autocomplete="off">
           <input id="link-port" placeholder="Port" inputmode="numeric" style="max-width:110px" autocomplete="off">
         </div>
@@ -226,6 +227,9 @@
           <button id="link-save" class="primary">Save</button>
           <button id="link-test" class="secondary">Send test (120 BPM)</button>
         </div>
+        <label id="send-demo-row" class="hidden" style="display:flex;gap:8px;align-items:center;margin-top:10px">
+          <input type="checkbox" id="send-demo"> <span>Send demo data (the tempos of the demo decks go to the desk)</span>
+        </label>
         <div class="hint" id="link-status"></div>
       </div>
     </div>
@@ -256,7 +260,13 @@
     <h2 id="bpm-title">Send BPM</h2>
     <div id="bpm-state" class="note"></div>
     <div id="bpm-list" class="bpm-list"></div>
-    <div class="hint">Auto takes the tempo master; without a master the deck that is on air and playing. Manual always takes the chosen deck, even when another one is live.</div>
+    <div id="bpm-manual" class="bpm-manual">
+      <span>Fixed value</span>
+      <input id="manual-range" type="range" min="60" max="180" step="1" value="120" aria-label="Fixed value in BPM">
+      <input id="manual-bpm" type="number" min="30" max="300" step="0.1" value="120" aria-label="BPM">
+      <span>BPM</span>
+    </div>
+    <div class="hint">Auto takes the tempo master; without a master the deck that is on air and playing. Manual always takes the chosen deck, even when another one is live. Fixed value is a deck of its own that sends the tempo you type in, for tests or when no DJ gear is connected.</div>
     <div class="row">
       <button id="bpm-close" class="primary">Done</button>
       <button id="bpm-setup" class="secondary">Light desk settings</button>

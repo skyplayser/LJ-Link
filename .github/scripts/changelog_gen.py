@@ -11,6 +11,19 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.2", "6 November 2026", "6. November 2026", [
+   ("Daslight over Ableton Link, the recommended way: choose Daslight (Ableton Link) under Light desk link, and LJ Link switches Ableton Link on and leads the session with the tempo, beats and bars of the SEND BPM deck. In Daslight set the BPM source to Ableton Link Sync.",
+    "Daslight über Ableton Link, der empfohlene Weg: Unter Lichtpult-Link Daslight (Ableton Link) wählen, LJ Link schaltet Ableton Link ein und führt die Session mit Tempo, Beats und Takten des SEND-BPM-Decks. In Daslight die BPM Source auf Ableton Link Sync stellen."),
+   ("Fixed value under SEND BPM: a deck of its own that sends the tempo you type in (slider 60 to 180 BPM, field 30 to 300), to the light desk and over Ableton Link. Handy for tests or without DJ gear.",
+    "Festwert unter SEND BPM: ein eigenes Deck, das das eingetippte Tempo sendet (Regler 60 bis 180 BPM, Feld 30 bis 300), ans Lichtpult und über Ableton Link. Praktisch für Tests oder ohne DJ-Technik."),
+   ("Send demo data: while the demo runs, a tick in the light desk settings lets the demo tempos go to the desk and to Ableton Link. Off at every start.",
+    "Demo-Daten senden: Während die Demo läuft, lässt ein Haken in den Lichtpult-Einstellungen die Demo-Tempos ans Pult und an Ableton Link gehen. Bei jedem Start aus."),
+   ("Tested: Ableton Link out and Daslight (over Ableton Link and over the OSC tap) are no longer alpha. The Daslight wiki page now has screenshots of the setup.",
+    "Getestet: Ableton Link senden und Daslight (über Ableton Link und über den OSC-Tap) sind kein Alpha mehr. Die Daslight-Wiki-Seite hat jetzt Screenshots der Einrichtung."),
+ ], [
+   ("Daslight OSC tap: Daslight ignores OSC messages without a value, so the tap is now the value 255 followed by 0. Default port 7000 like Daslight.",
+    "Daslight-OSC-Tap: Daslight ignoriert OSC-Nachrichten ohne Wert, der Tap ist jetzt deshalb der Wert 255, gefolgt von 0. Vorgabe-Port 7000 wie bei Daslight."),
+ ]),
  ("1.7.1", "6 November 2026", "6. November 2026", [
    ("Daslight (alpha, not tested on a real Daslight yet): Daslight cannot take the BPM as an OSC number, so LJ Link now sends an OSC tap on every beat of the SEND BPM deck, which you map to the BPM TAP button in Daslight's OSC mapping.",
     "Daslight (Alpha, noch nicht an einem echten Daslight getestet): Daslight kann das BPM nicht als OSC-Zahl annehmen, deshalb sendet LJ Link jetzt auf jedem Beat des SEND-BPM-Decks einen OSC-Tap, den du im OSC-Mapping von Daslight auf die Taste BPM TAP legst."),

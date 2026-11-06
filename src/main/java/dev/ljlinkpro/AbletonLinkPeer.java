@@ -539,7 +539,7 @@ final class AbletonLinkPeer {
         String problem = null;
         if (lead == null) {
             problem = "No deck with a tempo: the Link session keeps its tempo.";
-        } else if (lead.scope != null && "demo".equals(lead.scope.kind)) {
+        } else if (lead.scope != null && "demo".equals(lead.scope.kind) && !lightDesk.sendDemo()) {
             problem = "Demo mode: the Link session is not led.";
         } else if (lead.scope != null && "link".equals(lead.scope.kind)) {
             problem = "SEND BPM takes the Link session itself: choose a DJ deck to lead Link.";
@@ -553,7 +553,7 @@ final class AbletonLinkPeer {
                 return;
             }
             note = problem == null ? "" : problem;
-            sendingDeck = sending == null ? null : sending.key();
+            sendingDeck = sending == null ? null : lightDesk.keyOf(sending);
             if (sending == null) {
                 return;
             }

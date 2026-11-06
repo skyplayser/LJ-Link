@@ -175,7 +175,7 @@ def _():
            ("**Language**: English or German, saved per browser.", "**Sprache**: Englisch oder Deutsch, pro Browser gespeichert."),
            ("**Devices**: with many devices or several floors tick devices on or off.", "**Geräte**: bei vielen Geräten oder mehreren Floors Geräte an- und abhaken."),
            ("**Light desk link**: see [light desks](wiki-lighting-desks.html).", "**Lichtpult-Link**: siehe [Lichtpulte](wiki-lighting-desks.html)."),
-           ("**Ableton Link**: lead the Link session with the DJ tempo, beats and bars (alpha), see [Ableton Link](wiki-ableton-link.html#send).", "**Ableton Link**: die Link-Session mit DJ-Tempo, Beats und Takten führen (Alpha), siehe [Ableton Link](wiki-ableton-link.html#send)."),
+           ("**Ableton Link**: lead the Link session with the DJ tempo, beats and bars (tested with Daslight), see [Ableton Link](wiki-ableton-link.html#send).", "**Ableton Link**: die Link-Session mit DJ-Tempo, Beats und Takten führen (getestet mit Daslight), siehe [Ableton Link](wiki-ableton-link.html#send)."),
            ("**Disconnect** ends the running connection.", "**Verbindung trennen** beendet die laufende Verbindung.")),
         H2("Privacy mode", "Privatsphäre-Modus"),
         P("Switched only from the program icon. LJ Link then sends no titles, artists, albums, genres, labels, comments or covers at all, also not to tablets. Waveforms, times, tempo and cues stay. Details: [livestream and privacy mode](wiki-case-stream.html).",

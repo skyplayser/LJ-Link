@@ -335,6 +335,9 @@ label.check input { width: 20px; height: 20px; min-height: 0; accent-color: var(
 .bpm-option { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
 .bpm-option span { display: flex; flex-direction: column; }
 .bpm-option small { color: var(--muted); font-size: 13px; }
+.bpm-manual { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 0 12px; color: var(--muted); font-size: 14px; }
+.bpm-manual input[type=range] { flex: 1; min-width: 0; }
+.bpm-manual input[type=number] { width: 84px; }
 .bpm-option.sending { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
 .note.warn { border-color: var(--warn); }
 .bpm-option input[type="radio"] { width: 18px; height: 18px; min-height: 0; flex: 0 0 18px; margin: 0; padding: 0; accent-color: var(--accent); }

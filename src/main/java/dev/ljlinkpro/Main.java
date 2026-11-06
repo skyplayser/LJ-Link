@@ -133,7 +133,7 @@ public final class Main {
                 ctx.status(403);
                 return;
             }
-            ctx.json(Map.of("config", link.config(), "status", link.status(), "decks", link.candidates()));
+            ctx.json(Map.of("config", link.config(), "status", link.status(), "decks", link.candidates(), "sendDemo", link.sendDemo(), "manualBpm", link.manualBpm()));
         });
         app.post("/api/link", ctx -> control(ctx, () -> {
             try {
@@ -157,6 +157,20 @@ public final class Main {
             }
         }));
         app.post("/api/link/test", ctx -> control(ctx, link::sendTest));
+        app.post("/api/link/senddemo", ctx -> control(ctx, () -> {
+            try {
+                link.setSendDemo(Hub.JSON.readTree(ctx.body()).path("on").asBoolean(false));
+            } catch (java.io.IOException e) {
+                ctx.status(500);
+            }
+        }));
+        app.post("/api/link/manual", ctx -> control(ctx, () -> {
+            try {
+                link.setManualBpm(Hub.JSON.readTree(ctx.body()).path("bpm").asDouble(120));
+            } catch (java.io.IOException e) {
+                ctx.status(500);
+            }
+        }));
         app.get("/api/ableton", ctx -> {
             if (!isLocal(ctx)) {
                 ctx.status(403);
