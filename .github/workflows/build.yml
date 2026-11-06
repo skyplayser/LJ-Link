@@ -34,6 +34,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+          # Keeps the downloaded libraries between runs, so Maven Central is asked less often (it answers 429 when busy).
+          cache: gradle
 
       # jpackage needs WiX 3 to build .exe installers.
       - name: Install WiX (Windows)
