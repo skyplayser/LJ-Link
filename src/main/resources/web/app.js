@@ -192,8 +192,8 @@ const LINK_PRESETS = {
               hint: "grandMA2 console or onPC, over Telnet. On the desk: Setup, Console, Global Settings, Telnet: Login Enabled. Default user of every show: administrator, password admin (change it if your show uses another). {bpm} is replaced by the tempo. Step by step: see the light desk guide." },
   grandma:  { type: "ma",  port: 8000, text: "Master 3.1 At BPM {bpm}", speed: true, label: "Command on the desk",
               hint: "grandMA3 console or onPC, over OSC. On the desk: Menu, In & Out, OSC: a line with this port, Mode UDP, Receive Command Yes, then Enable Input. {bpm} is replaced by the tempo. Step by step: see the light desk guide." },
-  daslight: { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
-              hint: "Daslight receives this address as a number over OSC; map it in Daslight's OSC mapping. Whether your Daslight version can set the BPM this way is not confirmed yet, see the light desk guide." },
+  daslight: { type: "chamsys", port: 8000, text: "/ljlink/tap", label: "OSC address of the tap (several: separate by comma)",
+              hint: "ALPHA, UNTESTED: never tried on a real Daslight, do not rely on it yet. Daslight cannot take the BPM as a number over OSC, so LJ Link sends a tap (an OSC message without value) on every beat of the leading deck. In Daslight, in the OSC mapping, assign this address to the BPM TAP button. See the Daslight guide, and please report how it went." },
   osc:      { type: "osc", port: 8000, text: "/ljlinkpro/bpm", label: "OSC address",
               hint: "The tempo is sent as a number (float) to this address." },
   chamsys:  { type: "chamsys", port: 8000, text: "/tap", label: "OSC address of the tap (several: separate by comma)",
@@ -227,7 +227,7 @@ function linkPresetFromConfig(c) {
   if (c.type === "osc") return ui.linkPreset === "daslight" ? "daslight" : "osc";
   if (c.type === "ma2") return "grandma2";
   if (c.type === "os2l") return "wolfmix";
-  if (c.type === "chamsys") return "chamsys";
+  if (c.type === "chamsys") return ui.linkPreset === "daslight" ? "daslight" : "chamsys";
   return "grandma";
 }
 

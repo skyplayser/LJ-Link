@@ -11,6 +11,15 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.1", "6 November 2026", "6. November 2026", [
+   ("Daslight (alpha, not tested on a real Daslight yet): Daslight cannot take the BPM as an OSC number, so LJ Link now sends an OSC tap on every beat of the SEND BPM deck, which you map to the BPM TAP button in Daslight's OSC mapping.",
+    "Daslight (Alpha, noch nicht an einem echten Daslight getestet): Daslight kann das BPM nicht als OSC-Zahl annehmen, deshalb sendet LJ Link jetzt auf jedem Beat des SEND-BPM-Decks einen OSC-Tap, den du im OSC-Mapping von Daslight auf die Taste BPM TAP legst."),
+   ("Rewritten wiki page for Daslight with the setup, step by step.",
+    "Wiki-Seite zu Daslight neu geschrieben, mit der Einrichtung Schritt für Schritt."),
+ ], [
+   ("The old Daslight output (the tempo as a plain OSC number) never worked with Daslight's BPM and was replaced by the taps. The generic OSC target still sends the number for other programs.",
+    "Der alte Daslight-Ausgang (das Tempo als einfache OSC-Zahl) funktionierte beim BPM von Daslight nie und wurde durch die Taps ersetzt. Das allgemeine OSC-Ziel sendet die Zahl weiterhin für andere Programme."),
+ ]),
  ("1.7.0", "6 November 2026", "6. November 2026", [
    ("ChamSys MagicQ (alpha, not tested on a real desk yet): LJ Link sends an OSC tap on every beat of the SEND BPM deck, which MagicQ maps to Tap to Time. One or several addresses can be set.",
     "ChamSys MagicQ (Alpha, noch nicht an einem echten Pult getestet): LJ Link sendet auf jedem Beat des SEND-BPM-Decks einen OSC-Tap, den MagicQ auf Tap to Time legt. Eine oder mehrere Adressen sind möglich."),

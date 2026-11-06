@@ -42,7 +42,7 @@ connection outside your network is the update check (GitHub, only when you ask o
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
 - **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-AZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
 - **Denon / Engine DJ** (Prime 4, Prime 4+, Prime Go, SC6000) over StageLinQ: title, artist, tempo and pitch, play state, master, exact position, the real **fader positions** of the mixer, and the waveform with beat grid, bar starts, hot cues and loops read from the device's library. Passive: it never changes anything on the device.
-- **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC), Daslight and any OSC program. *Search for the desk* finds a grandMA2
+- **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC) and any OSC program that reads a number and, as an untested alpha, an OSC tap on every beat for Daslight (BPM TAP button) and ChamSys MagicQ. *Search for the desk* finds a grandMA2
   (onPC or console) in the network; otherwise enter its IP address by hand.
 - **SEND BPM:** a tab next to LINK chooses which deck gives the tempo, *Auto* (the deck that is master and/or live) or one deck by
   hand, and a green *SEND BPM* mark shows on that deck in every view, tablets included.
@@ -133,7 +133,8 @@ even from the computer's own browser. `--privacy` starts the program in this mod
 |---|---|---|
 | grandMA2, grandMA2 onPC | command line over **Telnet** (TCP 30000), `SpecialMaster 3.16 At {bpm}` (Speed 16 = BPM; Speed 1–15 selectable), whole BPM | Setup → Console → Global Settings → Telnet: *Login Enabled*; a user of the show to log in |
 | grandMA3, grandMA3 onPC | command line over **OSC** `/cmd`, `Master 3.1 At BPM {bpm}` | Menu → In & Out → OSC: UDP, port, *Receive Command: Yes*, *Enable Input* |
-| Daslight, Resolume, QLC+ … | the tempo as an **OSC number** to an address | map the address in the program's OSC mapping |
+| Resolume, QLC+ … | the tempo as an **OSC number** to an address | map the address in the program's OSC mapping |
+| Daslight (alpha, untested) | an **OSC tap** (message without value) on every beat | map the address to the **BPM TAP** button in the OSC mapping |
 | Wolfmix (via WTOOLS), other OS2L programs — **untested alpha feature** | **OS2L** over TCP (port 5000): the tempo and every beat | start WTOOLS on the computer the Wolfmix is plugged into and switch OS2L on; **never tried on a real Wolfmix**, guide: [docs/wolfmix-anleitung.de.md](docs/wolfmix-anleitung.de.md) (German) |
 | dot2 | not possible: the dot2 takes no Telnet or OSC from the network | tap tempo or sound-to-light |
 
@@ -150,7 +151,7 @@ The **SEND BPM** tab decides where the tempo comes from:
 | Auto | the tempo master; with two systems (CDJs and a Denon) the master that is also live and playing; without a master the deck that is on air and playing |
 | A deck | always that deck, even when another one is live; nothing is sent while it has no track |
 
-The commands come from the MA manuals; the grandMA2 command and the Daslight mapping are **not yet confirmed on a real desk**.
+The commands come from the MA manuals; the grandMA2 command is **not yet confirmed on a real desk**.
 Type the command into the desk's command line by hand first, and edit it in LJ Link to match your show.
 
 ## Compatibility
@@ -173,7 +174,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 |---|---|
 | Pioneer Pro DJ Link | done |
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
-| grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC), Daslight (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
+| grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
 | ChamSys MagicQ (OSC tap on every beat, for Tap to Time) | **untested alpha**: checked against a test receiver only, never tried on a real MagicQ |
 | Wolfmix / OS2L (beats and tempo) | **untested alpha**: built and tested against a test receiver only, never tried on a real Wolfmix |
 | dot2, MIDI clock out | planned |

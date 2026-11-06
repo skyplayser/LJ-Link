@@ -16,7 +16,7 @@ def _():
             [("[grandMA3, grandMA3 onPC](wiki-grandma3.html)", "[grandMA3, grandMA3 onPC](wiki-grandma3.html)"), BADGE("beta"), ("OSC, UDP (e.g. 8000)", "OSC, UDP (z. B. 8000)"), "<code>Master 3.1 At BPM 128</code>"],
             [("[Wolfmix (WTOOLS)](wiki-wolfmix.html)", "[Wolfmix (WTOOLS)](wiki-wolfmix.html)"), BADGE("alpha"), "OS2L, TCP 5000", ("every beat with its number and the tempo", "jeder Beat mit Nummer und das Tempo")],
             [("[ChamSys MagicQ](wiki-chamsys.html)", "[ChamSys MagicQ](wiki-chamsys.html)"), BADGE("alpha"), ("OSC taps, UDP (e.g. 8000)", "OSC-Taps, UDP (z. B. 8000)"), ("an OSC message without value on every beat, for Tap to Time", "eine OSC-Nachricht ohne Wert auf jedem Beat, für Tap to Time")],
-            [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("unk"), "OSC, UDP", ("a number `128.0` at `/ljlinkpro/bpm`", "eine Zahl `128.0` an `/ljlinkpro/bpm`")],
+            [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("alpha"), ("OSC taps, UDP (e.g. 8000)", "OSC-Taps, UDP (z. B. 8000)"), ("an OSC message without value on every beat, for the BPM TAP button", "eine OSC-Nachricht ohne Wert auf jedem Beat, für die Taste BPM TAP")],
             [("[Own OSC target](wiki-other-desks.html#osc)", "[Eigenes OSC-Ziel](wiki-other-desks.html#osc)"), BADGE("gen"), "OSC, UDP", ("a number at your address", "eine Zahl an deine Adresse")],
             [("[QLC+ and other OS2L programs](wiki-other-desks.html#os2l)", "[QLC+ und andere OS2L-Programme](wiki-other-desks.html#os2l)"), BADGE("alpha"), "OS2L, TCP", ("beats and tempo", "Beats und Tempo")],
             [("[Programs with Ableton Link](wiki-ableton-link.html#send)", "[Programme mit Ableton Link](wiki-ableton-link.html#send)"), BADGE("alpha"), "Ableton Link, UDP 20808", ("tempo, beats and bars", "Tempo, Beats und Takte")],
@@ -251,27 +251,29 @@ def _():
 @page("wiki-daslight.html", "Daslight", "Daslight")
 def _():
     body = SEC(
-        ADM("warn", ("**Unconfirmed:** LJ Link sends, but whether your Daslight version can put an OSC number on its BPM is not known yet.",
-                     "**Unbestätigt:** LJ Link sendet, aber ob deine Daslight-Version eine OSC-Zahl auf ihr BPM legen kann, ist noch nicht bekannt."), title=("Status", "Stand")),
+        ADM("warn", ("**Untested alpha feature:** never tried on a real Daslight. LJ Link sends the taps as described; whether your Daslight version takes them on the BPM TAP button as expected has to be checked. Please report how it went.",
+                     "**Ungetestetes Alpha-Feature:** noch nie an einem echten Daslight ausprobiert. LJ Link sendet die Taps wie beschrieben; ob deine Daslight-Version sie wie erwartet auf der Taste BPM TAP annimmt, muss sich zeigen. Bitte berichte, wie es gelaufen ist."), title=("Status", "Stand")),
         H2("How it works", "So funktioniert es"),
-        P("Daslight syncs its tempo officially via tap, MIDI clock and Ableton Link, and has an **OSC mapping** for incoming messages. LJ Link sends the tempo as a number over OSC, for example `128.0` to `/ljlinkpro/bpm`.",
-          "Daslight synchronisiert sein Tempo offiziell über Tap, MIDI-Clock und Ableton Link und hat ein **OSC-Mapping** für eingehende Nachrichten. LJ Link sendet das Tempo als Zahl über OSC, zum Beispiel `128.0` an `/ljlinkpro/bpm`."),
-        H2("Try it", "Ausprobieren"),
+        P("Daslight cannot take the tempo as an OSC number and apply it as BPM. But its OSC mapping can trigger buttons, and Daslight has a **BPM TAP** button. So LJ Link sends an OSC message **without a value** on every beat of the leading deck, and you map that address to BPM TAP. Daslight then measures the tempo from the beats, just as if you tapped it.",
+          "Daslight kann das Tempo nicht als OSC-Zahl annehmen und als BPM übernehmen. Sein OSC-Mapping kann aber Tasten auslösen, und Daslight hat eine Taste **BPM TAP**. Deshalb sendet LJ Link auf jedem Beat des führenden Decks eine OSC-Nachricht **ohne Wert**, und du legst diese Adresse auf BPM TAP. Daslight misst das Tempo dann aus den Beats, als hättest du getappt."),
+        H2("Set it up", "Einrichten"),
         STEPS(("In Daslight switch on the **OSC input** and note the **port**.", "In Daslight die **OSC-Eingabe** einschalten und den **Port** notieren."),
-              ("In LJ Link: **Daslight**, address of the Daslight computer (same computer: `127.0.0.1`), port, keep the address `/ljlinkpro/bpm`. **Save**, **Send test**.", "In LJ Link: **Daslight**, Adresse des Daslight-Computers (gleicher Computer: `127.0.0.1`), Port, Adresse `/ljlinkpro/bpm` lassen. **Speichern**, **Test senden**."),
-              ("In Daslight check the **MIDI/OSC monitor** for `/ljlinkpro/bpm`.", "In Daslight im **MIDI/OSC-Monitor** nach `/ljlinkpro/bpm` schauen."),
-              ("In the **OSC mapping** assign the address to the BPM or speed control, if your version offers it.", "Im **OSC-Mapping** die Adresse dem BPM- oder Speed-Regler zuordnen, sofern deine Version das anbietet.")),
-        H2("If it cannot be assigned", "Wenn es sich nicht zuordnen lässt"),
-        UL(("Use **Ableton Link** in Daslight: with a Link-capable DJ software (Serato, Traktor), or with Pioneer and Denon players through LJ Link, which can now [lead the Link session](wiki-ableton-link.html#send) (alpha).", "In Daslight **Ableton Link** nutzen: mit einer Link-fähigen DJ-Software (Serato, Traktor), oder mit Pioneer- und Denon-Playern über LJ Link, das jetzt [die Link-Session führen](wiki-ableton-link.html#send) kann (Alpha)."),
-           ("Tap tempo, with the big BPM field in LJ Link as a guide.", "Tap-Tempo, mit dem großen BPM-Feld in LJ Link als Hilfe."),
-           ("A MIDI clock straight from LJ Link is planned.", "Eine MIDI-Clock direkt aus LJ Link ist geplant.")),
+              ("In LJ Link, in the light desk settings: **Daslight (OSC taps)**, address of the Daslight computer (same computer: `127.0.0.1`), port, keep the address `/ljlink/tap`. **Save**.", "In LJ Link bei den Lichtpult-Einstellungen: **Daslight (OSC taps)**, Adresse des Daslight-Computers (gleicher Computer: `127.0.0.1`), Port, Adresse `/ljlink/tap` lassen. **Speichern**."),
+              ("Press **Send test**. In Daslight check the **OSC monitor** for `/ljlink/tap`.", "**Test senden** drücken. In Daslight im **OSC-Monitor** nach `/ljlink/tap` schauen."),
+              ("In the **OSC mapping** assign `/ljlink/tap` to the **BPM TAP** button.", "Im **OSC-Mapping** `/ljlink/tap` der Taste **BPM TAP** zuordnen."),
+              ("Play a deck. The BPM in Daslight should follow after a few beats.", "Ein Deck abspielen. Das BPM in Daslight sollte nach ein paar Beats folgen.")),
+        H2("Good to know", "Gut zu wissen"),
+        UL(("The tempo is only as exact as Daslight's tap averaging. It needs a few beats after every tempo change.", "Das Tempo ist nur so genau wie die Tap-Mittelung von Daslight. Nach jeder Tempoänderung braucht es ein paar Beats."),
+           ("The menu names depend on your Daslight version. If the mapping offers no BPM TAP target, tell us which version you have.", "Die Menünamen hängen von deiner Daslight-Version ab. Bietet das Mapping kein BPM-TAP-Ziel, sag uns bitte, welche Version du hast."),
+           ("Alternatives: **Ableton Link** in Daslight with a Link-capable DJ software (Serato, Traktor), or with Pioneer and Denon players through LJ Link, which can now [lead the Link session](wiki-ableton-link.html#send) (alpha, untested).", "Alternativen: **Ableton Link** in Daslight mit einer Link-fähigen DJ-Software (Serato, Traktor), oder mit Pioneer- und Denon-Playern über LJ Link, das jetzt [die Link-Session führen](wiki-ableton-link.html#send) kann (Alpha, ungetestet)."),
+           ("A tempo sent as a plain OSC number does not work with Daslight; use the generic [OSC target](wiki-other-desks.html#osc) only for programs that read such a number.", "Ein Tempo als einfache OSC-Zahl funktioniert bei Daslight nicht; das allgemeine [OSC-Ziel](wiki-other-desks.html#osc) nur für Programme nutzen, die so eine Zahl lesen.")),
         REPORT,
     )
-    return (("Daslight over OSC (unconfirmed)", "Daslight über OSC (unbestätigt)"),
-            ("Send the DJ tempo from LJ Link to Daslight as an OSC number and map it to the BPM. Status unconfirmed: how to try it and the alternatives.",
-             "Das DJ-Tempo von LJ Link als OSC-Zahl an Daslight schicken und dem BPM zuordnen. Stand unbestätigt: wie du es ausprobierst und die Alternativen."),
-            ("Light desks · unconfirmed", "Lichtpulte · unbestätigt"), ("Daslight", "Daslight"),
-            ("The tempo as an OSC number.", "Das Tempo als OSC-Zahl."), body)
+    return (("Daslight over OSC taps (alpha)", "Daslight über OSC-Taps (Alpha)"),
+            ("Send the DJ tempo to Daslight as an OSC tap on every beat, mapped to the BPM TAP button. Untested alpha feature: setup in Daslight and LJ Link.",
+             "Das DJ-Tempo als OSC-Tap auf jedem Beat an Daslight schicken, auf die Taste BPM TAP gelegt. Ungetestetes Alpha-Feature: Einrichtung in Daslight und LJ Link."),
+            ("Light desks · alpha", "Lichtpulte · Alpha"), ("Daslight", "Daslight"),
+            ("A tap on every beat for BPM TAP. Untested.", "Ein Tap auf jedem Beat für BPM TAP. Ungetestet."), body)
 
 
 @page("wiki-other-desks.html", "OSC, OS2L, dot2", "OSC, OS2L, dot2")

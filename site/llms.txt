@@ -1,12 +1,12 @@
 # LJ Link
 
-> Free, open-source app (Eclipse Public License 2.0) for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2, grandMA3 and Daslight (and, as an untested alpha, every beat to a Wolfmix over OS2L), so no tap tempo is needed. macOS and Windows.
+> Free, open-source app (Eclipse Public License 2.0) for lighting jockeys (LJs) in clubs, at festivals and at events. It shows every DJ deck live – waveforms, position, hot cues, memory cues, loops, beat grid, BPM and key – from Pioneer DJ players (Pro DJ Link) and Denon DJ players (StageLinQ), and sends the BPM to grandMA2 and grandMA3 (and, as an untested alpha, every beat to a Wolfmix over OS2L), so no tap tempo is needed. macOS and Windows.
 
 - Passive: it only listens and sends no commands to the DJ gear. No cloud, no telemetry.
 - Pioneer and Denon at the same time; devices are added and removed automatically.
 - Any tablet, phone or second screen in the network can open the same view.
 - Older gear works too, not only CDJ-3000 and DJM-A9: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-700 and DJM-900NXS are expected to work (not tested yet).
-- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight is not confirmed yet; the Wolfmix (OS2L via WTOOLS) and ChamSys MagicQ (an OSC tap on every beat, for Tap to Time) are untested alphas. Serato DJ Pro works on the same computer without play position. Ableton Link gives a session tempo; leading a Link session with the tempo, beats and bars of a Pioneer or Denon deck is an untested alpha (since 1.6.1). Traktor, VirtualDJ and rekordbox are planned.
+- Tested: CDJ-3000, CDJ-2000NXS2, DJM-2000NXS, Denon Prime 4+, grandMA2 onPC. grandMA3 follows the manual and is not yet tried on a desk; Daslight takes no BPM number over OSC, so LJ Link sends an OSC tap on every beat for its BPM TAP button (untested alpha); the Wolfmix (OS2L via WTOOLS) and ChamSys MagicQ (an OSC tap on every beat, for Tap to Time) are untested alphas. Serato DJ Pro works on the same computer without play position. Ableton Link gives a session tempo; leading a Link session with the tempo, beats and bars of a Pioneer or Denon deck is an untested alpha (since 1.6.1). Traktor, VirtualDJ and rekordbox are planned.
 - Not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight or Wolfmix.
 
 ## Guides
@@ -19,7 +19,7 @@
 
 - [Wiki overview](https://skyplayser.github.io/LJ-Link/wiki.html): every use case step by step, with an honest status for every device. German: https://skyplayser.github.io/LJ-Link/de/wiki.html
 - [Network setups compared](https://skyplayser.github.io/LJ-Link/wiki-network-setups.html): direct cable, switch, router with DHCP, DJM LINK sockets, Wi-Fi only, two networks.
-- [Light desks](https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html): grandMA2 (stable), grandMA3 (beta), ChamSys MagicQ (alpha), Wolfmix (alpha), Daslight, own OSC target, dot2.
+- [Light desks](https://skyplayser.github.io/LJ-Link/wiki-lighting-desks.html): grandMA2 (stable), grandMA3 (beta), ChamSys MagicQ (alpha), Wolfmix (alpha), Daslight (OSC taps, alpha), own OSC target, dot2.
 - [Use cases](https://skyplayser.github.io/LJ-Link/wiki-use-cases.html): club with CDJs and grandMA2, onPC on one laptop, Pioneer and Denon in one night, mobile with Wolfmix, Serato, tablet, two networks, livestream.
 - [Ableton Link](https://skyplayser.github.io/LJ-Link/wiki-ableton-link.html): take the tempo of a Link session, or lead it with the DJ tempo, beats and bars (alpha).
 - [Troubleshooting](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html): by symptom.
