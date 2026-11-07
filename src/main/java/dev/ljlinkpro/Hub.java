@@ -33,6 +33,11 @@ final class Hub {
         return t;
     });
 
+    /** Told the number of connected browsers whenever it changes (used by {@link SleepGuard}). */
+    private volatile java.util.function.IntConsumer clientCountListener = n -> { };
+    /** Change of the client set and its report happen together, so reports arrive in order (1 then 0, never swapped). */
+    private final Object clientCountLock = new Object();
+
     private volatile String lastMixer = "";
     private volatile String lastState = "";
 
@@ -282,8 +287,20 @@ final class Hub {
         return d == null ? null : d.detail;
     }
 
+    void onClientCount(java.util.function.IntConsumer listener) {
+        clientCountListener = listener == null ? n -> { } : listener;
+    }
+
+    int clientCount() {
+        return clients.size();
+    }
+
     void addClient(WsContext ctx) {
-        clients.add(ctx);
+        synchronized (clientCountLock) {
+            if (clients.add(ctx)) {
+                clientCountListener.accept(clients.size());
+            }
+        }
         send(ctx, stateJson());
         send(ctx, mixerJson());
         for (Deck d : decks.values()) {
@@ -293,7 +310,11 @@ final class Hub {
     }
 
     void removeClient(WsContext ctx) {
-        clients.remove(ctx);
+        synchronized (clientCountLock) {
+            if (clients.remove(ctx)) {
+                clientCountListener.accept(clients.size());
+            }
+        }
     }
 
     private Map<String, Object> stateJson0() {

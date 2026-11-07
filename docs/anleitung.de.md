@@ -166,6 +166,11 @@ Oben rechts im Menü (☰) und in der Werkzeugleiste:
 - **Anzeige:** **Tag** oder **Nacht**.
 - **Sprache:** Englisch (Standard) oder Deutsch. Die Wahl gilt für diesen Browser; das Menü des Programm-Symbols folgt der Sprache, die am Computer selbst eingestellt ist.
 - **Vollbild** für den Einsatz am Pult.
+- **Bildschirm → Bildschirm wach halten – Alpha** (ab 1.7.6, standardmäßig an): Der Bildschirm dieses Geräts bleibt an, solange
+  LJ Link angezeigt wird. Im Browser am Computer selbst wirkt das sofort; auf einem iPad oder Tablet über das Netzwerk
+  einmal auf die Seite tippen (siehe [Tablet](#tablet-oder-zweiter-bildschirm)). Auf dem Mac verhindert LJ Link außerdem
+  den Ruhezustand des Computers, solange ein Browser verbunden ist. Alpha: noch nicht an echten Geräten getestet,
+  auch nicht am Mac.
 - **Verbindung trennen** beendet die laufende Verbindung.
 
 Die Einstellungen werden im Browser gespeichert.
@@ -190,6 +195,13 @@ Programm-Symbol ändert. Mit `--privacy` startet das Programm in diesem Modus.
 Unter der Werkzeugleiste steht eine Adresse wie `http://192.168.1.50:8080`. Gib sie auf einem Tablet oder Laptop im **selben
 Netzwerk** im Browser ein. Dort siehst du dieselbe Anzeige. Zum Starten und Beenden ist weiterhin der Computer nötig, auf dem
 LJ Link läuft.
+
+Damit das Tablet nicht dunkel wird: Ein Streifen direkt unter der Kopfzeile zeigt
+**☼ Einmal hier tippen, damit der Bildschirm an bleibt**. Einmal auf den Streifen oder irgendwo sonst auf die Seite
+tippen, dann zeigt Menü (☰) → **Bildschirm** den Status **Aktiv (Video)**. Nach einem App-Wechsel eventuell noch einmal
+tippen. Über `http://` fehlt dem Browser die eigene Bildschirmsperre (sie braucht HTTPS), deshalb spielt LJ Link ein
+winziges stilles Video ab. Auf dem iPad kann das Musik einer anderen App pausieren, und LJ Link erscheint eventuell unter
+„Wird gespielt“ (noch ungetestet).
 
 ![Tablet](images/de/tablet.png)
 

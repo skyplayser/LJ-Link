@@ -186,3 +186,32 @@ plus whether CrateDigger runs and whether standard player numbers are used; they
 one) and forget a player when it leaves the network. `LJLINKPRO_DEBUG=1` records the tempo lines every second in a buffer of
 their own (300 lines, shown in the diagnostics), so they do not push start and error messages out of the log. Every change of
 the sent tempo of the leading deck is logged, the fixed value included ("Sent tempo of deck Fixed value: …").
+
+## ADR-022: Keep the screen awake (wake lock, video fallback, caffeinate on macOS)
+In a booth the view stays open for hours and nobody touches the device, so displays dimmed and locked. Setting "Keep
+screen awake" (per browser in `ljlinkpro.settings`, key `keepAwake`, default on):
+- Screen Wake Lock API (`navigator.wakeLock.request("screen")`) where it exists. The spec marks `Navigator.wakeLock` and
+  `WakeLock` as `[SecureContext]` (w3c/screen-wake-lock, MDN: "available only in secure contexts"), so it works on the Mac
+  itself (`http://localhost` counts as secure) but is missing on an iPad that opens `http://<ip>:8080`. The browser releases
+  the lock when the page is hidden; it is requested again on `visibilitychange` / `fullscreenchange`. A refusal
+  (`NotAllowedError`, e.g. power saving) is retried on the next tap, then the video fallback is used.
+- Fallback: a silent 10 s video (64x64 black, H.264 baseline plus a silent AAC track, about 4 KB) embedded as a data URI in
+  `web/keep-awake-video.js` (made with ffmpeg, command in the file; nothing taken from NoSleep.js, only the idea). A data URI
+  avoids HTTP range requests, which Safari needs for media files. Started on the first tap/click/key (browsers start unmuted
+  media only after a gesture); until then a strip below the header "☼ Tap here once to keep the screen on" is shown (its own row, so it
+  never widens the header or pushes the menu out; a tap on it starts it too). The setting is labelled "– Alpha" until tested
+  on real devices.
+  Checked in the WebKit source (`HTMLMediaElement::shouldDisableSleep`, `mediaType`, `computeCanProduceAudio`, main branch
+  2026-11): the display is kept on only for a playing video that has an audio track, is not muted, has volume > 0, has not
+  ended and does **not** have the `loop` attribute. So, unlike the first idea, the video is not muted and not looped; it
+  jumps back by itself on `timeupdate`. Being off screen (1 px, opacity 0) does not matter, only a hidden document does.
+  Side effect on iOS: as unmuted media it may take the audio session (pause music of another app on the iPad).
+- macOS: `SleepGuard` runs `/usr/bin/caffeinate -i -w <pid>` while at least one browser is connected (released 60 s after
+  the last one leaves, so reloads do not flap; ended on quit, and by `-w` also after a crash). `-i` keeps the computer from
+  idle sleep, which would stop LJ Link for the iPad. The display (`-d`) is deliberately left to the page: the server does not
+  know whether the Mac display shows LJ Link at all, and an unwatched Mac display in a dark booth should be allowed to sleep.
+- Windows: `SetThreadExecutionState` would need JNA or the FFM API (preview in Java 21) or a PowerShell helper; not done.
+  The page part (wake lock on localhost) works there anyway.
+Status shown under the setting and as tooltip: active, active (video), waiting for a tap, paused while hidden, not available,
+off. Races: the hub reports the browser count under one lock (reports cannot arrive swapped), and every report raises a
+generation number in `SleepGuard`, so a release timer that already fired does nothing once a browser came back. Not tested on a real iPad or on Windows yet (headless Chrome only).

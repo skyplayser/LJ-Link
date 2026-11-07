@@ -92,6 +92,15 @@ def _():
             [("macOS hides it", "macOS blendet es aus"), ("System Settings → Menu Bar; a full menu bar hides icons", "Systemeinstellungen → Menüleiste; eine volle Menüleiste blendet Symbole aus")],
             [("Windows hides it", "Windows blendet es aus"), ("behind the arrow next to the clock; drag it out", "hinter dem Pfeil neben der Uhr; herausziehen")],
         ]),
+        SYM("screen-off", "The screen goes dark (Mac, iPad, tablet)", "Bildschirm geht aus (Mac, iPad, Tablet)", [
+            [("older than 1.7.6", "älter als 1.7.6"), ("update; 1.7.6 keeps the screen on (alpha, not tested on real devices yet, Mac included)", "aktualisieren; 1.7.6 hält den Bildschirm an (Alpha, noch nicht an echten Geräten getestet, auch nicht am Mac)")],
+            [("iPad or tablet over `http://<address>:8080`: without HTTPS the browser has no screen lock, LJ Link needs one tap first", "iPad oder Tablet über `http://<Adresse>:8080`: Ohne HTTPS hat der Browser keine Bildschirmsperre, LJ Link braucht erst einen Tipp"),
+             ("tap once on the strip **☼ Tap here once to keep the screen on** right below the header, or anywhere else on the page; the strip disappears, ☰ → **Screen** shows **Active (video)**. After switching apps tap again", "einmal auf den Streifen **☼ Einmal hier tippen, damit der Bildschirm an bleibt** direkt unter der Kopfzeile oder irgendwo sonst auf die Seite tippen; der Streifen verschwindet, ☰ → **Bildschirm** zeigt **Aktiv (Video)**. Nach einem App-Wechsel erneut tippen")],
+            [("setting switched off in this browser", "Einstellung in diesem Browser ausgeschaltet"), ("☰ → **Screen** → tick **Keep screen awake – Alpha**; it is saved per browser", "☰ → **Bildschirm** → **Bildschirm wach halten – Alpha** anhaken; das wird pro Browser gespeichert")],
+            [("status **Not available in this browser**", "Status **In diesem Browser nicht verfügbar**"), ("switch off auto-lock on the device for the gig", "automatische Sperre am Gerät für den Gig ausschalten")],
+            [("iPad: music of another app pauses, or LJ Link shows up under Now Playing (possible, not tested yet)", "iPad: Musik einer anderen App pausiert, oder LJ Link erscheint unter „Wird gespielt“ (möglich, noch ungetestet)"),
+             ("side effect of the silent video that keeps the screen on; if it bothers you, switch the setting off and auto-lock off instead", "Nebenwirkung des stillen Videos, das den Bildschirm anhält; stört es, die Einstellung ausschalten und stattdessen die automatische Sperre ausschalten")],
+        ]),
         SYM("update", "“Check for updates” fails", "„Nach Updates suchen“ schlägt fehl", [
             [("version 1.2.x", "Version 1.2.x"), ("install the newest version by hand once", "die neueste Version einmal von Hand installieren")],
             [("no internet", "kein Internet"), ("normal in a show network; update at home", "im Show-Netz normal; zu Hause aktualisieren")],
@@ -103,8 +112,8 @@ def _():
               ("**Send by email** (to fehlermelden@nextphilm.de) or **Report on GitHub**. Or ask on [Discord](" + DISCORD + ").", "**Per E-Mail senden** (an fehlermelden@nextphilm.de) oder **Auf GitHub melden**. Oder auf [Discord](" + DISCORD + ") fragen.")),
     )
     return (("Troubleshooting by symptom", "Fehlersuche nach Symptom"),
-            ("LJ Link troubleshooting by symptom: nothing found, players twice, direct cable bug, no waveform, port in use, Denon reconnects, desk does not react, icon and updates, how to report.",
-             "LJ-Link-Fehlersuche nach Symptom: nichts gefunden, Player doppelt, Direktkabel-Fehler, keine Waveform, Port belegt, Denon verbindet neu, Pult reagiert nicht, Symbol und Updates, wie man meldet."),
+            ("LJ Link troubleshooting by symptom: nothing found, players twice, direct cable bug, no waveform, port in use, Denon reconnects, desk does not react, screen goes dark, icon and updates, how to report.",
+             "LJ-Link-Fehlersuche nach Symptom: nichts gefunden, Player doppelt, Direktkabel-Fehler, keine Waveform, Port belegt, Denon verbindet neu, Pult reagiert nicht, Bildschirm geht aus, Symbol und Updates, wie man meldet."),
             ("Help", "Hilfe"), ("Troubleshooting", "Fehlersuche"),
             ("Find the cause by what you see.", "Finde die Ursache über das, was du siehst."), body)
 

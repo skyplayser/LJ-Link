@@ -62,6 +62,8 @@ public final class Main {
         Session session = new Session(hub);
         LinkService link = new LinkService(hub);
         AbletonLinkPeer ableton = new AbletonLinkPeer(hub, link);
+        SleepGuard sleepGuard = SleepGuard.forThisProcess();
+        hub.onClientCount(sleepGuard::clients);
 
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/web", Location.CLASSPATH);
@@ -213,9 +215,11 @@ public final class Main {
             System.out.println("  On the network (e.g. tablet): " + u);
         }
         Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
+        Runtime.getRuntime().addShutdownHook(new Thread(sleepGuard::close));
         if (useTray) {
             boolean installed = Tray.install(url, () -> openInBrowser(url), () -> openInBrowser(url + "/#report"), () -> {
                 session.stop();
+                sleepGuard.close();
                 app.stop();
                 System.exit(0);
             });

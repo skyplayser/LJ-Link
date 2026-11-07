@@ -158,7 +158,7 @@ function handle(msg) {
 
 /* ---------- Settings (kept in this browser only) ---------- */
 
-const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both" };
+const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true };
 let settings = { ...DEFAULTS };
 try {
   Object.assign(settings, JSON.parse(localStorage.getItem("ljlinkpro.settings") || "{}"));
@@ -180,7 +180,122 @@ function applySettings() {
   for (const b of $("seg-mode").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.mode));
   for (const b of $("seg-theme").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.theme));
   for (const d of decks.values()) d.cache = null;
+  $("awake-box").checked = settings.keepAwake !== false;
 }
+
+/* ---------- Keep the screen awake (ADR-022) ---------- */
+
+// 1. Screen Wake Lock API: only in a secure context (https or localhost), so on the Mac itself, not on an iPad that
+//    opens http://<ip>:8080. The browser drops the lock when the page is hidden; it is requested again when visible.
+// 2. Otherwise a silent video that keeps playing (the idea of NoSleep.js, own code and own video). WebKit keeps the
+//    display on only for a playing, unmuted video with an audio track that does not use the loop attribute, so the
+//    video is unmuted (its audio is silence) and jumps back by itself. Browsers start such a video only after a tap.
+const awake = { lock: null, requesting: false, video: null, state: "off", lockFailed: false };
+
+function wakeLockUsable() {
+  return window.isSecureContext && "wakeLock" in navigator && !awake.lockFailed;
+}
+
+function renderAwake() {
+  const s = awake.state;
+  const text = {
+    off: "Off",
+    lock: "Active – the screen stays on",
+    video: "Active (video) – the screen stays on",
+    waiting: "Waiting for a tap – tap the page once",
+    hidden: "Paused while the page is hidden",
+    unavailable: "Not available in this browser",
+  }[s] || "Off";
+  $("awake-status").textContent = t("Status: {s}", { s: t(text) });
+  $("awake-hint").classList.toggle("hidden", s !== "waiting");
+  $("awake-box").title = t(text);
+}
+
+function setAwake(state) {
+  awake.state = state;
+  renderAwake();
+}
+
+function awakeVideo() {
+  if (awake.video) return awake.video;
+  const v = document.createElement("video");
+  v.setAttribute("playsinline", "");
+  v.setAttribute("webkit-playsinline", "");
+  v.setAttribute("aria-hidden", "true");
+  v.setAttribute("tabindex", "-1");
+  v.disablePictureInPicture = true;
+  v.preload = "auto";
+  v.className = "keep-awake-video";
+  v.src = KEEP_AWAKE_MP4;
+  // Loop by hand: WebKit lets the display sleep for a video with the loop attribute or one that has ended.
+  v.addEventListener("timeupdate", () => {
+    if (v.duration && v.currentTime > v.duration - 1.5) v.currentTime = 0.5;
+  });
+  v.addEventListener("pause", () => {
+    if (settings.keepAwake !== false && awake.state === "video" && document.visibilityState === "visible") setAwake("waiting");
+  });
+  document.body.appendChild(v);
+  awake.video = v;
+  return v;
+}
+
+function playAwakeVideo(fromTap) {
+  if (typeof KEEP_AWAKE_MP4 !== "string") { setAwake("unavailable"); return; }
+  const v = awakeVideo();
+  let p;
+  try { p = v.play(); } catch (e) { p = Promise.reject(e); }
+  Promise.resolve(p).then(() => setAwake("video")).catch((e) => {
+    // NotAllowedError: the browser wants a tap first. Anything else (e.g. NotSupportedError) after a tap: it does not
+    // work in this browser.
+    setAwake(fromTap && !(e && e.name === "NotAllowedError") ? "unavailable" : "waiting");
+  });
+}
+
+/** Asks for the screen to stay on; called at start, when the page gets visible again, on a tap and from the setting. */
+function updateAwake(fromTap = false) {
+  if (settings.keepAwake === false) { releaseAwake(); setAwake("off"); return; }
+  if (document.visibilityState !== "visible") { setAwake("hidden"); return; }
+  if (wakeLockUsable()) {
+    if (awake.lock && !awake.lock.released) { setAwake("lock"); return; }
+    if (awake.requesting) return;
+    awake.requesting = true;
+    navigator.wakeLock.request("screen").then((lock) => {
+      awake.lock = lock;
+      lock.addEventListener("release", () => {
+        if (awake.lock === lock) awake.lock = null;
+        if (settings.keepAwake === false) return;
+        if (document.visibilityState === "visible") updateAwake(); else setAwake("hidden");
+      });
+      if (settings.keepAwake === false) { releaseAwake(); setAwake("off"); return; }
+      setAwake("lock");
+    }).catch((e) => {
+      // e.g. NotAllowedError (power saving, policy). Try again on the next tap, then use the video.
+      console.info("Screen wake lock refused:", e && e.name);
+      if (fromTap) { awake.lockFailed = true; playAwakeVideo(true); } else setAwake("waiting");
+    }).finally(() => { awake.requesting = false; });
+    return;
+  }
+  if (awake.video && !awake.video.paused) { setAwake("video"); return; }
+  playAwakeVideo(fromTap);
+}
+
+function releaseAwake() {
+  if (awake.lock) {
+    const lock = awake.lock;
+    awake.lock = null;
+    lock.release().catch(() => { /* already released */ });
+  }
+  if (awake.video) awake.video.pause();
+}
+
+function onAwakeTap() {
+  if (settings.keepAwake !== false && awake.state === "waiting") updateAwake(true);
+}
+document.addEventListener("click", onAwakeTap, true);
+document.addEventListener("touchend", onAwakeTap, true);
+document.addEventListener("keydown", onAwakeTap, true);
+document.addEventListener("visibilitychange", () => updateAwake());
+document.addEventListener("fullscreenchange", () => updateAwake());
 
 /* ---------- Light desk link (tempo out via OSC) ---------- */
 
@@ -1262,6 +1377,7 @@ function setLanguage(l, remember = true) {
   if (typeof loadVersion === "function") loadVersion();
   applySettings();
   applyPrivacy();
+  renderAwake();
   updateModelNote();
   render();
   if (ui.tab === "mixer") renderMixer();
@@ -1411,6 +1527,8 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("setting
 $("zoom").oninput = () => { settings.zoom = Number($("zoom").value); saveSettings(); applySettings(); };
 $("seg-mode").onclick = (e) => { if (e.target.dataset.value) { settings.mode = e.target.dataset.value; saveSettings(); applySettings(); } };
 $("seg-theme").onclick = (e) => { if (e.target.dataset.value) { settings.theme = e.target.dataset.value; saveSettings(); applySettings(); } };
+$("awake-box").onchange = () => { settings.keepAwake = $("awake-box").checked; saveSettings(); updateAwake(true); };
+// #awake-hint needs no handler of its own: the tap on it is caught by onAwakeTap.
 const ZOOM_STEPS = [4, 6, 8, 12, 16, 24, 32, 40];
 function stepZoom(dir) {
   // dir > 0 = zoom in = fewer seconds visible
@@ -1570,6 +1688,7 @@ setInterval(() => { if (ui.state.phase === "searching") render(); }, 1000);
 $("lang-select").value = lang;
 translateStatic();
 applySettings();
+updateAwake();
 
 // Deep links such as /#settings, /#manual, /#mixer, /#info-1 or /#day,shot (used for the screenshots in the docs;
 // "shot" hides the network addresses).

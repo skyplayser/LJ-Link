@@ -11,6 +11,18 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.6", "7 November 2026", "7. November 2026", [
+   ("The screen stays on while LJ Link is open. On the Mac (LJ Link in a browser on the computer itself) this works at once, without a tap.",
+    "Der Bildschirm bleibt an, solange LJ Link offen ist. Auf dem Mac (LJ Link im Browser am Computer selbst) geht das sofort, ohne Tippen."),
+   ("On an iPad or tablet that opens LJ Link over the network, tap once: until then a strip right below the header shows \"☼ Tap here once to keep the screen on\". A tap on the strip or anywhere else on the page is enough.",
+    "Auf einem iPad oder Tablet, das LJ Link über das Netzwerk öffnet, einmal tippen: Bis dahin zeigt ein Streifen direkt unter der Kopfzeile \"☼ Einmal hier tippen, damit der Bildschirm an bleibt\". Ein Tipp auf den Streifen oder irgendwo sonst auf der Seite reicht."),
+   ("New setting under ☰ → Screen → Keep screen awake – Alpha, on by default and saved per browser. Below it a status shows whether it is active.",
+    "Neue Einstellung unter ☰ → Bildschirm → Bildschirm wach halten – Alpha, standardmäßig an und pro Browser gespeichert. Darunter zeigt ein Status, ob sie aktiv ist."),
+   ("On a Mac, LJ Link keeps the computer from falling asleep while a browser (also an iPad) is connected.",
+    "Auf dem Mac verhindert LJ Link den Ruhezustand des Computers, solange ein Browser (auch ein iPad) verbunden ist."),
+   ("The whole feature is alpha: not tested on real devices yet, neither on a Mac nor on an iPad, Android tablet or Windows PC.",
+    "Die ganze Funktion ist Alpha: noch nicht an echten Geräten getestet, weder am Mac noch auf iPad, Android-Tablet oder Windows-PC."),
+ ], []),
  ("1.7.5", "7 November 2026", "7. November 2026", [
    ("The BPM on each deck shows the real value of the player again, with two decimals (for example 137.95). The steadied tempo that goes to the light desks (rounded to 0.1) now appears as a tooltip on the BPM field: \"Sent to light desks: 138.0 BPM\". What is sent does not change. Not tested on real hardware yet.",
     "Die BPM-Anzeige im Deck zeigt wieder den echten Wert des Players, mit zwei Nachkommastellen (zum Beispiel 137,95). Das beruhigte Tempo, das an die Lichtpulte geht (auf 0,1 gerundet), steht jetzt als Tooltip am BPM-Feld: \"An Lichtpulte gesendet: 138,0 BPM\". Was gesendet wird, ändert sich nicht. Noch nicht an echter Hardware getestet."),

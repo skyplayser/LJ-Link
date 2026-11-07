@@ -23,6 +23,7 @@
   <button id="btn-fullscreen" class="ghost" title="Full screen">Full screen</button>
   <button id="btn-settings" class="ghost menu" aria-haspopup="dialog" aria-label="Settings">&#9776;</button>
 </header>
+<button id="awake-hint" class="awake-hint hidden"><span class="awake-icon" aria-hidden="true">&#9788;</span> <span>Tap here once to keep the screen on</span></button>
 
 <div id="toolbar" class="hidden">
   <div class="spacer"></div>
@@ -186,6 +187,13 @@
       </select>
     </div>
 
+    <div class="setting" id="awake-setting">
+      <div class="label">Screen</div>
+      <label class="check"><input type="checkbox" id="awake-box"> <span>Keep screen awake – Alpha</span></label>
+      <div class="hint" id="awake-status"></div>
+      <div class="hint">Stops this device from dimming or locking the screen while LJ Link is shown, like a playing video. On an iPad opened over the network, tap the page once to start it. On a Mac LJ Link also keeps the computer from falling asleep while a browser shows it.</div>
+    </div>
+
     <div class="setting" id="privacy-setting">
       <div class="label">Privacy mode</div>
       <label class="check"><input type="checkbox" id="privacy-box" disabled> <span id="privacy-text"></span></label>
@@ -305,6 +313,7 @@
   </div>
 </div>
 <script src="i18n.js"></script>
+<script src="keep-awake-video.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
