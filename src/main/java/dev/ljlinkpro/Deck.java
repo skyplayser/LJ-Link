@@ -69,39 +69,148 @@ final class Deck {
     volatile long beatPacketNanos;
     volatile int beatPacketInBar;
 
-    // The tempo for the outputs, steadied: see stableBpm().
+    /** True for a tempo that is typed in or set by a program, not measured (the fixed value, an Ableton Link session,
+     * the file tag of a Serato track): it has no jitter and goes out unfiltered. */
+    volatile boolean exactTempo;
+    /** Counts the tracks loaded on this deck; a source raises it when another track is loaded (not on unloading: no track
+     * means no tempo, which resets the steadied tempo anyway).
+     * Unlike {@link #beatVersion} it does not change when only the beat grid of the same track arrives. */
+    volatile int trackVersion;
+    // The tempo for the outputs, steadied: see stableBpm(). Guarded by this. Times are System.nanoTime() values, which
+    // may be negative: no time is used as a marker, flags say whether a time is set.
     private double stable;
-    private double candidate;
-    private long candidateSince;
+    private double smoothed;
+    private long smoothedAt;
+    private long lastCallAt;
+    /** True while the raw tempo is a jump away from the sent one: since {@link #jumpSince}, and near {@link #jumpAnchor}
+     * since {@link #jumpAnchorSince}. */
+    private boolean jumping;
+    private long jumpSince;
+    private double jumpAnchor;
+    private long jumpAnchorSince;
+    /** The track version last seen, and whether a new track is waiting for its tempo (since {@link #newTrackSince}). */
+    private int seenTrackVersion;
+    private boolean newTrack;
+    private long newTrackSince;
+    private long stableChanges;
+    /** Dead band: the sent tempo stays while the smoothed raw tempo is closer to it than this (ADR-021). */
+    static final double STABLE_BAND = 0.15;
+    /** A raw tempo this far from the sent one is a real change (pitch fader, new track): it goes the fast way. */
     static final double STABLE_JUMP = 0.25;
-    static final long STABLE_HOLD_NANOS = 2_000_000_000L;
+    /** Time constant of the smoothing of the raw tempo for the dead band. */
+    static final double STABLE_SMOOTH_SECONDS = 0.5;
+    /** A jump is taken once the raw tempo stays within {@link #STABLE_SETTLE_RANGE} for this long … */
+    static final long STABLE_SETTLE_NANOS = 250_000_000L;
+    static final double STABLE_SETTLE_RANGE = 0.1;
+    /** … or, while the fader keeps moving, at the latest after this long. */
+    static final long STABLE_MAX_WAIT_NANOS = 750_000_000L;
+    /** After a new track, a tempo outside the band is taken at once for this long (the tempo may come a moment after the
+     * track); also when nobody asked for the tempo for this long, a jump is taken at once (it had time to settle). */
+    static final long STABLE_FRESH_NANOS = 1_000_000_000L;
 
     /**
-     * The tempo sent to light desks and Ableton Link: rounded to 0.1 BPM, and a change of only 0.1 counts only when it
-     * lasts {@link #STABLE_HOLD_NANOS}. Players report their pitched tempo with a jitter of a tenth (137.9, 138.0, 137.9 …);
-     * passing that on made the lighting program restart its beat. A real change (0.25 BPM or more) goes through at once.
+     * The tempo sent to light desks and Ableton Link, rounded to 0.1 BPM. Players report their pitched tempo with a jitter
+     * of a few hundredths; a true tempo of 137.95 lies on the rounding edge and flipped between 137.9 and 138.0, which
+     * made the lighting program restart its beat. So the sent tempo has a dead band on the (smoothed) raw tempo instead of
+     * a hold time on the rounded number:
+     * <ul>
+     * <li>while the smoothed raw tempo is within {@link #STABLE_BAND} of the sent tempo, nothing changes;</li>
+     * <li>a slow drift beyond the band is taken (rounded smoothed value);</li>
+     * <li>a jump of {@link #STABLE_JUMP} or more (pitch fader) is taken as soon as the raw tempo settles
+     * ({@link #STABLE_SETTLE_NANOS}), at the latest after {@link #STABLE_MAX_WAIT_NANOS}; a short nudge is ignored;</li>
+     * <li>no tempo gives 0, and the first tempo after none goes out at once; so does a tempo outside the band right after
+     * a new track ({@link #trackVersion}).</li>
+     * </ul>
+     * Works with any calling rate: the smoothing runs on the time between calls, not on their number.
      */
     synchronized double stableBpm(long nowNanos) {
         double raw = effectiveBpm;
+        int version = trackVersion;
+        if (version != seenTrackVersion) {
+            seenTrackVersion = version;
+            newTrack = true;
+            newTrackSince = nowNanos;
+        }
+        if (newTrack && nowNanos - newTrackSince > STABLE_FRESH_NANOS) {
+            newTrack = false;
+        }
+        long sinceLastCall = nowNanos - lastCallAt;
+        lastCallAt = nowNanos;
+        if (exactTempo && raw > 0) {
+            take(rounded(raw), raw, nowNanos); // no jitter: every step counts at once
+            return stable;
+        }
         if (raw <= 0) {
             stable = 0;
+            jumping = false;
             return 0;
         }
-        double rounded = Math.round(raw * 10) / 10.0;
-        if (stable <= 0 || Math.abs(raw - stable) >= STABLE_JUMP) {
-            stable = rounded;
-            candidate = rounded;
-            candidateSince = nowNanos;
-        } else if (rounded == stable) {
-            candidate = rounded;
-            candidateSince = nowNanos;
-        } else if (rounded != candidate) {
-            candidate = rounded;
-            candidateSince = nowNanos;
-        } else if (nowNanos - candidateSince >= STABLE_HOLD_NANOS) {
-            stable = rounded;
+        if (stable <= 0) {
+            take(rounded(raw), raw, nowNanos);
+            return stable;
+        }
+        if (newTrack && Math.abs(raw - stable) > STABLE_BAND) {
+            take(rounded(raw), raw, nowNanos); // another track: its tempo is no fader move, nothing to wait for
+            newTrack = false;
+            return stable;
+        }
+        double dt = Math.max(0, (nowNanos - smoothedAt) / 1e9);
+        smoothedAt = Math.max(smoothedAt, nowNanos);
+        if (Math.abs(raw - stable) >= STABLE_JUMP) {
+            if (sinceLastCall > STABLE_FRESH_NANOS) {
+                take(rounded(raw), raw, nowNanos); // nobody asked for a while: the change is old, not a moving fader
+                return stable;
+            }
+            // The smoothing pauses: a short nudge must not pull the smoothed tempo out of the band afterwards.
+            if (!jumping) {
+                jumping = true;
+                jumpSince = nowNanos;
+                jumpAnchor = raw;
+                jumpAnchorSince = nowNanos;
+            } else if (Math.abs(raw - jumpAnchor) >= STABLE_SETTLE_RANGE) {
+                jumpAnchor = raw; // still moving
+                jumpAnchorSince = nowNanos;
+            }
+            if (nowNanos - jumpAnchorSince >= STABLE_SETTLE_NANOS || nowNanos - jumpSince >= STABLE_MAX_WAIT_NANOS) {
+                take(rounded(raw), raw, nowNanos);
+            }
+            return stable;
+        }
+        jumping = false; // near the sent tempo (again): a nudge was no change
+        smoothed += (raw - smoothed) * (1 - Math.exp(-dt / STABLE_SMOOTH_SECONDS));
+        if (Math.abs(smoothed - stable) > STABLE_BAND) {
+            take(rounded(smoothed), smoothed, nowNanos);
         }
         return stable;
+    }
+
+    private void take(double value, double smoothFrom, long nowNanos) {
+        double before = stable;
+        stable = value;
+        smoothed = smoothFrom;
+        smoothedAt = nowNanos;
+        jumping = false;
+        if (before > 0 && before != value) {
+            stableChanges++;
+            if (sendingBpm || sendingLink) {
+                System.out.println(String.format(java.util.Locale.ROOT, "Sent tempo of deck %s: %.1f -> %.1f BPM (raw %.3f)",
+                        scope == null ? name : key(), before, value, effectiveBpm));
+            }
+        }
+    }
+
+    private static double rounded(double bpm) {
+        return Math.round(bpm * 10) / 10.0;
+    }
+
+    /** The tempo last given by {@link #stableBpm} (0 when none), without updating it; for the display and diagnostics. */
+    synchronized double sentBpm() {
+        return stable;
+    }
+
+    /** How often the steadied tempo changed, for the diagnostics. */
+    synchronized long stableChanges() {
+        return stableChanges;
     }
     volatile int artVersion;
     volatile java.util.List<Map<String, Object>> cues = java.util.List.of();
@@ -242,6 +351,10 @@ final class Deck {
         m.put("key", key);
         m.put("trackBpm", trackBpm);
         m.put("effectiveBpm", effectiveBpm);
+        // The steadied tempo the outputs send; the display shows it so it matches the light desk.
+        // Asked on every tick, also without a tempo, so a pause without tempo resets it and the next tempo goes out at once.
+        double steady = stableBpm(System.nanoTime());
+        m.put("stableBpm", hasTrack ? steady : 0.0);
         m.put("speed", speed);
         m.put("durationMs", durationMs);
         m.put("waveformVersion", waveformVersion);

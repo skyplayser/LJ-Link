@@ -26,16 +26,7 @@ final class LinkTempoSource implements DeckSource {
                     hub.removeAllDecks();
                     hub.setState("idle", "live", "");
                 } else {
-                    Deck d = hub.deck(1);
-                    d.name = "Ableton Link";
-                    d.noWaveformSource = true;
-                    d.hasTrack = true;
-                    d.title = "Ableton Link";
-                    d.artist = s.peers() == 1 ? "1 program" : s.peers() + " programs";
-                    d.trackBpm = s.bpm();
-                    d.effectiveBpm = s.bpm();
-                    d.playing = s.playing() == null || s.playing();
-                    d.positionMs = -1;
+                    apply(hub.deck(1), s);
                     if (!"monitoring".equals(hub.phase())) {
                         hub.setState("monitoring", "live", "Connected");
                     }
@@ -49,6 +40,20 @@ final class LinkTempoSource implements DeckSource {
         }, "link-tempo");
         t.setDaemon(true);
         t.start();
+    }
+
+    /** Shows the session on its deck. */
+    static void apply(Deck d, AbletonLink.State s) {
+        d.name = "Ableton Link";
+        d.noWaveformSource = true;
+        d.exactTempo = true; // the session tempo is set by a program and has no jitter: every step counts (ADR-021)
+        d.hasTrack = true;
+        d.title = "Ableton Link";
+        d.artist = s.peers() == 1 ? "1 program" : s.peers() + " programs";
+        d.trackBpm = s.bpm();
+        d.effectiveBpm = s.bpm();
+        d.playing = s.playing() == null || s.playing();
+        d.positionMs = -1;
     }
 
     @Override

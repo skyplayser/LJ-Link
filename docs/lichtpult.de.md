@@ -219,9 +219,12 @@ QLC+, Chamsys MagicQ, TouchDesigner oder eigene Skripte. Im Zielprogramm diese A
 
 ---
 
-## 8a. Wolfmix und andere OS2L-Programme (ungetestetes Alpha-Feature)
+## 8a. Wolfmix und andere OS2L-Programme (Beta)
 
-> **⚠️ Ungetestetes Alpha-Feature:** noch nie an einem echten Wolfmix ausprobiert. Die ausführliche Anleitung mit allen Einschränkungen: [wolfmix-anleitung.de.md](wolfmix-anleitung.de.md).
+> **Beta:** an einem Wolfmix W1 ausprobiert. **Ableton Link** lief dort besser als OS2L und ist der empfohlene Weg: in LJ Link
+> **Wolfmix (Ableton Link) – empfohlen** wählen, in WTOOLS Ableton Link als Tempo-Quelle. OS2L (unten) ist die Alternative; im
+> Test startete der Wolfmix seinen Beat bei Tempowechseln über OS2L manchmal neu. Die Korrekturen aus 1.7.3 und 1.7.4 sind am
+> Wolfmix noch nicht ausprobiert. Die ausführliche Anleitung: [wolfmix-anleitung.de.md](wolfmix-anleitung.de.md).
 
 Der Wolfmix hat selbst kein Netzwerk (nur USB und DMX). Das Tempo kommt über die Hersteller-App **WTOOLS** auf dem Computer,
 an dem der Wolfmix per USB hängt. LJ Link spricht mit WTOOLS über **OS2L** ("Open Sound to Light", so macht es auch VirtualDJ)
@@ -229,8 +232,9 @@ und schickt nicht nur das Tempo, sondern **jeden Beat** mit Beat-Nummer. Der Tak
 dem Beatgrid des Players überein.
 
 1. Wolfmix per USB an einen Computer anschließen, **WTOOLS** starten und dort **OS2L** einschalten.
-2. In LJ Link: Einstellungen → Lichtpult-Link → **Wolfmix (OS2L, WTOOLS)**. Adresse `127.0.0.1`, wenn WTOOLS auf demselben
-   Computer läuft wie LJ Link, sonst die Adresse des WTOOLS-Computers. Port `5000`. Speichern.
+2. In LJ Link: Menü (☰) → Lichtpult-Link → **Wolfmix (OS2L, WTOOLS) – Beta**. Adresse `127.0.0.1`, wenn WTOOLS auf demselben
+   Computer läuft wie LJ Link, sonst die Adresse des WTOOLS-Computers. Port `5000` wie im Wolfmix-Handbuch; ein Beitrag im
+   VirtualDJ-Forum nennt `9996`. Kommt nichts an, den OS2L-Port in WTOOLS ansehen und eintragen. Speichern.
 3. **Test senden** schickt acht Beats mit 120 BPM. Am Wolfmix im FX-Rack den **ersten Drehregler drücken**, damit die Effekte
    dem BPM folgen.
 4. Es wird jeweils das Deck als Takt benutzt, das unter SEND BPM gewählt ist (Auto: Master).
@@ -238,7 +242,7 @@ dem Beatgrid des Players überein.
 Verhalten: Steht das Deck, werden keine Beats gesendet. Springt das Deck (Cue, Loop, Track-Wechsel), meldet LJ Link
 `change`, damit das Lichtprogramm die Phase neu sucht. Bei Serato und Ableton Link gibt es keine Position; dort läuft der Takt
 frei mit dem Tempo des Tracks. Läuft WTOOLS nicht, zeigt LJ Link das im Status und versucht es alle 5 Sekunden neu.
-Die Demo sendet nie.
+Die Demo sendet nur, wenn **Demo-Daten senden** angehakt ist.
 
 Das geht auch mit anderen Programmen, die OS2L empfangen (z. B. QLC+ mit dem OS2L-Plugin); dort Port und Adresse des Programms
 eintragen.
@@ -273,7 +277,7 @@ Ehrlich und vollständig, Stand dieser Version:
 | Befehl `Master 3.1 At BPM {bpm}` beim grandMA3 | aus dem grandMA3-Handbuch |
 | dot2 | nicht möglich (siehe Kapitel 6) |
 | Daslight per OSC | **nicht bestätigt** (siehe Kapitel 7) |
-| Wolfmix per OS2L (Kapitel 8a) | **nicht am echten Wolfmix geprüft.** Gegen einen Test-Empfänger geprüft: Beats im Takt, Abweichung im Schnitt 1,5 ms. Ob WTOOLS Verbindungen von einem anderen Computer annimmt, ist offen |
+| Wolfmix per Ableton Link oder OS2L (Kapitel 8a) | **Beta:** an einem Wolfmix W1 ausprobiert, Ableton Link lief besser als OS2L. Die Korrekturen aus 1.7.3 und 1.7.4 sind am Wolfmix noch nicht ausprobiert. Ob WTOOLS Verbindungen von einem anderen Computer annimmt, ist offen |
 
 Wenn du es an deinem Pult ausprobiert hast, erzähl es uns gerne über ein Issue auf GitHub (Vorlage *Hardware report*). Dann
 wird diese Tabelle aktualisiert.

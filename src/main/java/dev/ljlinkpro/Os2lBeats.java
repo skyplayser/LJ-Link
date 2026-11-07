@@ -14,6 +14,7 @@ final class Os2lBeats {
 
     private String deckKey;
     private int trackVersion = -1;
+    private int gridVersion = -1;
     private long lastBeat = Long.MIN_VALUE;
     private double lastBpm;
     private long lastPosition = -1;
@@ -38,22 +39,33 @@ final class Os2lBeats {
             return null;
         }
         String key = deck.key();
-        if (!key.equals(deckKey) || deck.beatVersion != trackVersion) {
+        if (!key.equals(deckKey) || deck.trackVersion != trackVersion) {
+            // Another deck or another track: a new start for the lighting program.
             deckKey = key;
-            trackVersion = deck.beatVersion;
+            trackVersion = deck.trackVersion;
+            gridVersion = deck.beatVersion;
             lastBeat = Long.MIN_VALUE;
             lastPosition = -1;
             nextFreeNanos = 0;
             lastPacketCount = -1;
             packetPos = -1;
             pendingChange = true;
+        } else if (deck.beatVersion != gridVersion) {
+            // Only the beat grid of the same track came (or changed): the grid beats start over, beat packets and the
+            // free-running beat go on; a change is flagged unless the beats come from beat packets.
+            gridVersion = deck.beatVersion;
+            lastBeat = Long.MIN_VALUE;
+            lastPosition = -1;
+            if (lastPacketCount < 0) {
+                pendingChange = true; // beats from the grid now, in another phase than before
+            }
         }
         double bpm = deck.stableBpm(nowNanos);
         if (Math.abs(bpm - lastBpm) >= CHANGE_BPM) {
             pendingChange = true;
         }
         long interval = Math.round(60e9 / bpm);
-        if (deck.beatPacketNanos > 0 && nowNanos - deck.beatPacketNanos < 2 * interval + 200_000_000L) {
+        if (deck.beatPacketCount > 0 && nowNanos - deck.beatPacketNanos < 2 * interval + 200_000_000L) {
             Beat beat = packetBeat(deck, bpm);
             if (beat != null) {
                 lastBpm = bpm;

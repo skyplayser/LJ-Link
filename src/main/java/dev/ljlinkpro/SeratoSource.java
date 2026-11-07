@@ -149,6 +149,8 @@ final class SeratoSource implements DeckSource {
     private void apply(int n, Path file, long durationMs) {
         Deck d = hub.deck(n);
         d.clearTrack();
+        d.trackVersion++;
+        d.exactTempo = true; // the BPM of the file tag: no pitch, no jitter
         d.name = "Serato DJ Pro";
         d.hasTrack = true;
         d.playing = false;

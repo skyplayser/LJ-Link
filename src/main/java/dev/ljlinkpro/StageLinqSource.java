@@ -372,6 +372,9 @@ final class StageLinqSource implements DeckSource {
             case "Track/TrackNetworkPath" -> {
                 String path = text(json);
                 if (path != null && !path.isBlank()) {
+                    if (!path.equals(trackPath[n])) {
+                        d.trackVersion++; // another track (Deck.stableBpm, Os2lBeats)
+                    }
                     trackPath[n] = path;
                     trackPathTime[n] = System.currentTimeMillis();
                     loadTrack(n);

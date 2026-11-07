@@ -77,6 +77,7 @@ final class MockSource implements DeckSource {
             bars[b] = (byte) (b % 4 + 1);
         }
         d.setBeats(times, bars);
+        d.trackVersion++;
         d.cues = List.of(
                 java.util.Map.of("t", 60_000L, "hot", 0, "loop", true, "loopEnd", 67_620L, "color", "#ff8800"),
                 java.util.Map.of("t", 0L, "hot", 1, "loop", false, "loopEnd", 0L, "color", "#ff0017"),

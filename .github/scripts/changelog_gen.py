@@ -11,6 +11,17 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.4", "7 November 2026", "7. November 2026", [
+   ("The diagnostic data now show the raw tempo data of every Pioneer player (track BPM, pitch, tempo from the status and the beat packets, sync and master state, the tempo LJ Link sends). If the tempo on a light desk still jumps, a report with these lines tells us why.",
+    "Die Diagnosedaten zeigen jetzt die Tempo-Rohdaten jedes Pioneer-Players (Track-BPM, Pitch, Tempo aus den Status- und den Beat-Paketen, Sync- und Master-Zustand, das Tempo, das LJ Link sendet). Springt das Tempo an einem Lichtpult weiter, sagt uns ein Bericht mit diesen Zeilen, warum."),
+   ("The BPM on each deck now shows the steadied tempo, the one LJ Link sends. It can differ from the player display by up to 0.15 BPM. Not tested on real hardware yet.",
+    "Die BPM-Anzeige im Deck zeigt jetzt das beruhigte Tempo, also das, was LJ Link sendet. Sie kann bis zu 0,15 BPM vom Display des Players abweichen. Noch nicht an echter Hardware getestet."),
+ ], [
+   ("Tempo jumps at a rounding edge: when a player stands right between two tenths (for example 137.95 BPM), the tempo for light desks and Ableton Link kept flipping between 137.9 and 138.0, and the Wolfmix restarted its beat. LJ Link now steadies the raw tempo first and only sends a new value when it moves clearly away, so the tempo stays put. Changes of 0.25 BPM or more go through in under a second; smaller deviations of up to 0.15 BPM are deliberately not sent. The tempo of a new track goes out at once, and over OS2L a beat grid of the same track that arrives later no longer restarts the beat. A fixed value, the tempo of an Ableton Link session as source and Serato have no jitter and go out exactly, every tenth included. Not tested on real hardware yet.",
+    "Tempo springt an einer Rundungsgrenze: Steht ein Player genau zwischen zwei Zehnteln (zum Beispiel 137,95 BPM), kippte das Tempo für Lichtpulte und Ableton Link immer wieder zwischen 137,9 und 138,0, und der Wolfmix startete seinen Beat neu. LJ Link beruhigt jetzt zuerst das Roh-Tempo und sendet einen neuen Wert erst, wenn er sich deutlich entfernt; das Tempo bleibt ruhig. Änderungen ab 0,25 BPM kommen in unter einer Sekunde durch; kleinere Abweichungen bis 0,15 BPM werden absichtlich nicht gesendet. Das Tempo eines neuen Tracks geht sofort raus, und über OS2L startet ein später nachgeladenes Beatgrid desselben Tracks den Beat nicht mehr neu. Ein fester Wert, das Tempo einer Ableton-Link-Session als Quelle und Serato zittern nicht und gehen genau raus, auch jedes Zehntel. Noch nicht an echter Hardware getestet."),
+   ("OSC and grandMA: a change of exactly 0.1 BPM was sent late, only with the next 2-second refresh. It now goes out at once.",
+    "OSC und grandMA: Eine Änderung um genau 0,1 BPM wurde verspätet gesendet, erst mit der nächsten Auffrischung nach 2 Sekunden. Jetzt geht sie sofort raus."),
+ ]),
  ("1.7.3", "6 November 2026", "6. November 2026", [
    ("Wolfmix over Ableton Link, the recommended way after a test on a Wolfmix W1: choose Wolfmix (Ableton Link) under Light desk link, LJ Link switches Ableton Link on, and WTOOLS takes the tempo from Link. Wolfmix is now beta.",
     "Wolfmix über Ableton Link, nach einem Test an einem Wolfmix W1 der empfohlene Weg: Unter Lichtpult-Link Wolfmix (Ableton Link) wählen, LJ Link schaltet Ableton Link ein, und WTOOLS nimmt das Tempo von Link. Wolfmix ist jetzt Beta."),

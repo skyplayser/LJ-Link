@@ -71,14 +71,25 @@ final class ProDjLinkSource implements DeckSource {
         public void deviceLost(DeviceAnnouncement a) {
             if (a.getDeviceNumber() >= 1 && a.getDeviceNumber() <= 6) {
                 hub.removeDeck(a.getDeviceNumber()); // the player was switched off or unplugged
+                forgetPlayer(a.getDeviceNumber());
             }
             publishDevices();
         }
     };
 
     /** The latest status of every player, for the diagnostics. */
-    private final java.util.Map<Integer, CdjStatus> lastStatus = new java.util.concurrent.ConcurrentHashMap<>();
+    final java.util.Map<Integer, CdjStatus> lastStatus = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<Integer, String> trackKeys = new java.util.concurrent.ConcurrentHashMap<>();
+    /** The latest beat packet of every player, for the diagnostics (its tempo is a second, independent reading). */
+    private final java.util.Map<Integer, Beat> lastBeat = new java.util.concurrent.ConcurrentHashMap<>();
+    /** The effective tempo of the status packets of the last {@link TempoTrace#WINDOW_NANOS} per player. */
+    private final java.util.Map<Integer, TempoTrace> statusTempo = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Map<Integer, TempoTrace> beatTempo = new java.util.concurrent.ConcurrentHashMap<>();
+    /** LJLINKPRO_DEBUG=1 records the tempo readings of every player once per second, in a buffer of their own. */
+    private static final boolean DEBUG = System.getenv("LJLINKPRO_DEBUG") != null;
+    private boolean debugLogged;
+    private long lastDebugNanos;
+    private final TempoDebug tempoDebug = new TempoDebug();
 
     ProDjLinkSource(Hub.Scope hub) {
         this.hub = hub;
@@ -334,7 +345,8 @@ final class ProDjLinkSource implements DeckSource {
         d.noWaveformSource = loaded && !analysed;
         String trackKey = s.getTrackType() + "/" + s.getTrackSourceSlot() + "/" + s.getTrackSourcePlayer() + "/"
                 + s.getRekordboxId() + "/" + s.getTrackNumber();
-        if (loaded && !trackKey.equals(trackKeys.put(s.getDeviceNumber(), trackKey)) && !analysed) {
+        boolean otherTrack = loaded && !trackKey.equals(trackKeys.put(s.getDeviceNumber(), trackKey));
+        if (otherTrack && !analysed) {
             d.title = null; // another unanalysed track: the title of the previous one must not stay
         }
         if (loaded && !analysed && (d.title == null || d.title.isBlank())) {
@@ -348,6 +360,12 @@ final class ProDjLinkSource implements DeckSource {
         // An empty player reports the placeholder 655.35 BPM; show nothing instead of that.
         boolean bpmKnown = loaded && s.getBpm() > 0 && s.getBpm() != 0xFFFF;
         d.effectiveBpm = bpmKnown ? s.getEffectiveTempo() : 0;
+        if (otherTrack) {
+            d.trackVersion++; // after the tempo, so the steadied tempo takes the new one at once (Deck.stableBpm)
+        }
+        if (bpmKnown) {
+            statusTempo.computeIfAbsent(s.getDeviceNumber(), k -> new TempoTrace()).add(System.nanoTime(), d.effectiveBpm);
+        }
         d.speed = s.getPitch() / (double) NORMAL_PITCH;
         // Only the CDJ-3000 sends its exact position several times per second; older players are interpolated between beats.
         d.coarsePosition = d.name == null || !d.name.contains("3000");
@@ -367,6 +385,10 @@ final class ProDjLinkSource implements DeckSource {
         d.beatPacketInBar = b.isBeatWithinBarMeaningful() ? b.getBeatWithinBar() : 0;
         d.beatPacketNanos = System.nanoTime();
         d.beatPacketCount++;
+        lastBeat.put(player, b);
+        if (b.getBpm() > 0 && b.getBpm() != 0xFFFF) {
+            beatTempo.computeIfAbsent(player, k -> new TempoTrace()).add(System.nanoTime(), b.getEffectiveTempo());
+        }
     }
 
     private void onMetadata(int player, TrackMetadata md) {
@@ -434,6 +456,12 @@ final class ProDjLinkSource implements DeckSource {
                 }
                 d.samplePosition(t);
             }
+            long now = System.nanoTime();
+            if (DEBUG && (!debugLogged || now - lastDebugNanos >= 1_000_000_000L)) {
+                debugLogged = true;
+                lastDebugNanos = now;
+                tempoDebug.add(tempoLines());
+            }
         } catch (RuntimeException e) {
             // Position polling must never take the monitor down.
 
@@ -482,6 +510,7 @@ final class ProDjLinkSource implements DeckSource {
         try {
             VirtualCdj v = VirtualCdj.getInstance();
             out.add("VirtualCdj running: " + v.isRunning() + (v.isRunning() ? ", own player number " + v.getDeviceNumber()
+                    + " (standard numbers 1-4 " + (v.getUseStandardPlayerNumber() ? "used" : "not used") + ")"
                     + ", address " + v.getLocalAddress() + ", interfaces " + v.getMatchingInterfaces() : ""));
         } catch (RuntimeException e) {
             out.add("VirtualCdj: " + e);
@@ -491,6 +520,9 @@ final class ProDjLinkSource implements DeckSource {
         }
         out.add("Finders running: DeviceFinder " + DeviceFinder.getInstance().isRunning()
                 + ", MetadataFinder " + MetadataFinder.getInstance().isRunning()
+                + (MetadataFinder.getInstance().isPassive() ? " (passive)" : "")
+                + ", CrateDigger " + CrateDigger.getInstance().isRunning()
+                + ", mounted media " + mountedMedia()
                 + ", WaveformFinder " + WaveformFinder.getInstance().isRunning()
                 + ", BeatGridFinder " + BeatGridFinder.getInstance().isRunning()
                 + ", TimeFinder " + TimeFinder.getInstance().isRunning());
@@ -516,6 +548,142 @@ final class ProDjLinkSource implements DeckSource {
                     + ", USB " + s.isLocalUsbLoaded() + ", SD " + s.isLocalSdLoaded() + ", playing " + s.isPlaying()
                     + ", on air " + s.isOnAir() + ", master " + s.isTempoMaster());
         }
+        out.addAll(tempoLines());
+        if (DEBUG) {
+            out.addAll(tempoDebug.lines());
+        }
         return out;
+    }
+
+    /** The player left the network: its readings go, so the diagnostics do not list it any more. */
+    void forgetPlayer(int player) {
+        lastStatus.remove(player);
+        lastBeat.remove(player);
+        statusTempo.remove(player);
+        beatTempo.remove(player);
+        trackKeys.remove(player);
+    }
+
+    /**
+     * Per player every tempo reading LJ Link has: the track BPM and the four pitch copies of the status packet, the effective
+     * tempo of the status and of the beat packets (now and the range of the last 10 s), sync and master, and the steadied
+     * tempo the outputs send. Makes jitter on the rounding edge (137.95) and display differences (137.9 against 140.0) visible.
+     */
+    java.util.List<String> tempoLines() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        long now = System.nanoTime();
+        java.util.List<Integer> players = new java.util.ArrayList<>(lastStatus.keySet());
+        java.util.Collections.sort(players);
+        for (int n : players) {
+            CdjStatus s = lastStatus.get(n);
+            StringBuilder b = new StringBuilder("Player " + n + " tempo: track BPM ");
+            b.append(s.getBpm() == 0xFFFF ? "none" : fmt(s.getBpm() / 100.0, 2));
+            b.append(", pitch 1-4 ");
+            for (int i = 1; i <= 4; i++) {
+                b.append(i > 1 ? "/" : "").append(fmt(org.deepsymmetry.beatlink.Util.pitchToPercentage(s.getPitch(i)), 3));
+            }
+            b.append(" %, status ").append(fmt(s.getEffectiveTempo(), 3));
+            TempoTrace st = statusTempo.get(n);
+            if (st != null) {
+                b.append(" ").append(st.summary(now));
+            }
+            Beat beat = lastBeat.get(n);
+            if (beat != null) {
+                b.append(", beat packet BPM ").append(fmt(beat.getBpm() / 100.0, 2)).append(" pitch ")
+                        .append(fmt(org.deepsymmetry.beatlink.Util.pitchToPercentage(beat.getPitch()), 3)).append(" % = ")
+                        .append(fmt(beat.getEffectiveTempo(), 3));
+                TempoTrace bt = beatTempo.get(n);
+                if (bt != null) {
+                    b.append(" ").append(bt.summary(now));
+                }
+                Deck withBeat = hub.existingDeck(n);
+                if (withBeat != null) {
+                    b.append(" (").append((now - withBeat.beatPacketNanos) / 1_000_000).append(" ms ago)");
+                }
+            } else {
+                b.append(", no beat packets");
+            }
+            Deck d = hub.existingDeck(n); // only look: asking hub.deck() would bring back the deck of a player that left
+            b.append(", synced ").append(s.isSynced()).append(", BPM-only sync ").append(s.isBpmOnlySynced())
+                    .append(", master ").append(s.isTempoMaster());
+            if (d == null) {
+                b.append(", no deck");
+            } else {
+                b.append(", sent tempo ").append(fmt(d.sentBpm(), 1)).append(" (").append(d.stableChanges()).append(" changes)")
+                        .append(d.sendingBpm ? ", leads the light desk" : "").append(d.sendingLink ? ", leads Ableton Link" : "");
+            }
+            out.add(b.toString());
+        }
+        return out;
+    }
+
+    private static String mountedMedia() {
+        try {
+            return MetadataFinder.getInstance().isRunning() ? String.valueOf(MetadataFinder.getInstance().getMountedMediaSlots()) : "-";
+        } catch (RuntimeException e) {
+            return "?";
+        }
+    }
+
+    private static String fmt(double v, int digits) {
+        return String.format(java.util.Locale.ROOT, "%." + digits + "f", v);
+    }
+
+    /**
+     * The tempo lines of the debug mode, in a buffer of their own: written to the log once per second they pushed the
+     * start and error messages out of the diagnostics within minutes.
+     */
+    static final class TempoDebug {
+        static final int MAX_LINES = 300;
+        private final java.util.ArrayDeque<String> lines = new java.util.ArrayDeque<>();
+        private static final java.time.format.DateTimeFormatter TIME = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        synchronized void add(java.util.List<String> batch) {
+            String time = java.time.LocalTime.now().format(TIME);
+            for (String line : batch) {
+                lines.addLast(time + " " + line);
+                while (lines.size() > MAX_LINES) {
+                    lines.removeFirst();
+                }
+            }
+        }
+
+        synchronized java.util.List<String> lines() {
+            java.util.List<String> out = new java.util.ArrayList<>();
+            out.add("Tempo debug (LJLINKPRO_DEBUG, once per second, last " + lines.size() + " of at most " + MAX_LINES + " lines):");
+            out.addAll(lines);
+            return out;
+        }
+    }
+
+    /** The readings of a tempo over the last 10 s: minimum, maximum and count. */
+    static final class TempoTrace {
+        static final long WINDOW_NANOS = 10_000_000_000L;
+        private final java.util.ArrayDeque<double[]> samples = new java.util.ArrayDeque<>();
+
+        synchronized void add(long nowNanos, double bpm) {
+            samples.addLast(new double[] {nowNanos, bpm});
+            trim(nowNanos);
+        }
+
+        private void trim(long nowNanos) {
+            while (!samples.isEmpty() && nowNanos - (long) samples.peekFirst()[0] > WINDOW_NANOS) {
+                samples.removeFirst();
+            }
+        }
+
+        synchronized String summary(long nowNanos) {
+            trim(nowNanos);
+            if (samples.isEmpty()) {
+                return "[none in 10 s]";
+            }
+            double min = Double.MAX_VALUE;
+            double max = -Double.MAX_VALUE;
+            for (double[] x : samples) {
+                min = Math.min(min, x[1]);
+                max = Math.max(max, x[1]);
+            }
+            return "[10 s: " + fmt(min, 3) + "-" + fmt(max, 3) + ", " + samples.size() + " readings]";
+        }
     }
 }

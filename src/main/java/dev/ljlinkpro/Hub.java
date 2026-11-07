@@ -76,6 +76,11 @@ final class Hub {
             });
         }
 
+        /** The deck for this number if it exists; never creates one (for diagnostics, which must not bring decks back). */
+        Deck existingDeck(int label) {
+            return own.get(label);
+        }
+
         void removeDeck(int label) {
             Deck d = own.remove(label);
             if (d != null) {
@@ -449,6 +454,8 @@ final class Hub {
             out.add("Deck " + d.number + " (" + (d.scope == null ? "?" : d.scope.kind) + " " + d.label + ", " + d.name + "): "
                     + "track " + d.hasTrack + ", playing " + d.playing + ", on air " + d.onAir + ", master " + d.master
                     + ", BPM " + String.format(java.util.Locale.ROOT, "%.2f", d.effectiveBpm)
+                    + ", sent tempo " + String.format(java.util.Locale.ROOT, "%.1f", d.sentBpm()) + " (" + d.stableChanges() + " changes)"
+                    + ", synced " + d.synced
                     + ", length " + d.durationMs + " ms, position " + d.positionMs + " ms"
                     + ", waveform " + (d.waveform != null) + ", detail " + (d.detail != null)
                     + ", beat grid " + (d.beatTimes == null ? 0 : d.beatTimes.length) + ", cues " + d.cues.size()

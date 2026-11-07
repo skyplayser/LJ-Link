@@ -176,7 +176,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 | Denon / Engine DJ (StageLinQ) | done, several devices at once |
 | grandMA2 / onPC (Telnet), grandMA3 / onPC (OSC) | working; grandMA2 found automatically; not yet confirmed on every desk |
 | ChamSys MagicQ (OSC tap on every beat, for Tap to Time) | **untested alpha**: checked against a test receiver only, never tried on a real MagicQ |
-| Wolfmix / OS2L (beats and tempo) | **beta**: tried on a Wolfmix W1; Ableton Link works better there; the OS2L beat fix of 1.7.3 is not yet tried on the Wolfmix |
+| Wolfmix / OS2L (beats and tempo) | **beta**: tried on a Wolfmix W1; Ableton Link works better there; the OS2L beat fix of 1.7.3 and the steadier tempo of 1.7.4 are not yet tried on the Wolfmix |
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
 | Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |

@@ -573,7 +573,9 @@ function updateDeck(m) {
   d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || "Loading track …")) : "No track loaded");
   d.q(".deck-artist").textContent = m.hasTrack && !ui.state.privacy ? (shownArtist || "") : "";
   d.q(".remain-main small").textContent = t("REMAIN");
-  d.q(".bpm-val").textContent = m.hasTrack && m.effectiveBpm ? m.effectiveBpm.toFixed(1) : "--";
+  // The steadied tempo (the one sent to light desks), so the display does not flicker between 137.9 and 138.0.
+  const shownBpm = m.stableBpm || m.effectiveBpm;
+  d.q(".bpm-val").textContent = m.hasTrack && shownBpm ? shownBpm.toFixed(1) : "--";
   d.q(".track-no").textContent = m.hasTrack && m.trackNumber ? two(m.trackNumber) : "--";
   d.q(".pitch").textContent = m.hasTrack ? (m.pitch >= 0 ? "+" : "") + m.pitch.toFixed(2) + "%" : "";
   d.q(".key-box").innerHTML = m.hasTrack && m.key ? "<small>KEY</small>" + m.key.replace(/[<&]/g, "") : "";

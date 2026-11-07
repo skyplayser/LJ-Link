@@ -156,6 +156,7 @@ final class LinkService {
         Deck d = manualDeck;
         d.label = 1;
         d.name = "Fixed value";
+        d.exactTempo = true;
         d.hasTrack = true;
         d.playing = true;
         d.velocity = 1.0;
@@ -413,6 +414,7 @@ final class LinkService {
         for (Deck d : hub.allDecks()) {
             d.sendingBpm = d == lead;
         }
+        manualDeck.sendingBpm = manualDeck == lead; // so its changes are logged too ("Sent tempo of deck Fixed value")
     }
 
     private void tick() {
@@ -455,7 +457,8 @@ final class LinkService {
                 bpm = Math.round(bpm);
             }
             long now = System.currentTimeMillis();
-            boolean changed = lastBpm == null || Math.abs(bpm - lastBpm) >= 0.1;
+            // Half a tenth: 138.0 - 137.9 is 0.0999… in floating point, so ">= 0.1" missed changes of one tenth.
+            boolean changed = lastBpm == null || Math.abs(bpm - lastBpm) >= 0.05;
             if (now < retryAt) {
                 return; // the last attempt failed; do not hammer the desk
             }

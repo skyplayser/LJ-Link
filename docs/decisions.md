@@ -150,3 +150,37 @@ step of 0.5 BPM. A first beat that began more than 60 ms ago is skipped rather t
 (Serato, Ableton Link) run freely at their tempo. The spec names no message delimiter; every object ends with a line feed.
 Not yet checked against a real WTOOLS: whether it accepts a connection from another computer, how it takes the line feed, and
 the USB latency (an offset setting is planned).
+
+## ADR-021: Steadied output tempo: dead band on the raw tempo
+Players compute their tempo from track BPM and pitch (`CdjStatus.getEffectiveTempo()`); in a real test with two XDJ-1000MK2
+and a Wolfmix the readings most likely swung by a few hundredths around about 137.95, the rounding edge of 0.1. The 1.7.3 hold time on the
+rounded number (0.1 change after 2 s) still let it flip every few seconds, and every flip restarted the Wolfmix beat.
+`Deck.stableBpm()` (used by the OSC/MA2 tick in `LinkService`, `Os2lBeats` and `AbletonLinkPeer`, and shown in the deck display)
+now works on the raw tempo:
+- Dead band 0.15 BPM: the sent tempo stays while the raw tempo, smoothed with a time constant of 0.5 s (time based, so the
+  calling rate does not matter), is closer than that. 0.15 is three times the assumed jitter (+-0.05) and still only 0.11 %
+  at 138 BPM (at most 65 ms of drift per minute for Link without phase, typically under 25 ms, since the sent value is within
+  0.05 of the smoothed one after a change); finer differences than the 0.02 % fader steps of an XDJ-1000MK2
+  (0.03 BPM) matter only for long free running, which phase correction and beat packets cover.
+- A slow drift beyond the band is taken as the rounded smoothed value, so the sent tempo ends within 0.05 of the true one.
+- A jump of 0.25 BPM or more (pitch fader, new track) is taken once the raw tempo stays within 0.1 for 0.25 s, at the latest
+  after 0.75 s while the fader keeps moving: +1 BPM arrives in about 0.25-0.45 s in one step. The smoothing pauses during a jump,
+  so a nudge shorter than 0.25 s changes nothing.
+- The sent value is still rounded to 0.1 (the Wolfmix and the OSC text show one decimal).
+- Tempos without measuring noise bypass the dead band (`Deck.exactTempo`), every step goes out at once: the fixed value,
+  an Ableton Link session as a source (`LinkTempoSource`) and Serato (BPM from the file tag, no pitch).
+- No tempo (0) resets the sent tempo and the first tempo after it goes out at once; the deck display tick asks every
+  100 ms also without a tempo, so this really happens. After another track (`Deck.trackVersion`, raised by the sources;
+  unlike `beatVersion` not by a late beat grid) a tempo outside the band goes out at once for 1 s, and so does a jump when
+  nobody asked for the tempo for more than 1 s. OS2L flags `change=true` once per track (a late beat grid of the same track
+  is no new start while beat packets give the beats).
+- `System.nanoTime()` may be negative: no time serves as a "not set" marker, flags do.
+Assumptions (not verified on hardware): the jitter is at most a few hundredths; a real change is at least 0.25 BPM or
+creeps slowly. The OSC tick now counts a change of one tenth as a change (`>= 0.05`; `138.0 - 137.9` is `0.0999…` in floating point,
+so tenths waited for the 2 s keep-alive). OS2L keeps `change=true` for start, jump, track change and steps of 0.5 BPM; the `bpm` of
+each beat is the steadied value, so it only changes on a real change. Tests: `StableBeatsTest`. The diagnostics now list per player
+track BPM, the four pitch copies, status and beat packet tempo (now and the range of the last 10 s), sync/master and the sent tempo,
+plus whether CrateDigger runs and whether standard player numbers are used; they only look up existing decks (never create
+one) and forget a player when it leaves the network. `LJLINKPRO_DEBUG=1` records the tempo lines every second in a buffer of
+their own (300 lines, shown in the diagnostics), so they do not push start and error messages out of the log. Every change of
+the sent tempo of the leading deck is logged, the fixed value included ("Sent tempo of deck Fixed value: …").
