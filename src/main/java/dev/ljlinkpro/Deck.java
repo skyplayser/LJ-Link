@@ -203,7 +203,7 @@ final class Deck {
         return Math.round(bpm * 10) / 10.0;
     }
 
-    /** The tempo last given by {@link #stableBpm} (0 when none), without updating it; for the display and diagnostics. */
+    /** The tempo last given by {@link #stableBpm} (0 when none), without updating it; for the tooltip of the display and diagnostics (the display itself shows the real tempo). */
     synchronized double sentBpm() {
         return stable;
     }
@@ -351,7 +351,7 @@ final class Deck {
         m.put("key", key);
         m.put("trackBpm", trackBpm);
         m.put("effectiveBpm", effectiveBpm);
-        // The steadied tempo the outputs send; the display shows it so it matches the light desk.
+        // The steadied tempo the outputs send; the display shows the real tempo and has this one as a tooltip.
         // Asked on every tick, also without a tempo, so a pause without tempo resets it and the next tempo goes out at once.
         double steady = stableBpm(System.nanoTime());
         m.put("stableBpm", hasTrack ? steady : 0.0);

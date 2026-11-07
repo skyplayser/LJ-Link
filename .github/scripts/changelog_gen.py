@@ -11,6 +11,10 @@ site = Path(sys.argv[1])
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.5", "7 November 2026", "7. November 2026", [
+   ("The BPM on each deck shows the real value of the player again, with two decimals (for example 137.95). The steadied tempo that goes to the light desks (rounded to 0.1) now appears as a tooltip on the BPM field: \"Sent to light desks: 138.0 BPM\". What is sent does not change. Not tested on real hardware yet.",
+    "Die BPM-Anzeige im Deck zeigt wieder den echten Wert des Players, mit zwei Nachkommastellen (zum Beispiel 137,95). Das beruhigte Tempo, das an die Lichtpulte geht (auf 0,1 gerundet), steht jetzt als Tooltip am BPM-Feld: \"An Lichtpulte gesendet: 138,0 BPM\". Was gesendet wird, ändert sich nicht. Noch nicht an echter Hardware getestet."),
+ ], []),
  ("1.7.4", "7 November 2026", "7. November 2026", [
    ("The diagnostic data now show the raw tempo data of every Pioneer player (track BPM, pitch, tempo from the status and the beat packets, sync and master state, the tempo LJ Link sends). If the tempo on a light desk still jumps, a report with these lines tells us why.",
     "Die Diagnosedaten zeigen jetzt die Tempo-Rohdaten jedes Pioneer-Players (Track-BPM, Pitch, Tempo aus den Status- und den Beat-Paketen, Sync- und Master-Zustand, das Tempo, das LJ Link sendet). Springt das Tempo an einem Lichtpult weiter, sagt uns ein Bericht mit diesen Zeilen, warum."),

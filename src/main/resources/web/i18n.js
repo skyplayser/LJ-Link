@@ -241,6 +241,7 @@ const DE = {
   "The mixer appears on the network as soon as it is connected to the switch with a cable.": "Der Mixer meldet sich im Netzwerk, sobald er per Kabel mit dem Switch verbunden ist.",
   "No. {n}": "Nr. {n}",
   "Tempo master": "Tempo-Master",
+  "Sent to light desks: {bpm} BPM": "An Lichtpulte gesendet: {bpm} BPM",
   "SIMULATED": "SIMULIERT",
   "Pro DJ Link only transmits whether a channel is on air (ON AIR). The position of the faders and the EQ knobs are not sent and cannot be shown here.": "Pro DJ Link überträgt vom Mixer nur, ob ein Kanal auf Sendung ist (ON AIR). Die Stellung der Fader und die EQ-Regler werden nicht gesendet und können hier nicht angezeigt werden.",
   "Demo mode: faders and knobs are simulated.": "Demo-Modus: Fader und Regler sind simuliert.",

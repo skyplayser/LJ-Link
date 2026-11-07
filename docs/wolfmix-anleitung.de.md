@@ -72,7 +72,7 @@ Wolfmix das BPM übernimmt, das die DJ-Software berechnet, hier LJ Link. In unse
 - Ein Player an einer Rundungsgrenze (137,95, pendelt zwischen 137,9 und 138,0) lässt das Tempo nicht mehr springen.
 - Eine Änderung ab **0,25 BPM** kommt in unter einer Sekunde durch. Kleinere Abweichungen bis 0,15 BPM werden absichtlich nicht gesendet.
 - Ein fester Wert, das Tempo einer Ableton-Link-Session als Quelle und Serato gehen genau raus, ohne diese Beruhigung.
-- Die BPM-Anzeige im Deck zeigt das beruhigte, gesendete Tempo. Sie kann bis zu 0,15 BPM vom Display des Players abweichen.
+- Die BPM-Anzeige im Deck zeigt (ab 1.7.5) den echten Wert des Players mit zwei Nachkommastellen, noch nicht an echter Hardware getestet. Das beruhigte, gesendete Tempo steht als Tooltip am BPM-Feld („An Lichtpulte gesendet“). Es kann bis zu 0,15 BPM von der Anzeige abweichen.
 - Das gilt für Ableton Link und OS2L gleich. Mehr dazu im Wiki unter
   [Tempo am Lichtpult springt](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#tempo-jumps).
 

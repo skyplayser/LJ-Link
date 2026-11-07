@@ -155,7 +155,7 @@ the USB latency (an offset setting is planned).
 Players compute their tempo from track BPM and pitch (`CdjStatus.getEffectiveTempo()`); in a real test with two XDJ-1000MK2
 and a Wolfmix the readings most likely swung by a few hundredths around about 137.95, the rounding edge of 0.1. The 1.7.3 hold time on the
 rounded number (0.1 change after 2 s) still let it flip every few seconds, and every flip restarted the Wolfmix beat.
-`Deck.stableBpm()` (used by the OSC/MA2 tick in `LinkService`, `Os2lBeats` and `AbletonLinkPeer`, and shown in the deck display)
+`Deck.stableBpm()` (used by the OSC/MA2 tick in `LinkService`, `Os2lBeats` and `AbletonLinkPeer`)
 now works on the raw tempo:
 - Dead band 0.15 BPM: the sent tempo stays while the raw tempo, smoothed with a time constant of 0.5 s (time based, so the
   calling rate does not matter), is closer than that. 0.15 is three times the assumed jitter (+-0.05) and still only 0.11 %
@@ -169,6 +169,8 @@ now works on the raw tempo:
 - The sent value is still rounded to 0.1 (the Wolfmix and the OSC text show one decimal).
 - Tempos without measuring noise bypass the dead band (`Deck.exactTempo`), every step goes out at once: the fixed value,
   an Ableton Link session as a source (`LinkTempoSource`) and Serato (BPM from the file tag, no pitch).
+- Display (changed in 1.7.5): the deck BPM shows the real player value with two decimals (137.95); the steadied, sent tempo is the
+  tooltip on the BPM field. Output unchanged; display change not tested on real hardware yet.
 - No tempo (0) resets the sent tempo and the first tempo after it goes out at once; the deck display tick asks every
   100 ms also without a tempo, so this really happens. After another track (`Deck.trackVersion`, raised by the sources;
   unlike `beatVersion` not by a late beat grid) a tempo outside the band goes out at once for 1 s, and so does a jump when
