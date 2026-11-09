@@ -52,7 +52,7 @@ h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; let
 .ico { width: 30px; height: 30px; border-radius: 8px; display: inline-grid; place-items: center; background: var(--panel-2); border: 1px solid var(--line); font-size: 16px; flex: 0 0 auto; }
 
 .split { display: grid; gap: 28px; grid-template-columns: 1fr 1fr; align-items: center; }
-.split img { width: 100%; border-radius: var(--radius); border: 1px solid var(--line); display: block; }
+.split img { width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--line); display: block; }
 .split ul { margin: 0; padding-left: 20px; color: var(--muted); }
 .split li { margin: 6px 0; }
 .split li b { color: var(--text); }
