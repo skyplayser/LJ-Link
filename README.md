@@ -228,6 +228,17 @@ diagnostic data* ticked. The diagnostic data holds the version, network adapters
 what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it
 by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue.
 
+## Try also: VJ-Link
+
+<a href="https://github.com/skyplayser/VJ-LINK"><img src="https://raw.githubusercontent.com/skyplayser/VJ-LINK/main/docs/images/logo.png" width="56" align="left" alt="VJ-Link logo"></a>
+
+**[VJ-Link](https://github.com/skyplayser/VJ-LINK)** is the sister project for live visuals: 150 visuals and 50 effects, run by
+your light desk over Art-Net, sACN, MIDI or OSC, on any number of screens, LED walls and projectors, with projection mapping and
+camera looks. It takes the tempo, beat phase, phrases and the playing track from LJ Link, so the visuals follow the DJ. Free for
+macOS and Windows, now as an alpha.
+
+<br clear="left">
+
 ## Credits and notices
 
 Built on [beat-link](https://github.com/Deep-Symmetry/beat-link) by Deep Symmetry and the protocol research of the
