@@ -22,6 +22,7 @@ public final class Main {
         // addresses; beat-link then no longer recognises its own announcements and shuts itself down as an "invader".
         System.setProperty("java.net.preferIPv4Stack", "true");
         LogBuffer.install();
+        disableAppNap();
         int port = 8080;
         boolean openBrowser = true;
         boolean useTray = true;
@@ -75,6 +76,15 @@ public final class Main {
             ws.onClose(hub::removeClient);
             ws.onError(hub::removeClient);
         });
+        // VJ-Link interface: its own stream for VJ programs, always on (see VjLink).
+        VjLink vjLink = new VjLink(hub, Updater.currentVersion());
+        vjLink.start();
+        app.ws("/vjlink", ws -> {
+            ws.onConnect(vjLink::addClient);
+            ws.onMessage(ctx -> vjLink.onMessage(ctx, ctx.message()));
+            ws.onClose(vjLink::removeClient);
+            ws.onError(vjLink::removeClient);
+        });
 
         final int[] boundPort = {port};
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
@@ -126,7 +136,8 @@ public final class Main {
             if (data == null) {
                 ctx.status(404);
             } else {
-                ctx.header("Cache-Control", "no-store").result(data);
+                byte[] img = CoverImage.limited(data);
+                ctx.contentType(CoverImage.contentType(img)).header("Cache-Control", "no-store").result(img);
             }
         });
         app.get("/api/deck/{n}/info", ctx -> ctx.json(Privacy.filterInfo(session.info(Integer.parseInt(ctx.pathParam("n"))))));
@@ -209,6 +220,7 @@ public final class Main {
 
         int bound = start(app, port);
         boundPort[0] = bound;
+        Bonjour.announce(bound, Updater.currentVersion());
         String url = "http://localhost:" + bound;
         System.out.println("LJ Link is running: " + url);
         for (String u : NetworkCheck.lanUrls(bound)) {
@@ -261,6 +273,36 @@ public final class Main {
             return java.net.InetAddress.getByName(addr).isLoopbackAddress();
         } catch (java.net.UnknownHostException e) {
             return false;
+        }
+    }
+
+    /**
+     * macOS "App Nap" throttles the timers of an app without a visible window (LJ Link lives in the menu bar): the demo and
+     * the updates to the browsers then ran only in bursts. The per-app default {@code NSAppSleepDisabled} turns it off; it
+     * is read when AppKit starts, which is after this (the menu bar icon), so it should hold from this start on, at the
+     * latest from the next. Only for the installed app (jpackage sets {@code jpackage.app-path}).
+     */
+    private static void disableAppNap() {
+        if (!System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac")
+                || System.getProperty("jpackage.app-path") == null) {
+            return;
+        }
+        try {
+            Process read = new ProcessBuilder("/usr/bin/defaults", "read", "dev.ljlinkpro", "NSAppSleepDisabled")
+                    .redirectErrorStream(true).start();
+            String value = new String(read.getInputStream().readAllBytes()).trim();
+            read.waitFor();
+            if (!"1".equals(value)) {
+                Process write = new ProcessBuilder("/usr/bin/defaults", "write", "dev.ljlinkpro", "NSAppSleepDisabled",
+                        "-bool", "YES").redirectErrorStream(true).start();
+                write.getInputStream().readAllBytes();
+                write.waitFor();
+                System.out.println("App Nap switched off for LJ Link (NSAppSleepDisabled).");
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("App Nap setting failed: " + e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

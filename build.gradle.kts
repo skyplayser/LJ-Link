@@ -12,6 +12,7 @@ dependencies {
     implementation("org.deepsymmetry:beat-link:8.0.0")
     implementation("io.javalin:javalin:6.7.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("org.jmdns:jmdns:3.6.1")
     runtimeOnly("org.slf4j:slf4j-simple:2.0.17")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
@@ -77,7 +78,7 @@ application {
     applicationName = "ljlinkpro"
 }
 
-version = "1.7.6"
+version = "1.7.7"
 
 // Builds a native installer with a bundled Java runtime: .dmg on macOS, .exe on Windows.
 // jpackage can only build installers for the OS it runs on, so each OS is built on its own (see CI).

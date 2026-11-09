@@ -166,6 +166,19 @@ final class ProDjLinkSource implements DeckSource {
                 }
                 hub.deck(u.player).setBeats(times, bars);
             });
+            // Phrases (rekordbox phrase analysis, "PSSI" in the .EXT file) for the VJ-Link interface. Alpha: untested on real players.
+            org.deepsymmetry.beatlink.data.AnalysisTagFinder.getInstance().addAnalysisTagListener(u -> {
+                Phrases ph = null;
+                if (u.taggedSection != null
+                        && u.taggedSection.body() instanceof org.deepsymmetry.cratedigger.pdb.RekordboxAnlz.SongStructureTag tag) {
+                    try {
+                        ph = Phrases.of(tag);
+                    } catch (RuntimeException e) {
+                        System.err.println("Phrases of player " + u.player + " not readable: " + e);
+                    }
+                }
+                hub.deck(u.player).phrases = ph;
+            }, ".EXT", "PSSI");
             WaveformFinder wf = WaveformFinder.getInstance();
             wf.setFindDetails(true);
             wf.setPreferredStyle(WaveformFinder.WaveformStyle.RGB);
@@ -233,6 +246,11 @@ final class ProDjLinkSource implements DeckSource {
         ArtFinder.getInstance().start();
         BeatGridFinder.getInstance().start();
         WaveformFinder.getInstance().start();
+        try {
+            org.deepsymmetry.beatlink.data.AnalysisTagFinder.getInstance().start();
+        } catch (Exception e) {
+            System.err.println("Phrase analysis unavailable: " + e);
+        }
         try {
             TimeFinder.getInstance().start();
             if (!beatListenerAdded) {
@@ -484,6 +502,7 @@ final class ProDjLinkSource implements DeckSource {
             positions.shutdownNow();
         }
         stopQuietly(() -> TimeFinder.getInstance().stop());
+        stopQuietly(() -> org.deepsymmetry.beatlink.data.AnalysisTagFinder.getInstance().stop());
         stopQuietly(() -> WaveformFinder.getInstance().stop());
         stopQuietly(() -> BeatGridFinder.getInstance().stop());
         stopQuietly(() -> ArtFinder.getInstance().stop());

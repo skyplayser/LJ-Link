@@ -19,11 +19,12 @@
   </nav>
   <div id="status" class="status"><span class="dot"></span><span id="status-text">Connecting …</span></div>
   <span id="privacy-badge" class="privacy-badge hidden" title="Title, artist, album and cover are hidden">PRIVACY</span>
+  <span id="vjlink-badge" class="vjlink-badge hidden"></span>
   <div class="spacer"></div>
   <button id="btn-fullscreen" class="ghost" title="Full screen">Full screen</button>
   <button id="btn-settings" class="ghost menu" aria-haspopup="dialog" aria-label="Settings">&#9776;</button>
 </header>
-<button id="awake-hint" class="awake-hint hidden"><span class="awake-icon" aria-hidden="true">&#9788;</span> <span>Tap here once to keep the screen on</span></button>
+<button id="awake-hint" class="awake-hint hidden"><span class="awake-icon" aria-hidden="true">&#9788;</span> <span id="awake-hint-first">Tap here once to keep the screen on</span><span id="awake-hint-again" class="hidden">The screen may turn off – tap here to restart keep-awake</span></button>
 
 <div id="toolbar" class="hidden">
   <div class="spacer"></div>
@@ -191,7 +192,8 @@
       <div class="label">Screen</div>
       <label class="check"><input type="checkbox" id="awake-box"> <span>Keep screen awake – Alpha</span></label>
       <div class="hint" id="awake-status"></div>
-      <div class="hint">Stops this device from dimming or locking the screen while LJ Link is shown, like a playing video. On an iPad opened over the network, tap the page once to start it. On a Mac LJ Link also keeps the computer from falling asleep while a browser shows it.</div>
+      <div class="hint hidden" id="awake-fallback">On an iPad or iPhone without HTTPS this is a stopgap. More reliable: in the iPad settings set “Display &amp; Brightness → Auto-Lock: Never” (with the charger connected). Also switch Low Power Mode off: on the iPhone it shortens Auto-Lock to 30 seconds, probably on the iPad too.</div>
+      <div class="hint">Stops this device from dimming or locking the screen while LJ Link is shown, like a playing video. On an iPad opened over the network, tap the page once; LJ Link then tries to keep the screen on. On a Mac LJ Link also keeps the computer from falling asleep while a browser shows it.</div>
     </div>
 
     <div class="setting" id="privacy-setting">

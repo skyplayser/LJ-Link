@@ -140,6 +140,7 @@ function handle(msg) {
     if (msg.phase !== "monitoring") clearDecks();
     ui.state = msg;
     applyPrivacy();
+    applyVjLink();
     render();
     applyGroups();
   } else if (msg.type === "deck") {
@@ -190,10 +191,34 @@ function applySettings() {
 // 2. Otherwise a silent video that keeps playing (the idea of NoSleep.js, own code and own video). WebKit keeps the
 //    display on only for a playing, unmuted video with an audio track that does not use the loop attribute, so the
 //    video is unmuted (its audio is silence) and jumps back by itself. Browsers start such a video only after a tap.
-const awake = { lock: null, requesting: false, video: null, state: "off", lockFailed: false };
+// 3. The video state is honest: "active (video)" only while its currentTime really moves (checked every few seconds).
+//    iOS pauses it on its own (lock, other audio app, call, Siri); then the status says so and the strip asks for a tap.
+const awake = {
+  lock: null, requesting: false, video: null, state: "off", lockFailed: false,
+  // Diagnostics for the console and the status tooltip (the problem report is made by the server and has no browser data).
+  path: "none", lastTime: -1, progressing: false, played: false, lastStop: null, check: null, still: 0,
+};
+const AWAKE_CHECK_MS = 3000;
+// "Starting the video …" ends after this many checks without the time moving (iOS may resolve play() and not play).
+const AWAKE_START_CHECKS = 2;
 
 function wakeLockUsable() {
   return window.isSecureContext && "wakeLock" in navigator && !awake.lockFailed;
+}
+
+function awakeDiag() {
+  const v = awake.video;
+  const lines = [
+    t("Way: {s}", { s: awake.path === "lock" ? "Wake Lock" : awake.path === "video" ? t("video") : t("none") }),
+  ];
+  if (v) {
+    lines.push(t("Video time running: {s}", { s: awake.progressing ? t("yes") : t("no") })
+      + " (currentTime " + v.currentTime.toFixed(1) + " s, paused " + v.paused + ", muted " + v.muted + ", volume " + v.volume + ")");
+  }
+  lines.push(t("Last stopped: {s}", { s: awake.lastStop
+    ? awake.lastStop.at.toLocaleTimeString() + " (" + awake.lastStop.why + ")" : t("never") }));
+  lines.push("User agent: " + navigator.userAgent);
+  return lines.join("\n");
 }
 
 function renderAwake() {
@@ -201,19 +226,87 @@ function renderAwake() {
   const text = {
     off: "Off",
     lock: "Active – the screen stays on",
+    starting: "Starting the video …",
     video: "Active (video) – the screen stays on",
+    stalled: "Video stopped – please tap the page",
     waiting: "Waiting for a tap – tap the page once",
     hidden: "Paused while the page is hidden",
     unavailable: "Not available in this browser",
   }[s] || "Off";
   $("awake-status").textContent = t("Status: {s}", { s: t(text) });
-  $("awake-hint").classList.toggle("hidden", s !== "waiting");
+  const diag = awakeDiag();
+  $("awake-status").title = diag;
+  const ask = s === "waiting" || s === "stalled";
+  $("awake-hint").classList.toggle("hidden", !ask);
+  $("awake-hint-first").classList.toggle("hidden", s === "stalled");
+  $("awake-hint-again").classList.toggle("hidden", s !== "stalled");
+  $("awake-fallback").classList.toggle("hidden", settings.keepAwake === false || awake.path !== "video");
   $("awake-box").title = t(text);
 }
 
 function setAwake(state) {
+  if (state !== awake.state) console.info("Keep awake: " + awake.state + " -> " + state + "\n" + awakeDiagLine());
   awake.state = state;
+  // The check runs only while the video should be playing: not when off, hidden, stopped or on the wake lock way.
+  if (state === "starting" || state === "video") startAwakeCheck(); else stopAwakeCheck();
+  if (state === "lock") awake.path = "lock";
+  if (state === "starting" || state === "video" || state === "stalled") awake.path = "video";
   renderAwake();
+}
+
+/** One line for the console (the tooltip has the long form). */
+function awakeDiagLine() {
+  const v = awake.video;
+  return "way=" + awake.path + (v ? " currentTime=" + v.currentTime.toFixed(1) + " paused=" + v.paused + " running=" + awake.progressing : "")
+    + " lastStop=" + (awake.lastStop ? awake.lastStop.at.toISOString() + " " + awake.lastStop.why : "none")
+    + " ua=" + navigator.userAgent;
+}
+
+/** The video stopped (by iOS, another app, a call ...): say so and ask for a tap, unless the page is hidden or it is off. */
+function awakeVideoStopped(why) {
+  awake.progressing = false;
+  awake.lastStop = { at: new Date(), why };
+  if (settings.keepAwake === false || awake.state === "off") return;
+  if (document.visibilityState !== "visible") { setAwake("hidden"); return; }
+  setAwake("stalled");
+}
+
+/** Every few seconds while the video should play: is its currentTime still moving? */
+function checkAwakeVideo() {
+  const v = awake.video;
+  if (!v || settings.keepAwake === false || document.visibilityState !== "visible") return;
+  if (awake.state !== "starting" && awake.state !== "video") return;
+  const now = v.currentTime;
+  const moved = awake.lastTime >= 0 && now !== awake.lastTime;
+  awake.lastTime = now;
+  if (v.paused || v.ended) { awakeVideoStopped(v.ended ? "ended" : "paused"); return; }
+  if (moved) {
+    awake.still = 0;
+    awake.progressing = true;
+    if (awake.state !== "video") setAwake("video"); else renderAwake();
+  } else if (awake.state === "video") {
+    awakeVideoStopped("time not moving");
+  } else if (++awake.still >= AWAKE_START_CHECKS) {
+    awakeVideoStopped("time never started");
+  }
+}
+
+function startAwakeCheck() {
+  if (awake.check) return;
+  awake.check = setInterval(checkAwakeVideo, AWAKE_CHECK_MS);
+}
+
+function stopAwakeCheck() {
+  if (!awake.check) return;
+  clearInterval(awake.check);
+  awake.check = null;
+}
+
+/** Starts the check over from now (after play()), so "starting" gets its full time; never two timers. */
+function restartAwakeCheck() {
+  stopAwakeCheck();
+  awake.still = 0;
+  awake.lastTime = awake.video ? awake.video.currentTime : -1;
 }
 
 function awakeVideo() {
@@ -232,8 +325,12 @@ function awakeVideo() {
     if (v.duration && v.currentTime > v.duration - 1.5) v.currentTime = 0.5;
   });
   v.addEventListener("pause", () => {
-    if (settings.keepAwake !== false && awake.state === "video" && document.visibilityState === "visible") setAwake("waiting");
+    if (awake.state !== "off" && awake.state !== "stalled") awakeVideoStopped("pause event");
   });
+  v.addEventListener("ended", () => {
+    if (awake.state === "video" || awake.state === "starting") awakeVideoStopped("ended event");
+  });
+  // In the page, on top and inside the viewport, but 2x2 px at opacity 0.01: not visible, see style.css.
   document.body.appendChild(v);
   awake.video = v;
   return v;
@@ -242,12 +339,22 @@ function awakeVideo() {
 function playAwakeVideo(fromTap) {
   if (typeof KEEP_AWAKE_MP4 !== "string") { setAwake("unavailable"); return; }
   const v = awakeVideo();
+  awake.path = "video";
   let p;
   try { p = v.play(); } catch (e) { p = Promise.reject(e); }
-  Promise.resolve(p).then(() => setAwake("video")).catch((e) => {
+  Promise.resolve(p).then(() => {
+    if (settings.keepAwake === false) { v.pause(); return; }
+    // play() resolving is not enough: "active" only once the time is seen moving.
+    awake.played = true;
+    awake.progressing = false;
+    restartAwakeCheck();
+    setAwake("starting");
+  }).catch((e) => {
+    console.info("Keep awake video refused:", e && e.name);
     // NotAllowedError: the browser wants a tap first. Anything else (e.g. NotSupportedError) after a tap: it does not
     // work in this browser.
-    setAwake(fromTap && !(e && e.name === "NotAllowedError") ? "unavailable" : "waiting");
+    if (fromTap && !(e && e.name === "NotAllowedError")) setAwake("unavailable");
+    else setAwake(awake.played ? "stalled" : "waiting");
   });
 }
 
@@ -275,7 +382,16 @@ function updateAwake(fromTap = false) {
     }).finally(() => { awake.requesting = false; });
     return;
   }
-  if (awake.video && !awake.video.paused) { setAwake("video"); return; }
+  awake.path = "video";
+  // Back on the page (unlocked, tab again, bfcache) or full screen with the video still playing: keep the last state
+  // ("active" if its time was moving) and let the check change it only when the time really stands still.
+  if (awake.video && !awake.video.paused && !awake.video.ended && !fromTap) {
+    if (awake.state !== "starting" && awake.state !== "video") {
+      restartAwakeCheck();
+      setAwake(awake.progressing ? "video" : "starting");
+    }
+    return;
+  }
   playAwakeVideo(fromTap);
 }
 
@@ -285,17 +401,21 @@ function releaseAwake() {
     awake.lock = null;
     lock.release().catch(() => { /* already released */ });
   }
+  awake.progressing = false;
+  stopAwakeCheck();
   if (awake.video) awake.video.pause();
 }
 
 function onAwakeTap() {
-  if (settings.keepAwake !== false && awake.state === "waiting") updateAwake(true);
+  if (settings.keepAwake !== false && (awake.state === "waiting" || awake.state === "stalled")) updateAwake(true);
 }
 document.addEventListener("click", onAwakeTap, true);
 document.addEventListener("touchend", onAwakeTap, true);
 document.addEventListener("keydown", onAwakeTap, true);
 document.addEventListener("visibilitychange", () => updateAwake());
 document.addEventListener("fullscreenchange", () => updateAwake());
+// Back from the back/forward cache (Safari): the page did not reload, so check again.
+window.addEventListener("pageshow", (e) => { if (e.persisted) updateAwake(); });
 
 /* ---------- Light desk link (tempo out via OSC) ---------- */
 
@@ -1074,6 +1194,26 @@ function applyPrivacy() {
   $("privacy-box").checked = on;
   $("privacy-text").textContent = t(on ? "On – title, artist, album and cover are hidden" : "Off");
 }
+
+/* ---------- VJ-Link (a VJ program connected to /vjlink) ---------- */
+
+function applyVjLink() {
+  const v = ui.state.vjlink;
+  const el = $("vjlink-badge");
+  el.classList.toggle("hidden", !v);
+  if (!v) return;
+  el.classList.toggle("blackout", !!v.blackout);
+  el.classList.toggle("clickable", ui.controller);
+  el.textContent = "VJ-Link" + (v.scene ? " · " + t("Scene") + " " + v.scene : "") + (v.blackout ? " · Blackout" : "");
+  el.title = t("A VJ program receives tempo, beats, phrases and cues from LJ Link")
+    + (v.bpm ? " · " + Number(v.bpm).toFixed(1) + " BPM" : "") + (v.clients > 1 ? " (" + v.clients + ")" : "")
+    + (ui.controller ? "\n" + t("Click to bring VJ-Link to the front") : "");
+}
+
+// On the computer LJ Link runs on, a click brings VJ-Link to the front (it registers the vjlink:// scheme).
+document.addEventListener("click", e => {
+  if (e.target && e.target.id === "vjlink-badge" && ui.controller) location.href = "vjlink://focus";
+});
 
 /* ---------- Tabs and mixer view ---------- */
 

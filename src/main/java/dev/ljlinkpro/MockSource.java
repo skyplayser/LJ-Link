@@ -6,10 +6,32 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/** Demo source: three synthetic decks with generated waveforms, so the UI works without hardware. */
+/**
+ * Demo source: three synthetic decks with generated waveforms, so the UI (and VJ-Link) works without hardware.
+ * Decks 1 and 2 are mixed like a DJ would: the master plays its track (16 bars intro, 8 up, 16 chorus, 8 down, 16 chorus,
+ * 16 outro); at the start of its outro the other deck starts beat-aligned and in sync, the crossfader and channel faders move
+ * over, and when the old track ends the new deck becomes master and the old one loads the next track. Every other track
+ * has a 4-beat loop at the end of its breakdown. Deck 3 stands paused with a track loaded.
+ */
 final class MockSource implements DeckSource {
     private static final int SEGMENTS = 400;
-    private static final long TRACK_MS = 4 * 60_000L;
+    /** Phrase plan in bars (4 beats each). */
+    private static final int[] PHRASE_BARS = {16, 8, 16, 8, 16, 16};
+    private static final String[] PHRASE_PLAN = {"intro", "up", "chorus", "down", "chorus", "outro"};
+    static final int TRACK_BEATS;
+    static final int[] PHRASE_STARTS = new int[PHRASE_BARS.length];
+    static {
+        int beat = 1;
+        for (int i = 0; i < PHRASE_BARS.length; i++) {
+            PHRASE_STARTS[i] = beat;
+            beat += PHRASE_BARS[i] * 4;
+        }
+        TRACK_BEATS = beat - 1;
+    }
+    private static final int OUTRO_START = PHRASE_STARTS[5];
+    /** The 4-beat loop: the last bar of the breakdown ("down"), played 4 times. */
+    private static final int LOOP_START = PHRASE_STARTS[4] - 4;
+    private static final int LOOP_REPEATS = 4;
 
     private record Track(String title, String artist, String key, double bpm) {}
 
@@ -21,13 +43,24 @@ final class MockSource implements DeckSource {
 
     private final Hub.Scope hub;
     private ScheduledExecutorService executor;
-    private final long[] originNanos = new long[3];
-    private final long[] offsets = {60_000, 150_000, 0};
+    /** Position in ms (deck 1-3), speed, playing; the master is deck 1 or 2. */
+    private final double[] pos = new double[3];
+    private final double[] speed = {1, 1, 1};
+    private final boolean[] playing = {true, false, false};
     private final int[] trackIndex = {0, 1, 2};
+    private int nextTrack = 3;
+    private int master = 0;
+    private boolean mixing;
+    private int loopsLeft;
+    private long lastNanos;
 
     MockSource(Hub.Scope hub) {
         this.hub = hub;
         hub.setSource(this);
+    }
+
+    static double msPerBeat(double bpm) {
+        return 60_000.0 / bpm;
     }
 
     @Override
@@ -39,21 +72,27 @@ final class MockSource implements DeckSource {
         for (int i = 0; i < 3; i++) {
             loadTrack(i);
         }
-        java.util.Arrays.fill(originNanos, System.nanoTime());
+        // Start a little into the intro of deck 1, so the first mix comes after about a minute and a half.
+        pos[0] = (PHRASE_STARTS[1] - 1 - 40) * msPerBeat(TRACKS.get(0).bpm());
+        lastNanos = System.nanoTime();
         executor = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "mock-source");
             t.setDaemon(true);
             return t;
         });
-        executor.scheduleAtFixedRate(this::update, 0, 50, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(this::update, 0, 20, TimeUnit.MILLISECONDS);
         hub.setMixer(java.util.Map.of("present", true, "name", "DEMO-MIXER", "number", 33, "address", "demo",
                 "bpm", 126.0, "master", true, "simulated", true, "levels", true));
         hub.setState("monitoring", "demo", "Demo mode – no real hardware");
     }
 
+    private Track track(int i) {
+        return TRACKS.get(trackIndex[i] % TRACKS.size());
+    }
+
     private void loadTrack(int i) {
         Deck d = hub.deck(i + 1);
-        Track t = TRACKS.get(trackIndex[i] % TRACKS.size());
+        Track t = track(i);
         d.name = "DEMO-PLAYER";
         d.address = "demo";
         d.hasTrack = true;
@@ -61,60 +100,156 @@ final class MockSource implements DeckSource {
         d.artist = t.artist();
         d.key = t.key();
         d.trackBpm = t.bpm();
-        d.effectiveBpm = t.bpm();
-        d.speed = 1.0;
-        d.pitchPercent = i == 1 ? 0.35 : 0.0;
+        d.effectiveBpm = t.bpm() * speed[i];
+        d.speed = speed[i];
+        d.pitchPercent = (speed[i] - 1) * 100;
         d.trackNumber = trackIndex[i] % 9 + 1;
-        d.durationMs = TRACK_MS;
-        d.setWaveform(waveform(trackIndex[i] * 31L + i));
-        d.setArt(cover(trackIndex[i] * 31L + i));
-        d.setDetail(detail(trackIndex[i] * 31L + i, t.bpm()));
-        int beats = (int) (TRACK_MS / 1000.0 * t.bpm() / 60.0);
-        int[] times = new int[beats];
-        byte[] bars = new byte[beats];
-        for (int b = 0; b < beats; b++) {
-            times[b] = (int) (b * 60_000.0 / t.bpm());
+        double beatMs = msPerBeat(t.bpm());
+        d.durationMs = Math.round(TRACK_BEATS * beatMs);
+        long seed = trackIndex[i] * 31L + i;
+        d.setWaveform(waveform(seed));
+        d.setArt(cover(seed));
+        d.setDetail(detail(seed, t.bpm(), d.durationMs));
+        int[] times = new int[TRACK_BEATS];
+        byte[] bars = new byte[TRACK_BEATS];
+        for (int b = 0; b < TRACK_BEATS; b++) {
+            times[b] = (int) Math.round(b * beatMs);
             bars[b] = (byte) (b % 4 + 1);
         }
         d.setBeats(times, bars);
+        d.loop = null;
+        d.loopBeats = 0;
+        String[] kinds = PHRASE_PLAN.clone();
+        d.phrases = new Phrases(PHRASE_STARTS.clone(), kinds, TRACK_BEATS + 1);
         d.trackVersion++;
+        java.util.function.IntFunction<Long> at = beat -> Math.round((beat - 1) * beatMs);
         d.cues = List.of(
-                java.util.Map.of("t", 60_000L, "hot", 0, "loop", true, "loopEnd", 67_620L, "color", "#ff8800"),
-                java.util.Map.of("t", 0L, "hot", 1, "loop", false, "loopEnd", 0L, "color", "#ff0017"),
-                java.util.Map.of("t", 24_000L, "hot", 2, "loop", false, "loopEnd", 0L, "color", "#00c4ff"),
-                java.util.Map.of("t", 96_000L, "hot", 3, "loop", false, "loopEnd", 0L, "color", "#33ff00"),
-                java.util.Map.of("t", 150_000L, "hot", 0, "loop", false, "loopEnd", 0L, "color", "#ffffff"));
+                java.util.Map.of("t", at.apply(PHRASE_STARTS[0]), "hot", 1, "loop", false, "loopEnd", 0L, "color", "#ff0017"),
+                java.util.Map.of("t", at.apply(PHRASE_STARTS[2]), "hot", 2, "loop", false, "loopEnd", 0L, "color", "#ff8800"),
+                java.util.Map.of("t", at.apply(PHRASE_STARTS[4]), "hot", 3, "loop", false, "loopEnd", 0L, "color", "#00c4ff"),
+                java.util.Map.of("t", at.apply(OUTRO_START), "hot", 4, "loop", false, "loopEnd", 0L, "color", "#33ff00"),
+                java.util.Map.of("t", at.apply(PHRASE_STARTS[1]), "hot", 0, "loop", false, "loopEnd", 0L, "color", "#ffffff"),
+                java.util.Map.of("t", at.apply(LOOP_START), "hot", 0, "loop", true,
+                        "loopEnd", at.apply(LOOP_START + 4), "color", "#ff8800"));
     }
 
     private void update() {
         try {
             long now = System.nanoTime();
+            double dt = Math.min(200, (now - lastNanos) / 1e6);
+            lastNanos = now;
+            int other = 1 - master;
+            Track mt = track(master);
+            double masterBeatMs = msPerBeat(mt.bpm() * speed[master]);
+            // The master glides back to its own tempo once it plays alone (the DJ rides the pitch back slowly).
+            if (!mixing) {
+                speed[master] += (1 - speed[master]) * Math.min(1, dt / 20_000);
+            }
+            double before = pos[master];
+            pos[master] += dt * speed[master];
+            // The loop at the end of the breakdown, on every other track.
+            Deck md = hub.deck(master + 1);
+            double trackBeatMs = msPerBeat(mt.bpm());
+            double loopStart = (LOOP_START - 1) * trackBeatMs;
+            double loopEnd = loopStart + 4 * trackBeatMs;
+            if (trackIndex[master] % 2 == 1 && before < loopStart && pos[master] >= loopStart) {
+                loopsLeft = LOOP_REPEATS - 1;
+                md.loop = new long[] {Math.round(loopStart), Math.round(loopEnd)};
+                md.loopBeats = 4;
+            }
+            if (md.loop != null && pos[master] >= loopEnd) {
+                if (loopsLeft > 0) {
+                    loopsLeft--;
+                    pos[master] -= loopEnd - loopStart;
+                } else {
+                    md.loop = null;
+                    md.loopBeats = 0;
+                }
+            }
+            double outroAt = (OUTRO_START - 1) * trackBeatMs;
+            if (!mixing && before < outroAt && pos[master] >= outroAt) {
+                // Mix in: the other deck starts in sync and on the beat.
+                mixing = true;
+                Track ot = track(other);
+                speed[other] = mt.bpm() * speed[master] / ot.bpm();
+                playing[other] = true;
+                pos[other] = (pos[master] - outroAt) / masterBeatMs * msPerBeat(ot.bpm());
+            } else if (mixing) {
+                Track ot = track(other);
+                speed[other] = mt.bpm() * speed[master] / ot.bpm();
+                pos[other] += dt * speed[other];
+            }
+            double mixProgress = mixing ? Math.max(0, Math.min(1, (pos[master] - outroAt) / (TRACK_BEATS * trackBeatMs - outroAt))) : 0;
+            if (pos[master] >= TRACK_BEATS * trackBeatMs) {
+                // The old track ends: the other deck is the master now, the old one loads the next track and waits.
+                playing[master] = false;
+                pos[master] = 0;
+                speed[master] = 1;
+                trackIndex[master] = nextTrack++;
+                loadTrack(master);
+                master = other;
+                other = 1 - master;
+                mixing = false;
+                mixProgress = 0;
+            }
+            double t = now / 1e9;
             for (int i = 0; i < 3; i++) {
                 Deck d = hub.deck(i + 1);
-                d.playing = i != 2;
-                d.onAir = i == 0;
-                double t = now / 1e9;
-                d.fader = i == 2 ? 0.0 : (i == 0 ? 0.9 : 0.55 + 0.4 * Math.sin(t / 3 + i));
-                d.eqHi = 0.3 * Math.sin(t / 4 + i);
-                d.eqMid = 0.4 * Math.sin(t / 5 + 2 * i);
-                d.eqLow = i == 1 ? -0.7 : 0.2 * Math.sin(t / 6 + i);
-                d.master = i == 0;
-                d.synced = i == 1;
-                long pos = d.playing ? offsets[i] + (now - originNanos[i]) / 1_000_000 : offsets[i];
-                if (pos >= TRACK_MS) {
-                    trackIndex[i]++;
-                    offsets[i] = 0;
-                    originNanos[i] = now;
-                    loadTrack(i);
-                    pos = 0;
+                Track tr = track(i);
+                d.playing = i < 2 && playing[i];
+                d.master = i == master;
+                d.synced = i == other && mixing;
+                d.onAir = i == master || i == other && mixing;
+                d.speed = speed[i];
+                d.effectiveBpm = tr.bpm() * speed[i];
+                d.pitchPercent = (speed[i] - 1) * 100;
+                // Channel faders and EQ: the master is up; the incoming deck comes up over the first half of the mix with
+                // its bass cut, and the basses are swapped at the middle; the old deck goes down over the second half.
+                double up = Math.min(1, mixProgress * 2);
+                double down = Math.min(1, Math.max(0, mixProgress * 2 - 1));
+                if (i == 2) {
+                    d.fader = 0.0;
+                    d.eqHi = 0.0;
+                    d.eqMid = 0.0;
+                    d.eqLow = 0.0;
+                } else if (i == master) {
+                    d.fader = 0.9 * (1 - down);
+                    d.eqLow = mixing && mixProgress >= 0.5 ? -1.0 : 0.0;
+                    d.eqMid = 0.15 * Math.sin(t / 5 + i);
+                    d.eqHi = 0.2 * Math.sin(t / 4 + i);
+                } else {
+                    d.fader = mixing ? 0.9 * up : 0.0;
+                    d.eqLow = mixing && mixProgress < 0.5 ? -1.0 : 0.0;
+                    d.eqMid = 0.0;
+                    d.eqHi = 0.0;
                 }
-                d.velocity = d.playing ? 1.0 : 0.0;
-                d.samplePosition(pos);
-                d.velocity = d.playing ? 1.0 : 0.0;
+                d.velocity = d.playing ? speed[i] : 0.0;
+                d.samplePosition(Math.round(pos[i]));
+                d.velocity = d.playing ? speed[i] : 0.0;
             }
+            // Crossfader: deck 1 left (0), deck 2 right (1); it moves over during the mix.
+            double side = master == 0 ? 0 : 1;
+            hub.setCrossfader(mixing ? side + (1 - 2 * side) * mixProgress : side);
         } catch (RuntimeException e) {
             System.err.println("Mock update failed: " + e);
         }
+    }
+
+    /** Loudness of the demo song at a beat (1-based): quiet intro, rising build-up, loud choruses, breakdown, outro. */
+    private static double energyAt(double beat) {
+        if (beat < PHRASE_STARTS[1]) {
+            return 0.3;
+        }
+        if (beat < PHRASE_STARTS[2]) {
+            return 0.3 + 0.6 * (beat - PHRASE_STARTS[1]) / (PHRASE_STARTS[2] - PHRASE_STARTS[1]);
+        }
+        if (beat < PHRASE_STARTS[3] || beat >= PHRASE_STARTS[4] && beat < PHRASE_STARTS[5]) {
+            return 0.95;
+        }
+        if (beat < PHRASE_STARTS[4]) {
+            return 0.4;
+        }
+        return 0.3;
     }
 
     /** A small generated cover so the demo shows artwork without shipping any real album art. */
@@ -142,16 +277,15 @@ final class MockSource implements DeckSource {
         return out.toByteArray();
     }
 
-    /** A plausible-looking track: quiet intro, build-up, loud drop, breakdown, second drop, outro. */
+    /** Preview waveform following the phrases: quiet intro, build-up, loud choruses, breakdown, outro. */
     private static byte[] waveform(long seed) {
         Random rnd = new Random(seed);
         byte[] out = new byte[SEGMENTS * 4];
         for (int i = 0; i < SEGMENTS; i++) {
-            double p = i / (double) SEGMENTS;
-            double energy = p < 0.1 ? 0.3 : p < 0.25 ? 0.3 + (p - 0.1) * 4 : p < 0.5 ? 0.95
-                    : p < 0.6 ? 0.4 : p < 0.9 ? 0.95 : 0.3;
-            double beat = 0.75 + 0.25 * Math.abs(Math.sin(i * Math.PI / 4.0));
-            double h = Math.min(1.0, energy * beat * (0.85 + rnd.nextDouble() * 0.15));
+            double beat = 1 + i * (double) TRACK_BEATS / SEGMENTS;
+            double energy = energyAt(beat);
+            double pulse = 0.75 + 0.25 * Math.abs(Math.sin(i * Math.PI / 4.0));
+            double h = Math.min(1.0, energy * pulse * (0.85 + rnd.nextDouble() * 0.15));
             out[i * 4] = (byte) (h * 255);
             double mix = Math.max(0, Math.min(1, (energy - 0.3) / 0.65));
             out[i * 4 + 1] = (byte) (40 + 215 * mix);
@@ -161,23 +295,28 @@ final class MockSource implements DeckSource {
         return out;
     }
 
-    /** Detail waveform at 150 frames per second with a kick on every beat, following the same song sections. */
-    private static byte[] detail(long seed, double bpm) {
+    /**
+     * Detail waveform at 150 frames per second: height plus red (bass: a kick on every beat, none in the breakdown),
+     * green (mids, follow the energy) and blue (highs: a hi-hat on every off-beat), like rekordbox's RGB waveform.
+     */
+    private static byte[] detail(long seed, double bpm, long durationMs) {
         Random rnd = new Random(seed);
-        int frames = (int) (TRACK_MS * 150 / 1000);
+        int frames = (int) (durationMs * 150 / 1000);
         byte[] out = new byte[frames * 4];
         double framesPerBeat = 150 * 60.0 / bpm;
         for (int i = 0; i < frames; i++) {
-            double p = i / (double) frames;
-            double energy = p < 0.1 ? 0.3 : p < 0.25 ? 0.3 + (p - 0.1) * 4 : p < 0.5 ? 0.95
-                    : p < 0.6 ? 0.4 : p < 0.9 ? 0.95 : 0.3;
+            double beat = 1 + i / framesPerBeat;
+            double energy = energyAt(beat);
             double phase = (i % framesPerBeat) / framesPerBeat;
-            double kick = Math.exp(-phase * 6);
-            double h = Math.min(1.0, energy * (0.45 + 0.55 * kick) * (0.9 + rnd.nextDouble() * 0.1));
+            boolean breakdown = beat >= PHRASE_STARTS[3] && beat < PHRASE_STARTS[4];
+            double kick = breakdown || beat < PHRASE_STARTS[0] + 4 ? 0 : Math.exp(-phase * 6);
+            double hat = energy > 0.35 ? Math.exp(-Math.abs(phase - 0.5) * 18) : 0;
+            double mid = energy * (0.7 + 0.3 * rnd.nextDouble());
+            double h = Math.min(1.0, energy * (0.45 + 0.55 * Math.max(kick, hat * 0.6)) * (0.9 + rnd.nextDouble() * 0.1));
             out[i * 4] = (byte) (h * 255);
-            out[i * 4 + 1] = (byte) (60 + 195 * kick);
-            out[i * 4 + 2] = (byte) (70 - 20 * kick);
-            out[i * 4 + 3] = (byte) (255 - 45 * kick);
+            out[i * 4 + 1] = (byte) Math.min(255, 40 + 215 * kick);
+            out[i * 4 + 2] = (byte) Math.min(255, 30 + 120 * mid);
+            out[i * 4 + 3] = (byte) Math.min(255, 60 + 195 * hat);
         }
         return out;
     }
@@ -202,10 +341,10 @@ final class MockSource implements DeckSource {
                         row.apply("Tempo master", d.master ? yes : no), row.apply("Sync active", d.synced ? yes : no))),
                 java.util.Map.of("title", "Track", "rows", java.util.List.of(
                         row.apply("Title", String.valueOf(d.title)), row.apply("Artist", String.valueOf(d.artist)),
-                        row.apply("Key", String.valueOf(d.key)), row.apply("Duration", "04:00.0"))),
+                        row.apply("Key", String.valueOf(d.key)), row.apply("Duration", String.format(java.util.Locale.ROOT, "%02d:%04.1f", d.durationMs / 60_000, d.durationMs % 60_000 / 1000.0)))),
                 java.util.Map.of("title", "Cues and loops", "rows", java.util.List.of(
-                        row.apply("Hot cue A", "00:00.0"), row.apply("Hot cue B", "00:24.0"),
-                        row.apply("Hot cue C", "01:36.0"), row.apply("Memory point", "01:00.0 – loop until 01:07.6"))));
+                        row.apply("Hot cues", "A intro, B first chorus, C second chorus, D outro"),
+                        row.apply("Memory points", "start of the build-up; a 4-beat loop at the end of the breakdown"))));
     }
 
     @Override

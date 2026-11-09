@@ -215,3 +215,58 @@ screen awake" (per browser in `ljlinkpro.settings`, key `keepAwake`, default on)
 Status shown under the setting and as tooltip: active, active (video), waiting for a tap, paused while hidden, not available,
 off. Races: the hub reports the browser count under one lock (reports cannot arrive swapped), and every report raises a
 generation number in `SleepGuard`, so a release timer that already fired does nothing once a browser came back. Not tested on a real iPad or on Windows yet (headless Chrome only).
+
+Addendum (2026-11-08, after the developer found it working on the Mac but not on the iPad over `http://<ip>`; research in
+`docs/handoffs/2026-11-08-ipad-wach-recherche.md`). Still Alpha, still untested on a real iPad.
+- The video is no longer invisible by CSS: 2x2 px, `opacity: 0.01`, `position: fixed` at the bottom left corner (inside the
+  viewport), `z-index` at the top instead of `-1`, never `display: none` / `visibility: hidden`, never `muted`, `loop` or volume 0,
+  and appended to `body`. Reason: the current WebKit source only looks at a hidden *document*, but old reports (iOS 10) said
+  `opacity: 0` stopped the trick, and iOS may skip rendering a fully transparent or covered element. A real, rendered pixel
+  rules that out at no visible cost (black at 1 % on any background changes a colour value by about 2 of 255, on 2x2 px).
+  2x2 instead of 1x1 so the element has a real area even after device-pixel rounding; on top so no panel covers it;
+  `pointer-events: none` so it never takes a tap.
+- Honest status: `play()` resolving only means "starting". "Active (video)" is shown only once `currentTime` is seen moving;
+  it is checked every 3 s while the page is visible. If the video is paused (`pause`/`ended` events, e.g. iOS after a lock,
+  another audio app, a call, Siri) or its time stands still, the status becomes "Video stopped – please tap the page" and the
+  strip comes back with "The screen may turn off – tap here to start it again"; the next tap/click/key plays it again.
+  On `visibilitychange` (unlocked, back to the tab) and `pageshow` from the back/forward cache the state is checked again
+  instead of trusting an old "active". QS round 2: "starting" ends after 2 checks (about 6 s) without movement in "stopped"
+  (iOS may resolve `play()` without playing). A video that still plays keeps its last state on full screen, visibility
+  and `pageshow` (no flicker to "starting"); only a real standstill changes it. The check timer runs only in "starting" and
+  "active (video)" and is cleared otherwise (off, hidden, stopped, wake lock); there is never more than one.
+- While the video way is used, a note under the setting recommends "Display & Brightness → Auto-Lock: Never" with the charger
+  connected, as the more reliable way on iPad/iPhone without HTTPS. It also asks to switch Low Power Mode off, worded carefully: that it shortens
+  Auto-Lock to 30 s is documented for the iPhone only.
+- Diagnostics: the problem report (`/api/diagnostics`) is made by the server and holds no browser data, and on a tablet it is
+  not even offered, so no new channel was added. Instead the way (Wake Lock or video), whether `currentTime` moves (with
+  `paused`, `muted`, `volume`), the last stop (time and reason) and the user agent are in the tooltip of the status line and
+  logged with `console.info` on every state change.
+## ADR-023: VJ-Link interface (`/vjlink`, Bonjour `_ljlink._tcp`)
+Status: Alpha (2026-11-09). Tested against the demo only; phrases from real players untested.
+
+VJ-Link (the developer's VJ program) used the browser stream `/ws`, which lacks beat phase, phrases, cues, band levels and
+track-change events and only sends decks on a change. So LJ Link gets its own read-only stream for VJ programs:
+- `ws://<host>:<port>/vjlink`, always on, nothing to set up. JSON protocol version 1, every message has `t`; unknown
+  fields are ignored by the receiver, so fields can be added. On connect: `hello`, all `deck`s, `tempo`.
+- `tempo` (~30/s): tempo of the master deck and a running beat counter (`beat`, whole number = beat) from the beat grid at
+  the predicted position. The counter is continuous over loops, cue jumps and a change of master: after a jump it moves
+  forward to the same beat phase (less than one beat), so visuals never count backwards. `bar` from the beat grid,
+  `phraseBeat` from the phrases.
+- `deck` at once on a change (compared without the position), otherwise every 0.5 s; `gone` when a deck disappears.
+  `trackId` is a hash of title, artist and length: the same for every source, and it does not reveal the title.
+  Privacy mode drops title, artist and cover (and a new `hello` with `privacy` goes out when it is switched).
+- `event`: `track` (a new track plays on air or as master; not for what already plays when LJ Link starts), `phrase`,
+  `next` (32/16/8/4 beats before the next phrase), `cue` (a hot cue A-H or memory point M is passed while playing or
+  jumped to), `loop` (on/off with beats).
+- `wave` (~30/s, master deck): bass/mids/highs from the detail waveform at the play position (strongest frame since the
+  last message, so no kick is missed); colour waveforms are split by red/green/blue (rekordbox colours lows red, highs
+  blue), three-band ones are taken as they are; times channel fader and EQ when the mixer reports them.
+- `mixer` (~10/s) when faders or a crossfader are known (Denon, demo; Pro DJ Link only knows ON AIR).
+- The VJ program may send `{"t":"vj","scene":…,"blackout":…}`; the header shows "VJ-Link connected · Scene …".
+- Phrases: rekordbox phrase analysis (`PSSI` in the `.EXT` file) via beat-link's `AnalysisTagFinder`; the mid and low moods
+  are mapped to the five kinds of the high mood (verses → up, bridge → down).
+- Bonjour/mDNS `_ljlink._tcp` with TXT `vjlink=1`, `path=/vjlink`, `version`, `app` on every IPv4 adapter (JmDNS), so
+  VJ-Link finds LJ Link on another computer. Failures are only logged.
+- The demo now plays a DJ set: phrases 16/8/16/8/16/16 bars, the other deck starts beat-aligned and synced at the outro,
+  faders, EQ (bass swap) and crossfader move, the new deck becomes master when the old track ends (about every two
+  minutes), every other track loops the last bar of its breakdown four times, cues sit on the phrase starts.

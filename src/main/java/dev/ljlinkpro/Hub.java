@@ -38,6 +38,11 @@ final class Hub {
     /** Change of the client set and its report happen together, so reports arrive in order (1 then 0, never swapped). */
     private final Object clientCountLock = new Object();
 
+    /** Crossfader 0 (left) .. 1 (right), or null when no source reports it (only the demo does so far). */
+    volatile Double crossfader;
+    /** Extra fields for the state message, e.g. the VJ-Link connection; see {@link #setStateExtra}. */
+    private final Map<String, Object> stateExtras = new ConcurrentHashMap<>();
+
     private volatile String lastMixer = "";
     private volatile String lastState = "";
 
@@ -110,6 +115,10 @@ final class Hub {
 
         void setSource(DeckSource source) {
             this.source = source;
+        }
+
+        void setCrossfader(Double value) {
+            crossfader = value;
         }
 
         void setMixer(Map<String, Object> base) {
@@ -365,7 +374,18 @@ final class Hub {
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);
+        m.putAll(stateExtras);
         return m;
+    }
+
+    /** Sets (or with null removes) an extra field of the state message and sends the state to the browsers. */
+    void setStateExtra(String key, Object value) {
+        if (value == null) {
+            stateExtras.remove(key);
+        } else {
+            stateExtras.put(key, value);
+        }
+        broadcastState();
     }
 
     String stateJson() {

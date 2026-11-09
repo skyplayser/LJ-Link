@@ -214,6 +214,9 @@ final class Deck {
     }
     volatile int artVersion;
     volatile java.util.List<Map<String, Object>> cues = java.util.List.of();
+    /** Phrases of the track (rekordbox phrase analysis, or the demo): first beat of each phrase (1-based, ascending) and its
+     * kind (intro, up, chorus, down, outro); {@link #phraseEndBeat} is the beat after the last phrase. Null when unknown. */
+    volatile Phrases phrases;
     volatile byte[] detail;
 
     /** Stays the same while the device is on the network and across restarts (unlike {@link #number}). */
@@ -244,6 +247,7 @@ final class Deck {
         beatVersion++;
         loop = null;
         cues = java.util.List.of();
+        phrases = null;
     }
 
     /** Stores a new position sample; velocity is estimated from the previous sample. */

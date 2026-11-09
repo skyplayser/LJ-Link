@@ -168,9 +168,10 @@ Oben rechts im Menü (☰) und in der Werkzeugleiste:
 - **Vollbild** für den Einsatz am Pult.
 - **Bildschirm → Bildschirm wach halten – Alpha** (ab 1.7.6, standardmäßig an): Der Bildschirm dieses Geräts bleibt an, solange
   LJ Link angezeigt wird. Im Browser am Computer selbst wirkt das sofort; auf einem iPad oder Tablet über das Netzwerk
-  einmal auf die Seite tippen (siehe [Tablet](#tablet-oder-zweiter-bildschirm)). Auf dem Mac verhindert LJ Link außerdem
-  den Ruhezustand des Computers, solange ein Browser verbunden ist. Alpha: noch nicht an echten Geräten getestet,
-  auch nicht am Mac.
+  einmal auf die Seite tippen, dann versucht LJ Link es. Auf dem iPad ist das bisher nicht zuverlässig, dort die
+  automatische Sperre auf **Nie** stellen (siehe [Tablet](#tablet-oder-zweiter-bildschirm)). Auf dem Mac verhindert LJ Link außerdem
+  den Ruhezustand des Computers, solange ein Browser verbunden ist. Alpha: am Mac getestet; auf dem iPad bisher
+  nicht zuverlässig, Android und Windows noch nicht getestet.
 - **Verbindung trennen** beendet die laufende Verbindung.
 
 Die Einstellungen werden im Browser gespeichert.
@@ -196,11 +197,32 @@ Unter der Werkzeugleiste steht eine Adresse wie `http://192.168.1.50:8080`. Gib 
 Netzwerk** im Browser ein. Dort siehst du dieselbe Anzeige. Zum Starten und Beenden ist weiterhin der Computer nötig, auf dem
 LJ Link läuft.
 
-Damit das Tablet nicht dunkel wird: Ein Streifen direkt unter der Kopfzeile zeigt
+**Damit das iPad oder iPhone nicht dunkel wird (der sichere Weg):** Ohne HTTPS hat Safari keine echte
+Bildschirmsperre. LJ Link versucht es mit einem Notbehelf, und der klappt nicht auf jedem Gerät. Zuverlässig ist:
+
+1. iPad oder iPhone für den Gig ans Netzteil hängen.
+2. Einstellungen → **Anzeige & Helligkeit** → **Automatische Sperre** → **Nie**.
+3. Den **Stromsparmodus** ausschalten (Einstellungen → **Batterie**). Auf dem iPhone verkürzt er die automatische
+   Sperre auf 30 Sekunden, auf dem iPad vermutlich auch.
+
+Die Einstellung **Nie** gilt für alle Apps; nach dem Gig bei Bedarf zurückstellen. Vielleicht auch hilfreich, von uns
+nicht geprüft: **Geführter Zugriff** (Einstellungen → Bedienungshilfen) hält Safari mit LJ Link im Vordergrund, und in
+seinen Optionen lässt sich eventuell eine eigene automatische Sperre einstellen. Ob das zuverlässig hilft, ist unklar.
+
+**Das Tippen in LJ Link (Alpha):** Ein Streifen direkt unter der Kopfzeile zeigt
 **☼ Einmal hier tippen, damit der Bildschirm an bleibt**. Einmal auf den Streifen oder irgendwo sonst auf die Seite
-tippen, dann zeigt Menü (☰) → **Bildschirm** den Status **Aktiv (Video)**. Nach einem App-Wechsel eventuell noch einmal
-tippen. Über `http://` fehlt dem Browser die eigene Bildschirmsperre (sie braucht HTTPS), deshalb spielt LJ Link ein
-winziges stilles Video ab. Auf dem iPad kann das Musik einer anderen App pausieren, und LJ Link erscheint eventuell unter
+tippen, dann versucht LJ Link, den Bildschirm anzuhalten. Menü (☰) → **Bildschirm** zeigt erst
+**Status: Video startet …**, nach ein paar Sekunden **Status: Aktiv (Video) – der Bildschirm bleibt an**. Läuft das Video
+nicht an (nach etwa 6 Sekunden) oder hält iOS es an, etwa nach einem App-Wechsel, zeigt der Status
+**Video angehalten – bitte auf die Seite tippen**, und der Streifen kommt als
+**☼ Der Bildschirm kann ausgehen – hier tippen, um den Wachmodus neu zu starten** zurück; dann noch einmal tippen.
+Weitere Statustexte: **Wartet auf Tippen – einmal auf die Seite tippen** (vor dem ersten Tipp),
+**Pausiert, solange die Seite verdeckt ist**, **In diesem Browser nicht verfügbar**, **Aus**; am Computer selbst
+**Aktiv – der Bildschirm bleibt an**. Auf dem Video-Weg steht unter der Einstellung außerdem ein Hinweis, dass das auf
+iPad oder iPhone ohne HTTPS ein Notbehelf ist und die automatische Sperre **Nie** sicherer ist. Über `http://` fehlt dem Browser die eigene
+Bildschirmsperre (sie braucht HTTPS), deshalb spielt LJ Link ein winziges stilles Video ab. Auf dem iPad hat das den
+Bildschirm bisher nicht zuverlässig angehalten; deshalb zusätzlich die automatische Sperre wie oben auf **Nie** stellen.
+Auf dem iPad kann das Video außerdem Musik einer anderen App pausieren, und LJ Link erscheint eventuell unter
 „Wird gespielt“ (noch ungetestet).
 
 ![Tablet](images/de/tablet.png)
