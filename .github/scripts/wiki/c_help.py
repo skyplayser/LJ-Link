@@ -54,9 +54,14 @@ def _():
         SYM("beat-port", "Yellow note “Beat port 50001 is in use”", "Gelber Hinweis „Beat port 50001 is in use“", [
             [("rekordbox, Beat Link Trigger, SoundSwitch or a second LJ Link", "rekordbox, Beat Link Trigger, SoundSwitch oder ein zweites LJ Link"), ("close it, search again; until then positions are estimated", "schließen, erneut suchen; bis dahin werden Positionen geschätzt")],
         ]),
-        SYM("jumps", "The waveform jumps or stutters", "Die Waveform springt oder ruckelt", [
+        SYM("jumps", "The waveform lags behind, jumps or stutters", "Die Waveform hängt hinterher, springt oder ruckelt", [
+            [("LJ Link 1.7.7 or older: one slow or sleeping device with the page open (for example an iPad) could hold up all other browsers, delays on the way to the browser were not compensated, and brief gaps in the position from the players could make the waveform jump", "LJ Link 1.7.7 oder älter: Ein einzelnes langsames oder schlafendes Gerät mit offener Seite (zum Beispiel ein iPad) konnte alle anderen Browser aufhalten, Verzögerungen auf dem Weg zum Browser wurden nicht ausgeglichen, und kurze Lücken in der Position von den Playern konnten die Waveform springen lassen"),
+             ("update to 1.7.8 or newer (fix not tested on real hardware yet, alpha)", "auf 1.7.8 oder neuer aktualisieren (Korrektur noch nicht an echter Hardware getestet, Alpha)")],
+            [("the page is still open on devices you are not using (old tab, iPad in standby)", "die Seite ist noch auf Geräten offen, die du gerade nicht nutzt (alter Tab, iPad im Standby)"), ("close the page there", "die Seite dort schließen")],
+            [("the display has fallen behind after a long time", "die Anzeige ist nach langer Zeit hinterher"), ("reload the page: Cmd+R on a Mac, Ctrl+R or F5 on Windows, the reload button in Safari on an iPad", "die Seite neu laden: Cmd+R am Mac, Strg+R oder F5 unter Windows, auf dem iPad die Taste zum Neuladen in Safari")],
             [("CDJ-2000NXS2 and older report position only between beats", "CDJ-2000NXS2 und älter melden die Position nur zwischen Beats"), ("normal after a cue or loop; the CDJ-3000 is exact", "nach Cue oder Loop normal; der CDJ-3000 ist genau")],
             [("busy network", "ausgelastetes Netz"), ("own switch for the DJ gear", "eigener Switch für die DJ-Geräte")],
+            [("still lagging or jumping", "hängt oder springt weiter"), ("please [send a report](#report) while it happens", "bitte einen [Bericht senden](#report), während es passiert")],
         ]),
         SYM("onair", "ON AIR shows the wrong deck", "ON AIR zeigt das falsche Deck", [
             [("player number and mixer channel do not match", "Player-Nummer und Mixerkanal passen nicht"), ("player 1 on channel 1, and so on", "Player 1 auf Kanal 1 und so weiter")],
@@ -93,7 +98,7 @@ def _():
             [("Windows hides it", "Windows blendet es aus"), ("behind the arrow next to the clock; drag it out", "hinter dem Pfeil neben der Uhr; herausziehen")],
         ]),
         SYM("screen-off", "The screen goes dark (Mac, iPad, tablet)", "Bildschirm geht aus (Mac, iPad, Tablet)", [
-            [("older than 1.7.6", "älter als 1.7.6"), ("update; 1.7.6 keeps the screen on (alpha; tested on a Mac, on the iPad not reliable so far, Android and Windows not tested yet)", "aktualisieren; 1.7.6 hält den Bildschirm an (Alpha; am Mac getestet, auf dem iPad bisher nicht zuverlässig, Android und Windows noch nicht getestet)")],
+            [("older than 1.7.6", "älter als 1.7.6"), ("update; 1.7.6 keeps the screen on (alpha; works on a Mac, on the iPad not reliable so far, Android and Windows not tested yet)", "aktualisieren; 1.7.6 hält den Bildschirm an (Alpha; läuft am Mac, auf dem iPad bisher nicht zuverlässig, Android und Windows noch nicht getestet)")],
             [("iPad or iPhone over `http://<address>:8080`: without HTTPS Safari has no real screen lock; LJ Link tries a workaround (alpha) that does not work on every device and has not been reliable on the iPad so far", "iPad oder iPhone über `http://<Adresse>:8080`: Ohne HTTPS hat Safari keine echte Bildschirmsperre; LJ Link versucht es mit einem Notbehelf (Alpha), der nicht auf jedem Gerät klappt und auf dem iPad bisher nicht zuverlässig war"),
              ("the reliable way: power adapter on, Settings → **Display & Brightness** → **Auto-Lock** → **Never**, and **Low Power Mode** off (on the iPhone it shortens auto-lock to 30 seconds, probably on the iPad too). See [tablet](wiki-case-tablet.html#keep-awake-ios)", "der sichere Weg: Netzteil dran, Einstellungen → **Anzeige & Helligkeit** → **Automatische Sperre** → **Nie**, und den **Stromsparmodus** ausschalten (auf dem iPhone verkürzt er die automatische Sperre auf 30 Sekunden, auf dem iPad vermutlich auch). Siehe [Tablet](wiki-case-tablet.html#keep-awake-ios)")],
             [("tablet over the network, strip **☼ Tap here once to keep the screen on** right below the header", "Tablet über das Netzwerk, Streifen **☼ Einmal hier tippen, damit der Bildschirm an bleibt** direkt unter der Kopfzeile"),
@@ -116,8 +121,8 @@ def _():
               ("**Send by email** (to fehlermelden@nextphilm.de) or **Report on GitHub**. Or ask on [Discord](" + DISCORD + ").", "**Per E-Mail senden** (an fehlermelden@nextphilm.de) oder **Auf GitHub melden**. Oder auf [Discord](" + DISCORD + ") fragen.")),
     )
     return (("Troubleshooting by symptom", "Fehlersuche nach Symptom"),
-            ("LJ Link troubleshooting by symptom: nothing found, players twice, direct cable bug, no waveform, port in use, Denon reconnects, desk does not react, screen goes dark, icon and updates, how to report.",
-             "LJ-Link-Fehlersuche nach Symptom: nichts gefunden, Player doppelt, Direktkabel-Fehler, keine Waveform, Port belegt, Denon verbindet neu, Pult reagiert nicht, Bildschirm geht aus, Symbol und Updates, wie man meldet."),
+            ("LJ Link troubleshooting by symptom: nothing found, players twice, direct cable bug, no waveform, waveform lags or jumps, port in use, Denon reconnects, desk does not react, screen goes dark, icon and updates, how to report.",
+             "LJ-Link-Fehlersuche nach Symptom: nichts gefunden, Player doppelt, Direktkabel-Fehler, keine Waveform, Waveform hängt oder springt, Port belegt, Denon verbindet neu, Pult reagiert nicht, Bildschirm geht aus, Symbol und Updates, wie man meldet."),
             ("Help", "Hilfe"), ("Troubleshooting", "Fehlersuche"),
             ("Find the cause by what you see.", "Finde die Ursache über das, was du siehst."), body)
 

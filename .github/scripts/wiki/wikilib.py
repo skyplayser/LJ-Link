@@ -8,6 +8,34 @@ BASE = "https://skyplayser.github.io/LJ-Link/"
 DISCORD = "https://discord.gg/N6DMca4Bjk"
 REPO = "https://github.com/skyplayser/LJ-Link"
 
+# Pages about another maker's gear: the title and the heading start with our own name, and a note below the heading says
+# that LJ Link is independent (file -> (what it works with en, de, the maker)).
+BRANDS = {
+    "wiki-pioneer.html": ("Pioneer DJ equipment", "Geräten von Pioneer DJ", "AlphaTheta / Pioneer DJ"),
+    "wiki-denon.html": ("Denon DJ equipment", "Geräten von Denon DJ", "inMusic / Denon DJ"),
+    "wiki-serato.html": ("Serato DJ Pro", "Serato DJ Pro", "Serato"),
+    "wiki-ableton-link.html": ("Ableton Link", "Ableton Link", "Ableton AG"),
+    "wiki-grandma2.html": ("grandMA2 consoles and grandMA2 onPC", "grandMA2-Pulten und grandMA2 onPC", "MA Lighting"),
+    "wiki-grandma3.html": ("grandMA3 consoles and grandMA3 onPC", "grandMA3-Pulten und grandMA3 onPC", "MA Lighting"),
+    "wiki-chamsys.html": ("ChamSys MagicQ", "ChamSys MagicQ", "ChamSys"),
+    "wiki-daslight.html": ("Daslight", "Daslight", "Nicolaudie / Daslight"),
+    "wiki-wolfmix.html": ("the Wolfmix", "dem Wolfmix", "Wolfmix"),
+}
+
+
+def compat_note(file):
+    """The independence note below the heading of a maker page (empty for other pages)."""
+    if file not in BRANDS:
+        return ""
+    en, de, maker = BRANDS[file]
+    extra = (" Ableton and Link are trademarks of Ableton AG.", " Ableton und Link sind Marken der Ableton AG.") \
+        if maker == "Ableton AG" else ("", "")
+    return el("p", "LJ Link is an independent program that works with %s. It is not a product of, or endorsed by, %s.%s"
+              % (en, maker, extra[0]),
+              "LJ Link ist ein unabhängiges Programm und arbeitet mit %s zusammen. Es ist kein Produkt %s und wird "
+              "vom Hersteller nicht unterstützt.%s" % (de, "der Ableton AG" if maker == "Ableton AG" else "von " + maker, extra[1]),
+              cls="small compat")
+
 
 def esc(s):
     return html.escape(s, quote=True)
@@ -267,12 +295,14 @@ def _flat():
 
 
 def _head(file, title, desc):
+    og = title if title[0].startswith("LJ Link") else ("LJ Link Wiki – " + title[0], "LJ Link Wiki – " + title[1])
+    suffix = " | Wiki" if title[0].startswith("LJ Link") else " | LJ Link Wiki"  # no "LJ Link" twice
     return f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-de="{esc(title[1])} | LJ Link Wiki">{esc(title[0])} | LJ Link Wiki</title>
+<title data-de="{esc(title[1])}{suffix}">{esc(title[0])}{suffix}</title>
 <meta name="description" content="{esc(desc[0])}" data-de-content="{esc(desc[1])}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="SKYPLAYSER / NEXTPHILM">
@@ -287,7 +317,7 @@ def _head(file, title, desc):
 <meta property="og:site_name" content="LJ Link">
 <meta property="og:locale" content="en_US" data-de-content="de_DE">
 <meta property="og:locale:alternate" content="de_DE" data-de-content="en_US">
-<meta property="og:title" content="LJ Link Wiki – {esc(title[0])}" data-de-content="LJ Link Wiki – {esc(title[1])}">
+<meta property="og:title" content="{esc(og[0])}" data-de-content="{esc(og[1])}">
 <meta property="og:description" content="{esc(desc[0])}" data-de-content="{esc(desc[1])}">
 <meta property="og:image" content="{BASE}images/og.png">
 <meta property="og:image:width" content="1200">
@@ -322,6 +352,9 @@ def render(site: Path, footer: str):
         global CUR
         CUR = Page()
         title, desc, kicker, h1, lead, body = PAGES[file]()
+        if file in BRANDS:  # our own name first on maker pages
+            title = ("LJ Link: " + title[0], "LJ Link: " + title[1])
+            h1 = ("LJ Link: " + h1[0], "LJ Link: " + h1[1])
         toc = CUR.toc
         # section tabs
         tabs = '<nav class="dtabs" aria-label="Wiki sections" data-de-aria-label="Wiki-Bereiche"><div class="dwrap">'
@@ -361,6 +394,7 @@ def render(site: Path, footer: str):
   <main class="dbody article wiki">
     {crumbs}
     <h1><span class="kicker" data-de="{esc(kicker[1])}">{esc(kicker[0])}</span><span data-de="{esc(h1[1])}">{esc(h1[0])}</span></h1>
+    {compat_note(file)}
     {el("p", lead[0], lead[1], cls="tag")}
     {body}
     <div class="adm community"><p class="adm-t"><span class="adm-i" aria-hidden="true">💬</span><span data-de="Fehlt etwas oder stimmt etwas nicht?">Something missing or wrong?</span></p>{P("Ask in our [Discord](" + DISCORD + ") or [report a problem](wiki-troubleshooting.html#report). Reports from real gear help most, also when something does not work.", "Frag auf unserem [Discord](" + DISCORD + ") oder [melde ein Problem](wiki-troubleshooting.html#report). Am meisten helfen Berichte von echten Geräten, auch wenn etwas nicht klappt.")}</div>

@@ -38,7 +38,7 @@ final class Deck {
     volatile long positionMs = -1;
     /** Measured playback speed (1.0 = normal, negative = backwards, 0 = standing). Follows scratching. */
     volatile double velocity;
-    /** Counts position samples so the {@link Hub} knows when there is something new to send. */
+    /** Counts position samples (the {@link Hub} sends a position when its value changed, see ADR-024). */
     volatile long positionSample;
     /** {@link System#nanoTime()} when the latest position sample arrived here, for predicting the position between samples. */
     volatile long positionArrivedNanos;
@@ -300,6 +300,14 @@ final class Deck {
         positionMs = ms;
         positionArrivedNanos = System.nanoTime();
         positionSample++;
+    }
+
+    /** One consistent reading of the latest position sample (position, speed, sample count, arrival time). */
+    record PositionSnapshot(long ms, double velocity, long sample, long atNanos) {}
+
+    /** The latest sample as one consistent set; {@link #samplePosition} writes these fields together. */
+    synchronized PositionSnapshot positionSnapshot() {
+        return new PositionSnapshot(positionMs, velocity, positionSample, positionArrivedNanos);
     }
 
     /** The position now, carried on from the latest sample at the measured speed; -1 when unknown. */

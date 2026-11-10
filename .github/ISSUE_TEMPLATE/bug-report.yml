@@ -24,4 +24,7 @@ body:
     attributes:
       label: Log
       render: text
-      description: Output of the app if you started it from a terminal
+      description: >-
+        Output of the app if you started it from a terminal, or the diagnostics report.
+        Issues are public. Before posting logs or the diagnostics report, remove anything private: names, email addresses,
+        IP addresses you do not want to share, file paths with your user name, serial numbers.

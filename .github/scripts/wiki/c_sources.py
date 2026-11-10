@@ -21,8 +21,8 @@ def _():
             [("Master, on air", "Master, auf Sendung"), ("master, ON AIR per channel", "Master, ON AIR pro Kanal"), ("master, fader levels", "Master, Fader-Stellungen"), N, N],
             [("Tempo to the desk", "Tempo ans Pult"), Y, Y, ("track BPM", "Track-BPM"), Y],
         ]),
-        ADM("tip", ("LJ Link can also **send** to Ableton Link and lead the session with the tempo, beats and bars of a Pioneer or Denon deck, tested with Daslight: [Ableton Link → Send](wiki-ableton-link.html#send).",
-                      "LJ Link kann auch an Ableton Link **senden** und die Session mit Tempo, Beats und Takten eines Pioneer- oder Denon-Decks führen, getestet mit Daslight: [Ableton Link → Senden](wiki-ableton-link.html#send).")),
+        ADM("tip", ("LJ Link can also **send** to Ableton Link and lead the session with the tempo, beats and bars of a Pioneer or Denon deck, works with Daslight: [Ableton Link → Send](wiki-ableton-link.html#send).",
+                      "LJ Link kann auch an Ableton Link **senden** und die Session mit Tempo, Beats und Takten eines Pioneer- oder Denon-Decks führen, läuft mit Daslight: [Ableton Link → Senden](wiki-ableton-link.html#send).")),
         P("All sources can run at the same time: **Search automatically** looks for all of them, and the decks appear side by side.",
           "Alle Quellen können gleichzeitig laufen: **Automatisch suchen** sucht nach allen, und die Decks erscheinen nebeneinander."),
         CARDS(("🟦", "wiki-pioneer.html", "Pioneer Pro DJ Link", "Pioneer Pro DJ Link", "CDJ, XDJ and DJM over the network.", "CDJ, XDJ und DJM über das Netzwerk."),
@@ -87,7 +87,7 @@ def _():
                 P("rekordbox, Beat Link Trigger, SoundSwitch or a second LJ Link listens for beats. Close it and search again. Until then positions are estimated.", "rekordbox, Beat Link Trigger, SoundSwitch oder ein zweites LJ Link hört auf Beats. Schließen und erneut suchen. Bis dahin werden Positionen geschätzt.")),
         P("More: [troubleshooting](wiki-troubleshooting.html).", "Mehr: [Fehlersuche](wiki-troubleshooting.html)."),
     )
-    return (("Pioneer Pro DJ Link: CDJ, XDJ and DJM", "Pioneer Pro DJ Link: CDJ, XDJ und DJM"),
+    return (("Pioneer Pro DJ Link – CDJ, XDJ and DJM", "Pioneer Pro DJ Link – CDJ, XDJ und DJM"),
             ("Connect Pioneer CDJ-3000, CDJ-2000NXS2, XDJ and DJM mixers to LJ Link over Pro DJ Link: network, player numbers, rekordbox export, limits and problems.",
              "Pioneer CDJ-3000, CDJ-2000NXS2, XDJ und DJM-Mischpulte über Pro DJ Link mit LJ Link verbinden: Netzwerk, Player-Nummern, rekordbox-Export, Grenzen und Probleme."),
             ("DJ sources", "DJ-Quellen"), ("Pioneer Pro DJ Link", "Pioneer Pro DJ Link"),
@@ -123,7 +123,7 @@ def _():
         DETAILS("No waveform for a track", "Keine Waveform für einen Track",
                 P("The track must be analysed in Engine DJ or on the device. Tracks from streaming services have no stored waveform.", "Der Track muss in Engine DJ oder am Gerät analysiert sein. Tracks von Streaming-Diensten haben keine gespeicherte Waveform.")),
     )
-    return (("Denon StageLinQ: Prime 4+, SC6000, Prime Go", "Denon StageLinQ: Prime 4+, SC6000, Prime Go"),
+    return (("Denon StageLinQ – Prime 4+, SC6000, Prime Go", "Denon StageLinQ – Prime 4+, SC6000, Prime Go"),
             ("Connect Denon DJ Prime 4+, Prime 4, Prime Go and SC6000 to LJ Link over StageLinQ: cable or Wi-Fi, fader positions, waveforms from the Engine library, problems.",
              "Denon DJ Prime 4+, Prime 4, Prime Go und SC6000 über StageLinQ mit LJ Link verbinden: Kabel oder WLAN, Fader-Stellungen, Waveforms aus der Engine-Bibliothek, Probleme."),
             ("DJ sources", "DJ-Quellen"), ("Denon StageLinQ", "Denon StageLinQ"),
@@ -133,8 +133,8 @@ def _():
 @page("wiki-serato.html", "Serato DJ Pro", "Serato DJ Pro")
 def _():
     body = SEC(
-        ADM("beta", ("Tested with Serato DJ Pro 3.x on macOS with MP3 and AIFF. Windows is expected to work but not tested yet.",
-                     "Getestet mit Serato DJ Pro 3.x unter macOS mit MP3 und AIFF. Windows sollte gehen, ist aber noch nicht getestet.")),
+        ADM("beta", ("Works with Serato DJ Pro 3.x on macOS with MP3 and AIFF. Windows is expected to work but not tested yet.",
+                     "Läuft mit Serato DJ Pro 3.x unter macOS mit MP3 und AIFF. Windows sollte gehen, ist aber noch nicht getestet.")),
         H2("How it works", "So funktioniert es"),
         P("Serato has no live interface for other programs. While it runs, it writes a log that names the file on each deck. LJ Link follows this log and reads title, artist, BPM, key, length, waveform overview, beat grid and cues from the tags Serato writes into the file.",
           "Serato hat keine Live-Schnittstelle für andere Programme. Während es läuft, schreibt es ein Protokoll, das die Datei auf jedem Deck nennt. LJ Link folgt diesem Protokoll und liest Titel, Artist, BPM, Tonart, Länge, Waveform-Übersicht, Beatgrid und Cues aus den Tags, die Serato in die Datei schreibt."),
@@ -165,12 +165,12 @@ def _():
           "Ableton Link hält Tempo und Beat mehrerer Programme über das Netzwerk im Gleichschritt. Serato DJ Pro, Traktor, Ableton Live, Resolume, Daslight und viele Apps unterstützen es. LJ Link nutzt es in beide Richtungen:"),
         TABLE([("Direction", "Richtung"), ("What happens", "Was passiert"), ("Status", "Stand")], [
             [("[**Receive**](#receive)", "[**Empfangen**](#receive)"), ("LJ Link listens to the session and shows its tempo as a deck, for the light desk", "LJ Link hört der Session zu und zeigt ihr Tempo als Deck, fürs Lichtpult"), BADGE("beta")],
-            [("[**Send**](#send)", "[**Senden**](#send)"), ("LJ Link joins the session and gives it the tempo, beats and bars of a DJ deck", "LJ Link tritt der Session bei und gibt ihr Tempo, Beats und Takte eines DJ-Decks vor"), BADGE("stable", "Tested", "Getestet")],
+            [("[**Send**](#send)", "[**Senden**](#send)"), ("LJ Link joins the session and gives it the tempo, beats and bars of a DJ deck", "LJ Link tritt der Session bei und gibt ihr Tempo, Beats und Takte eines DJ-Decks vor"), BADGE("stable", "Works", "Läuft")],
         ]),
 
         H2("Receive: the tempo of a Link session", "Empfangen: das Tempo einer Link-Session", "receive"),
-        ADM("beta", ("Built from Ableton’s published protocol and tested against it, but not yet tried with a real session at a gig.",
-                     "Nach dem veröffentlichten Protokoll von Ableton gebaut und dagegen getestet, aber noch nicht mit einer echten Session auf einem Gig ausprobiert.")),
+        ADM("beta", ("Built from Ableton’s published protocol and checked against it, but not yet tried with a real session at a gig.",
+                     "Nach dem veröffentlichten Protokoll von Ableton gebaut und dagegen geprüft, aber noch nicht mit einer echten Session auf einem Gig ausprobiert.")),
         P("LJ Link listens to the session and takes its **tempo**. Receiving alone never joins or changes the session.",
           "LJ Link hört der Session zu und nimmt ihr **Tempo**. Nur Empfangen tritt der Session nie bei und ändert nichts."),
         H3("When to use it", "Wann du es nutzt"),
@@ -188,8 +188,8 @@ def _():
            ("rekordbox may only follow a Link session and not lead it; then it gives no tempo.", "rekordbox folgt einer Link-Session eventuell nur und führt sie nicht; dann liefert es kein Tempo.")),
 
         H2("Send: lead the Link session with the DJ tempo", "Senden: die Link-Session mit dem DJ-Tempo führen", "send"),
-        ADM("tip", ("**Tested** with Daslight (BPM source *Ableton Link Sync*): the tempo follows the SEND BPM deck at once and stays in step. Before that it was checked against Ableton’s own Link library on one computer, with the beat about 1 ms off the deck. Ableton Live, Resolume and other Link programs use the same protocol; if one of them behaves differently, please [tell us](wiki-troubleshooting.html#report).",
-                    "**Getestet** mit Daslight (BPM Source *Ableton Link Sync*): Das Tempo folgt dem SEND-BPM-Deck sofort und bleibt im Gleichschritt. Vorher wurde es auf einem Computer gegen Abletons eigene Link-Bibliothek geprüft, der Beat lag etwa 1 ms neben dem Deck. Ableton Live, Resolume und andere Link-Programme nutzen dasselbe Protokoll; verhält sich eins anders, [sag uns bitte](wiki-troubleshooting.html#report) Bescheid."), title=("Status", "Stand")),
+        ADM("tip", ("**Works** with Daslight (BPM source *Ableton Link Sync*): the tempo follows the SEND BPM deck at once and stays in step. Before that it was checked against Ableton’s own Link library on one computer, with the beat about 1 ms off the deck. Ableton Live, Resolume and other Link programs use the same protocol; if one of them behaves differently, please [tell us](wiki-troubleshooting.html#report). This output is the one exception to “LJ Link only listens”: it is off by default, and once it is on, DJ software that joins the same Link session (such as Traktor) also follows LJ Link’s tempo.",
+                    "**Läuft** mit Daslight (BPM Source *Ableton Link Sync*): Das Tempo folgt dem SEND-BPM-Deck sofort und bleibt im Gleichschritt. Vorher wurde es auf einem Computer gegen Abletons eigene Link-Bibliothek geprüft, der Beat lag etwa 1 ms neben dem Deck. Ableton Live, Resolume und andere Link-Programme nutzen dasselbe Protokoll; verhält sich eins anders, [sag uns bitte](wiki-troubleshooting.html#report) Bescheid. Dieser Ausgang ist die einzige Ausnahme von „LJ Link hört nur zu“: Er ist standardmäßig aus, und ist er an, folgt auch DJ-Software, die derselben Link-Session beitritt (etwa Traktor), dem Tempo von LJ Link."), title=("Status", "Stand")),
         P("LJ Link takes part in the Link session like any other program and gives it the tempo of the deck chosen under [SEND BPM](wiki-lighting-desks.html#send-bpm). Every program with Link in the network then runs at the DJ’s tempo: visuals in Resolume, a backing track in Ableton Live, a light program with Link, an app on a phone. With **beats and bars** switched on, their beat and the start of their bar also sit on the beat grid of the deck.",
           "LJ Link nimmt wie jedes andere Programm an der Link-Session teil und gibt ihr das Tempo des Decks vor, das unter [SEND BPM](wiki-lighting-desks.html#send-bpm) gewählt ist. Jedes Programm mit Link im Netzwerk läuft dann im Tempo des DJs: Visuals in Resolume, ein Playback in Ableton Live, ein Lichtprogramm mit Link, eine App auf dem Handy. Mit **Beats und Takten** liegen auch ihr Beat und ihr Taktanfang auf dem Beatgrid des Decks."),
         H3("When to use it", "Wann du es nutzt"),
@@ -233,8 +233,8 @@ def _():
                         "Ausprobiert? Schreib das Ergebnis in unseren [Discord](" + DISCORD + ") oder [melde es](wiki-troubleshooting.html#report): welche Player, welches Link-Programm, ob Tempo und Beat im Gleichschritt blieben. Das hilft anderen Nutzern."),
             title=("Help us test", "Hilf beim Testen")),
     )
-    return (("Ableton Link: receive and send the tempo", "Ableton Link: Tempo empfangen und senden"),
-            ("Ableton Link in LJ Link: take the tempo of a Link session (Serato, Traktor, Live) for the light desk, or lead the session with the tempo, beats and bars of Pioneer and Denon decks (tested with Daslight).",
-             "Ableton Link in LJ Link: das Tempo einer Link-Session (Serato, Traktor, Live) fürs Lichtpult übernehmen, oder die Session mit Tempo, Beats und Takten von Pioneer- und Denon-Decks führen (getestet mit Daslight)."),
+    return (("Ableton Link – receive and send the tempo", "Ableton Link – Tempo empfangen und senden"),
+            ("Ableton Link in LJ Link: take the tempo of a Link session (Serato, Traktor, Live) for the light desk, or lead the session with the tempo, beats and bars of Pioneer and Denon decks (works with Daslight).",
+             "Ableton Link in LJ Link: das Tempo einer Link-Session (Serato, Traktor, Live) fürs Lichtpult übernehmen, oder die Session mit Tempo, Beats und Takten von Pioneer- und Denon-Decks führen (läuft mit Daslight)."),
             ("DJ sources", "DJ-Quellen"), ("Ableton Link", "Ableton Link"),
             ("Take the tempo from Link, or give Link the DJ’s tempo and beat.", "Das Tempo von Link nehmen, oder Link Tempo und Beat des DJs geben."), body)

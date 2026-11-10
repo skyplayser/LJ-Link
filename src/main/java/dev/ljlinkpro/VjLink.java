@@ -203,7 +203,7 @@ final class VjLink {
         hello.put("t", "hello");
         hello.put("version", VERSION);
         hello.put("privacy", Privacy.enabled());
-        hello.put("app", "LJ-Link PRO");
+        hello.put("app", "LJ Link");
         hello.put("appVersion", appVersion);
         out.add(write(hello));
         for (Deck d : decks()) {

@@ -37,7 +37,7 @@ def _():
             [("Direct cable or router?", "Direktkabel oder Router?"), ("**Router or switch**, always when you can. Direct cable only for one player. [Compared](wiki-network-setups.html)", "**Router oder Switch**, immer wenn es geht. Direktkabel nur für einen Player. [Vergleich](wiki-network-setups.html)")],
             [("Wi-Fi or cable?", "WLAN oder Kabel?"), ("**Cable** for Pioneer and the computer. Wi-Fi is fine for tablets and Denon.", "**Kabel** für Pioneer und den Computer. WLAN geht für Tablets und Denon.")],
             [("Where does LJ Link run?", "Wo läuft LJ Link?"), ("On a computer in the DJ network. With Serato: on the DJ’s laptop.", "Auf einem Computer im DJ-Netz. Mit Serato: auf dem Laptop des DJs.")],
-            [("Which desk works best?", "Welches Pult geht am besten?"), ("grandMA2, onPC and Daslight are tested. grandMA3 and Wolfmix are beta.", "grandMA2, onPC und Daslight sind getestet. grandMA3 und Wolfmix sind Beta.")],
+            [("Which desk works best?", "Welches Pult geht am besten?"), ("grandMA2, onPC and Daslight work. grandMA3 and Wolfmix are beta.", "grandMA2, onPC und Daslight laufen. grandMA3 und Wolfmix sind Beta.")],
             [("Several floors?", "Mehrere Floors?"), ("One LJ Link computer per floor, and under Settings → **Devices** tick only the devices of that floor.", "Ein LJ-Link-Computer pro Floor, und unter Einstellungen → **Geräte** nur die Geräte dieses Floors anhaken.")],
         ]),
     )
@@ -225,8 +225,8 @@ def _():
               ("Tempo to the desk: LINK on the DJ laptop, the desk must be reachable from there. Under SEND BPM choose the Ableton Link deck for the pitched tempo.", "Tempo ans Pult: LINK am DJ-Laptop, das Pult muss von dort erreichbar sein. Unter SEND BPM das Ableton-Link-Deck für das gepitchte Tempo wählen.")),
         ADM("info", ("Serato decks have **no playhead**: you see what is loaded and its waveform, but not where the track is. Count with the beat grid and the tempo.", "Serato-Decks haben **keinen Playhead**: Du siehst, was geladen ist, und die Waveform, aber nicht, wo der Track steht. Mit Beatgrid und Tempo mitzählen.")),
         H2("Limits", "Grenzen"),
-        UL(("MP3 and AIFF tested; FLAC and M4A not read yet.", "MP3 und AIFF getestet; FLAC und M4A werden noch nicht gelesen."),
-           ("Tested on macOS. Windows not tested yet.", "Getestet unter macOS. Windows noch nicht getestet."),
+        UL(("MP3 and AIFF work; FLAC and M4A not read yet.", "MP3 und AIFF laufen; FLAC und M4A werden noch nicht gelesen."),
+           ("Works on macOS. Windows not tested yet.", "Läuft unter macOS. Windows noch nicht getestet."),
            ("Hotel or venue Wi-Fi often isolates devices: use your own travel router.", "Hotel- oder Location-WLAN trennt Geräte oft voneinander: einen eigenen Reiserouter nehmen.")),
     )
     return (("Use case: Serato on the DJ laptop", "Anwendungsfall: Serato auf dem DJ-Laptop"),

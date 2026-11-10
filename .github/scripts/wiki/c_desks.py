@@ -16,10 +16,10 @@ def _():
             [("[grandMA3, grandMA3 onPC](wiki-grandma3.html)", "[grandMA3, grandMA3 onPC](wiki-grandma3.html)"), BADGE("beta"), ("OSC, UDP (e.g. 8000)", "OSC, UDP (z. B. 8000)"), "<code>Master 3.1 At BPM 128</code>"],
             [("[Wolfmix (WTOOLS)](wiki-wolfmix.html)", "[Wolfmix (WTOOLS)](wiki-wolfmix.html)"), BADGE("beta"), ("Ableton Link (recommended) or OS2L, TCP 5000", "Ableton Link (empfohlen) oder OS2L, TCP 5000"), ("tempo, beats and bars over Link; or every beat with its number over OS2L", "Tempo, Beats und Takte über Link; oder jeder Beat mit Nummer über OS2L")],
             [("[ChamSys MagicQ](wiki-chamsys.html)", "[ChamSys MagicQ](wiki-chamsys.html)"), BADGE("alpha"), ("OSC taps, UDP (e.g. 8000)", "OSC-Taps, UDP (z. B. 8000)"), ("an OSC message without value on every beat, for Tap to Time", "eine OSC-Nachricht ohne Wert auf jedem Beat, für Tap to Time")],
-            [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("stable", "Tested", "Getestet"), ("Ableton Link (recommended) or OSC tap, UDP 7000", "Ableton Link (empfohlen) oder OSC-Tap, UDP 7000"), ("tempo, beats and bars over Link; or a tap on every beat for BPM Tap", "Tempo, Beats und Takte über Link; oder ein Tap auf jedem Beat für BPM Tap")],
+            [("[Daslight](wiki-daslight.html)", "[Daslight](wiki-daslight.html)"), BADGE("stable", "Works", "Läuft"), ("Ableton Link (recommended) or OSC tap, UDP 7000", "Ableton Link (empfohlen) oder OSC-Tap, UDP 7000"), ("tempo, beats and bars over Link; or a tap on every beat for BPM Tap", "Tempo, Beats und Takte über Link; oder ein Tap auf jedem Beat für BPM Tap")],
             [("[Own OSC target](wiki-other-desks.html#osc)", "[Eigenes OSC-Ziel](wiki-other-desks.html#osc)"), BADGE("gen"), "OSC, UDP", ("a number at your address", "eine Zahl an deine Adresse")],
             [("[QLC+ and other OS2L programs](wiki-other-desks.html#os2l)", "[QLC+ und andere OS2L-Programme](wiki-other-desks.html#os2l)"), BADGE("alpha"), "OS2L, TCP", ("beats and tempo", "Beats und Tempo")],
-            [("[Programs with Ableton Link](wiki-ableton-link.html#send)", "[Programme mit Ableton Link](wiki-ableton-link.html#send)"), BADGE("stable", "Tested", "Getestet"), "Ableton Link, UDP 20808", ("tempo, beats and bars", "Tempo, Beats und Takte")],
+            [("[Programs with Ableton Link](wiki-ableton-link.html#send)", "[Programme mit Ableton Link](wiki-ableton-link.html#send)"), BADGE("stable", "Works", "Läuft"), "Ableton Link, UDP 20808", ("tempo, beats and bars", "Tempo, Beats und Takte")],
             [("[dot2](wiki-other-desks.html#dot2)", "[dot2](wiki-other-desks.html#dot2)"), BADGE("no"), "–", ("takes no network commands", "nimmt keine Netzwerk-Befehle an")],
         ]),
         H2("How the link works", "So funktioniert der Link"),
@@ -66,8 +66,8 @@ def _():
 @page("wiki-grandma2.html", "grandMA2", "grandMA2")
 def _():
     body = SEC(
-        ADM("tip", ("**Stable:** search, Telnet login and `SpecialMaster 3.16 At {bpm}` were tested on a real grandMA2 onPC. A hardware console uses the same software and is expected to behave the same; not tested yet.",
-                    "**Stabil:** Suche, Telnet-Login und `SpecialMaster 3.16 At {bpm}` wurden an einem echten grandMA2 onPC getestet. Ein Hardware-Pult nutzt dieselbe Software und sollte sich gleich verhalten; noch nicht getestet."),
+        ADM("tip", ("**Stable:** search, Telnet login and `SpecialMaster 3.16 At {bpm}` ran on a real grandMA2 onPC. A hardware console uses the same software and is expected to behave the same; not tested yet.",
+                    "**Stabil:** Suche, Telnet-Login und `SpecialMaster 3.16 At {bpm}` liefen an einem echten grandMA2 onPC. Ein Hardware-Pult nutzt dieselbe Software und sollte sich gleich verhalten; noch nicht getestet."),
             title=("Status", "Stand")),
         H2("How it works", "So funktioniert es"),
         P("The grandMA2 has **no OSC input**. LJ Link connects like a Telnet program to the command line of the desk (TCP port 30000), logs in as a user of the show and types the command for the speed master.",
@@ -109,7 +109,7 @@ def _():
                      "Nicht über Telnet ins Fixture-Setup oder den Zeitplan gehen: Laut MA sperrt das andere Benutzer ohne Warnung aus. LJ Link schickt nur den eingetragenen Befehl.")),
         REPORT,
     )
-    return (("grandMA2 and grandMA2 onPC: BPM over Telnet", "grandMA2 und grandMA2 onPC: BPM über Telnet"),
+    return (("grandMA2 and grandMA2 onPC – BPM over Telnet", "grandMA2 und grandMA2 onPC – BPM über Telnet"),
             ("Send the DJ tempo to a grandMA2 or grandMA2 onPC speed master with LJ Link: switch on Telnet, user and password, speed master, search, test and problems.",
              "Das DJ-Tempo mit LJ Link auf einen Speedmaster am grandMA2 oder grandMA2 onPC schicken: Telnet einschalten, Benutzer und Passwort, Speedmaster, Suche, Test und Probleme."),
             ("Light desks · stable", "Lichtpulte · stabil"), ("grandMA2 and onPC", "grandMA2 und onPC"),
@@ -119,8 +119,8 @@ def _():
 @page("wiki-grandma3.html", "grandMA3", "grandMA3")
 def _():
     body = SEC(
-        ADM("beta", ("Built from the grandMA3 manual (OSC `/cmd`, `Master 3.1 At BPM`) and tested against a simulation. **Not yet confirmed on a real grandMA3 or onPC.**",
-                     "Nach dem grandMA3-Handbuch gebaut (OSC `/cmd`, `Master 3.1 At BPM`) und gegen eine Simulation getestet. **Noch nicht an einem echten grandMA3 oder onPC bestätigt.**")),
+        ADM("beta", ("Built from the grandMA3 manual (OSC `/cmd`, `Master 3.1 At BPM`) and checked against a simulation. **Not yet confirmed on a real grandMA3 or onPC.**",
+                     "Nach dem grandMA3-Handbuch gebaut (OSC `/cmd`, `Master 3.1 At BPM`) und gegen eine Simulation geprüft. **Noch nicht an einem echten grandMA3 oder onPC bestätigt.**")),
         H2("How it works", "So funktioniert es"),
         P("The grandMA3 takes command line commands over **OSC** (address `/cmd`, text). LJ Link sends the command for the speed master there.",
           "Der grandMA3 nimmt Befehle für die Kommandozeile per **OSC** an (Adresse `/cmd`, Text). LJ Link schickt den Befehl für den Speedmaster dorthin."),
@@ -153,7 +153,7 @@ def _():
         ]),
         REPORT,
     )
-    return (("grandMA3 and grandMA3 onPC: BPM over OSC (beta)", "grandMA3 und grandMA3 onPC: BPM über OSC (Beta)"),
+    return (("grandMA3 and grandMA3 onPC – BPM over OSC (beta)", "grandMA3 und grandMA3 onPC – BPM über OSC (Beta)"),
             ("Send the DJ tempo to a grandMA3 or grandMA3 onPC speed master over OSC with LJ Link: In & Out settings, Receive Command, speed master, test and problems. Beta.",
              "Das DJ-Tempo mit LJ Link über OSC auf einen Speedmaster am grandMA3 oder grandMA3 onPC schicken: In-&-Out-Einstellungen, Receive Command, Speedmaster, Test und Probleme. Beta."),
             ("Light desks · beta", "Lichtpulte · Beta"), ("grandMA3 and onPC", "grandMA3 und onPC"),
@@ -261,11 +261,14 @@ def _():
             ("A tap on every beat for Tap to Time. Untested.", "Ein Tap auf jedem Beat für Tap to Time. Ungetestet."), body)
 
 
+DASLIGHT_CAP = ("Screenshot: Daslight (Nicolaudie)", "Bildschirmfoto: Daslight (Nicolaudie)")
+
+
 @page("wiki-daslight.html", "Daslight", "Daslight")
 def _():
     body = SEC(
-        ADM("tip", ("**Tested** with Daslight, both ways. **Ableton Link** is the recommended way: Daslight gets the tempo, the beat and the bar and follows at once. The **OSC tap** works too, but Daslight has to measure the tempo from the taps, so it needs a few beats after every change.",
-                    "**Getestet** mit Daslight, auf beiden Wegen. **Ableton Link** ist der empfohlene Weg: Daslight bekommt Tempo, Beat und Takt und folgt sofort. Der **OSC-Tap** funktioniert auch, aber Daslight muss das Tempo aus den Taps messen und braucht nach jeder Änderung ein paar Beats."), title=("Status", "Stand")),
+        ADM("tip", ("**Works** with Daslight, both ways. **Ableton Link** is the recommended way: Daslight gets the tempo, the beat and the bar and follows at once. The **OSC tap** works too, but Daslight has to measure the tempo from the taps, so it needs a few beats after every change.",
+                    "**Läuft** mit Daslight, auf beiden Wegen. **Ableton Link** ist der empfohlene Weg: Daslight bekommt Tempo, Beat und Takt und folgt sofort. Der **OSC-Tap** funktioniert auch, aber Daslight muss das Tempo aus den Taps messen und braucht nach jeder Änderung ein paar Beats."), title=("Status", "Stand")),
         TABLE([("Way", "Weg"), ("What Daslight gets", "Was Daslight bekommt"), ("", "")], [
             [("[**Ableton Link**](#link)", "[**Ableton Link**](#link)"), ("tempo, beats and bars, exact", "Tempo, Beats und Takte, genau"), BADGE("rec")],
             [("[**OSC tap**](#tap)", "[**OSC-Tap**](#tap)"), ("a tap on every beat for BPM Tap; Daslight measures the tempo", "ein Tap auf jedem Beat für BPM Tap; Daslight misst das Tempo"), BADGE("ok")],
@@ -277,7 +280,7 @@ def _():
         STEPS(("In LJ Link: Menu (☰) → **Light desk link** → **Daslight (Ableton Link) – recommended**. That is all: it switches on **Ableton Link** further down in the menu if it is off.", "In LJ Link: Menü (☰) → **Lichtpult-Link** → **Daslight (Ableton Link) – empfohlen**. Das war es schon: Es schaltet weiter unten im Menü **Ableton Link** ein, falls es aus ist."),
               ("In Daslight: **Settings → MIDI / Audio / BPM → BPM SOURCE → Ableton Link Sync**.", "In Daslight: **Settings → MIDI / Audio / BPM → BPM SOURCE → Ableton Link Sync**."),
               ("Under **SEND BPM** choose the deck (or Auto). The BPM in Daslight follows it.", "Unter **SEND BPM** das Deck wählen (oder Auto). Das BPM in Daslight folgt ihm.")),
-        IMG("daslight-bpm-source.png", "Daslight settings: BPM source Ableton Link Sync", "Daslight-Einstellungen: BPM Source Ableton Link Sync"),
+        IMG("daslight-bpm-source.png", "Daslight settings: BPM source Ableton Link Sync", "Daslight-Einstellungen: BPM Source Ableton Link Sync", DASLIGHT_CAP),
         ADM("note", ("Both computers must be in the **same network** (or it is the same computer). Link uses UDP port 20808; a firewall must let it through. More on [Ableton Link](wiki-ableton-link.html#send).",
                      "Beide Rechner müssen im **selben Netzwerk** sein (oder es ist derselbe Rechner). Link nutzt UDP-Port 20808; eine Firewall muss das durchlassen. Mehr zu [Ableton Link](wiki-ableton-link.html#send).")),
 
@@ -288,21 +291,21 @@ def _():
               ("In LJ Link: **Light desk link** → **Daslight (OSC tap)**, the IP address of the Daslight computer, port `7000`, address `/ljlink/tap`. **Save**.", "In LJ Link: **Lichtpult-Link** → **Daslight (OSC-Tap)**, IP-Adresse des Daslight-Rechners, Port `7000`, Adresse `/ljlink/tap`. **Speichern**."),
               ("In Daslight open the **OSC mappings**, click the **BPM tap** button (the hand next to the BPM) and press **Send test** in LJ Link. Daslight learns the address.", "In Daslight die **OSC Mappings** öffnen, die Taste **BPM Tap** anklicken (die Hand neben dem BPM) und in LJ Link **Test senden** drücken. Daslight lernt die Adresse."),
               ("The mapping shows **BPM Tap · Global · /ljlink/tap**. Close the window; the BPM now follows the taps.", "Das Mapping zeigt **BPM Tap · Global · /ljlink/tap**. Fenster schließen; das BPM folgt jetzt den Taps.")),
-        IMG("daslight-osc-settings.png", "Daslight settings: OSC Input on, incoming port 7000", "Daslight-Einstellungen: OSC Input an, Incoming Port 7000"),
-        IMG("daslight-osc-mappings-empty.png", "The empty OSC mappings window, waiting for a control", "Das leere Fenster OSC Mappings, wartet auf ein Bedienelement"),
-        IMG("daslight-tap-learn.png", "While learning, the BPM tap button shows the address", "Beim Lernen zeigt die Taste BPM Tap die Adresse"),
-        IMG("daslight-osc-mapping.png", "The finished mapping: BPM Tap, Global, /ljlink/tap", "Das fertige Mapping: BPM Tap, Global, /ljlink/tap"),
-        IMG("daslight-bpm-tap.png", "The BPM display with the tap button in Daslight", "Die BPM-Anzeige mit der Tap-Taste in Daslight"),
+        IMG("daslight-osc-settings.png", "Daslight settings: OSC Input on, incoming port 7000", "Daslight-Einstellungen: OSC Input an, Incoming Port 7000", DASLIGHT_CAP),
+        IMG("daslight-osc-mappings-empty.png", "The empty OSC mappings window, waiting for a control", "Das leere Fenster OSC Mappings, wartet auf ein Bedienelement", DASLIGHT_CAP),
+        IMG("daslight-tap-learn.png", "While learning, the BPM tap button shows the address", "Beim Lernen zeigt die Taste BPM Tap die Adresse", DASLIGHT_CAP),
+        IMG("daslight-osc-mapping.png", "The finished mapping: BPM Tap, Global, /ljlink/tap", "Das fertige Mapping: BPM Tap, Global, /ljlink/tap", DASLIGHT_CAP),
+        IMG("daslight-bpm-tap.png", "The BPM display with the tap button in Daslight", "Die BPM-Anzeige mit der Tap-Taste in Daslight", DASLIGHT_CAP),
         H3("Good to know", "Gut zu wissen"),
         UL(("The tempo is only as exact as Daslight's tap averaging; after a tempo change it takes a few beats.", "Das Tempo ist nur so genau wie die Tap-Mittelung von Daslight; nach einer Tempoänderung dauert es ein paar Beats."),
            ("To try it without DJ gear: under **SEND BPM** choose the **fixed value** and type a tempo, or start the demo and tick **Send demo data**.", "Zum Ausprobieren ohne DJ-Technik: unter **SEND BPM** den **Festwert** wählen und ein Tempo eintippen, oder die Demo starten und **Demo-Daten senden** anhaken."),
            ("Nothing arrives? Check the IP address and port, the firewall on the Daslight computer, and that **OSC Input** is ticked.", "Kommt nichts an? IP-Adresse und Port prüfen, die Firewall auf dem Daslight-Rechner, und ob **OSC Input** angehakt ist.")),
         REPORT,
     )
-    return (("Daslight: tempo over Ableton Link or OSC tap", "Daslight: Tempo über Ableton Link oder OSC-Tap"),
-            ("Send the DJ tempo from LJ Link to Daslight: recommended over Ableton Link (tempo, beat and bar), or as an OSC tap on the BPM Tap button. Tested, with screenshots of the setup.",
-             "Das DJ-Tempo von LJ Link an Daslight schicken: empfohlen über Ableton Link (Tempo, Beat und Takt) oder als OSC-Tap auf die Taste BPM Tap. Getestet, mit Screenshots der Einrichtung."),
-            ("Light desks · tested", "Lichtpulte · getestet"), ("Daslight", "Daslight"),
+    return (("Daslight – tempo over Ableton Link or OSC tap", "Daslight – Tempo über Ableton Link oder OSC-Tap"),
+            ("Send the DJ tempo from LJ Link to Daslight: recommended over Ableton Link (tempo, beat and bar), or as an OSC tap on the BPM Tap button. Works with Daslight, with screenshots of the setup.",
+             "Das DJ-Tempo von LJ Link an Daslight schicken: empfohlen über Ableton Link (Tempo, Beat und Takt) oder als OSC-Tap auf die Taste BPM Tap. Läuft mit Daslight, mit Screenshots der Einrichtung."),
+            ("Light desks · works", "Lichtpulte · läuft"), ("Daslight", "Daslight"),
             ("Ableton Link (recommended) or a tap on every beat.", "Ableton Link (empfohlen) oder ein Tap auf jedem Beat."), body)
 
 

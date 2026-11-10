@@ -25,11 +25,18 @@
 ![LJ Link showing three players](docs/images/waveform.png)
 
 When the DJ loads a track, the lighting jockey has to know where it is, where the drop is and when the next phrase starts.
-LJ Link listens to Pioneer Pro DJ Link and Denon StageLinQ and shows exactly that for all players at once, laid out like the
-display of a CDJ-3000. It runs on your computer, opens in its own window and can be watched on a tablet next to it.
+LJ Link listens to Pioneer Pro DJ Link and Denon StageLinQ and shows exactly that for all players at once, with a familiar
+player layout (player and track boxes, time with milliseconds, tempo, BPM, key). It runs on your computer, opens in its own
+window and can be watched on a tablet next to it.
 
-It only listens to the DJ gear. It never sends sync, master, tempo or fader commands to it, there is no telemetry, and the only
-connection outside your network is the update check (GitHub, only when you ask or once at start).
+It only listens to the DJ gear and never sends sync, master, tempo or fader commands to it. One exception is optional and off
+by default: the Ableton Link output leads the tempo of a Link session, so Link programs in your network – including DJ software
+such as Traktor if it joins the session – follow LJ Link's tempo. There is no telemetry. The only connection outside your
+network is the update check: LJ Link asks GitHub for the newest version about 15 seconds after the start (only when the
+program icon is shown) and when the interface is loaded, at most once an hour. Only the computer running LJ Link asks, also
+when a tablet loads the page; GitHub sees its IP address and the program version. You can switch this off under *Settings → Updates → Check for updates automatically*;
+*Check for updates* in the menu of the program icon still works (see
+[Privacy](https://skyplayser.github.io/LJ-Link/datenschutz.html)).
 
 ## What you get
 
@@ -42,12 +49,13 @@ connection outside your network is the update check (GitHub, only when you ask o
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
 - **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-AZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
 - **Denon / Engine DJ** (Prime 4, Prime 4+, Prime Go, SC6000) over StageLinQ: title, artist, tempo and pitch, play state, master, exact position, the real **fader positions** of the mixer, and the waveform with beat grid, bar starts, hot cues and loops read from the device's library. Passive: it never changes anything on the device.
-- **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC) and any OSC program that reads a number ; Daslight over Ableton Link (recommended) or an OSC tap on every beat for its BPM Tap button (tested); and, as an untested alpha, OSC taps for ChamSys MagicQ. *Search for the desk* finds a grandMA2
+- **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC) and any OSC program that reads a number ; Daslight over Ableton Link (recommended) or an OSC tap on every beat for its BPM Tap button (both work with Daslight); and, as an untested alpha, OSC taps for ChamSys MagicQ. *Search for the desk* finds a grandMA2
   (onPC or console) in the network; otherwise enter its IP address by hand.
 - **SEND BPM:** a tab next to LINK chooses which deck gives the tempo, *Auto* (the deck that is master and/or live) or one deck by
   hand, and a green *SEND BPM* mark shows on that deck in every view, tablets included.
 - **Updates from the icon:** *Check for updates* in the menu of the program icon downloads the new version and installs it; on a
-  Mac the app is replaced and restarts by itself, on Windows the installer opens. At start it checks once and tells you.
+  Mac the app is replaced and restarts by itself, on Windows the installer opens. A download is only installed if it matches
+  the checksum GitHub publishes for it. By default LJ Link also checks by itself and tells you (can be switched off).
 - **Easy to set up:** automatic search, or a guided check that tells you what to change in the network. A demo mode runs without hardware.
 - **English and German**, day and night mode, RGB or blue waveforms, zoom, three views (both, detail, overview), full screen, and
   a layout that works from a phone to a big screen.
@@ -78,9 +86,12 @@ Java is included.
 
 | System | File |
 |---|---|
-| macOS, Apple Silicon (M1 and newer) | `LJ-Link-PRO-macos-arm64.dmg` |
-| macOS, Intel | `LJ-Link-PRO-macos-intel.dmg` |
-| Windows | `LJ-Link-PRO-windows.exe` |
+| macOS, Apple Silicon (M1 and newer) | `LJ-Link-macos-arm64.dmg` |
+| macOS, Intel | `LJ-Link-macos-intel.dmg` |
+| Windows | `LJ-Link-windows.exe` |
+
+Up to version 1.7.7 the files were called `LJ-Link-PRO-…`; for a while each release also carries copies under the old
+names, so older versions still find their update.
 
 The installers are not signed yet, so both systems warn once on the first start:
 
@@ -134,7 +145,7 @@ even from the computer's own browser. `--privacy` starts the program in this mod
 | grandMA2, grandMA2 onPC | command line over **Telnet** (TCP 30000), `SpecialMaster 3.16 At {bpm}` (Speed 16 = BPM; Speed 1–15 selectable), whole BPM | Setup → Console → Global Settings → Telnet: *Login Enabled*; a user of the show to log in |
 | grandMA3, grandMA3 onPC | command line over **OSC** `/cmd`, `Master 3.1 At BPM {bpm}` | Menu → In & Out → OSC: UDP, port, *Receive Command: Yes*, *Enable Input* |
 | Resolume, QLC+ … | the tempo as an **OSC number** to an address | map the address in the program's OSC mapping |
-| Daslight (tested) | **Ableton Link** (recommended), or an **OSC tap** (value 255, then 0) on every beat | BPM source *Ableton Link Sync*, or map the address to **BPM Tap** in the OSC mappings |
+| Daslight (works) | **Ableton Link** (recommended), or an **OSC tap** (value 255, then 0) on every beat | BPM source *Ableton Link Sync*, or map the address to **BPM Tap** in the OSC mappings |
 | Wolfmix (via WTOOLS), other OS2L programs — **beta** | **Ableton Link** (recommended for Wolfmix), or **OS2L** over TCP (port 5000): the tempo and every beat | Ableton Link: choose it as the tempo source in WTOOLS; OS2L: start WTOOLS on the computer the Wolfmix is plugged into and switch OS2L on; tried on a Wolfmix W1, guide: [docs/wolfmix-anleitung.de.md](docs/wolfmix-anleitung.de.md) (German) |
 | dot2 | not possible: the dot2 takes no Telnet or OSC from the network | tap tempo or sound-to-light |
 
@@ -158,15 +169,17 @@ Type the command into the desk's command line by hand first, and edit it in LJ L
 
 | Device | Status |
 |---|---|
-| CDJ-3000 | tested: status, metadata, waveforms, cues, loops, exact position |
-| CDJ-2000NXS2 | tested: status, metadata, waveforms, cues, position from beats and beat grid |
-| DJM-2000NXS | tested as mixer: ON AIR per channel |
+| CDJ-3000 | works: status, metadata, waveforms, cues, loops, exact position |
+| CDJ-2000NXS2 | works: status, metadata, waveforms, cues, position from beats and beat grid |
+| DJM-2000NXS | works as mixer: ON AIR per channel |
 | CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-A9, DJM-V10 | expected to work, not tested |
-| Denon Prime 4+ (firmware 5.0.4) | tested over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
+| Denon Prime 4+ (firmware 5.0.4) | works over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
 | Denon SC6000, Prime 4, Prime Go | expected to work (same protocol), not tested |
-| Serato DJ Pro 3.x (macOS) | tested on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
+| Serato DJ Pro 3.x (macOS) | works on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
 
-Please tell us what you tested with the *Hardware report* issue template.
+“Works” means it ran with LJ Link in our own setups; there is no formal test protocol. Please tell us your setup with the
+[*Hardware report*](https://github.com/skyplayser/LJ-Link/issues/new?template=hardware-report.yml) issue template – reports
+of what works and what does not help everyone.
 
 ## Roadmap
 
@@ -180,7 +193,7 @@ Please tell us what you tested with the *Hardware report* issue template.
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
 | Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |
-| Ableton Link out (lead the session with the deck's tempo, beats and bars) | **tested** with Daslight; checked against Ableton's Link library |
+| Ableton Link out (lead the session with the deck's tempo, beats and bars) | works with Daslight; checked against Ableton's Link library |
 | Traktor | planned |
 
 The goal is to cover every common DJ standard.
@@ -228,6 +241,11 @@ diagnostic data* ticked. The diagnostic data holds the version, network adapters
 what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it
 by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue.
 
+## Live use
+
+**LJ Link is free and comes without warranty.** Software, network and devices can fail. Test your setup before the show and
+keep a fallback ready, for example tap tempo on the desk.
+
 ## Try also: VJ-Link
 
 <a href="https://github.com/skyplayser/VJ-LINK"><img src="https://raw.githubusercontent.com/skyplayser/VJ-LINK/main/docs/images/logo.png" width="56" align="left" alt="VJ-Link logo"></a>
@@ -244,9 +262,10 @@ macOS and Windows, now as an alpha.
 Built on [beat-link](https://github.com/Deep-Symmetry/beat-link) by Deep Symmetry and the protocol research of the
 [dysentery](https://github.com/Deep-Symmetry/dysentery) project (EPL-2.0). More in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-LJ Link is not an official product of AlphaTheta / Pioneer DJ, inMusic / Denon DJ, MA Lighting, Daslight, Serato, Ableton
-or Native Instruments, and is not related to the LightJockey software by Martin. All product names belong to their owners and
-are used only to describe compatibility.
+LJ Link is an independent project. It is not an official product of, and is not endorsed by, any maker of DJ, lighting or
+music hardware or software. All product names and trademarks mentioned in LJ Link and its documentation belong to their
+respective owners and are used only to describe compatibility. Ableton and Link are trademarks of Ableton AG. LJ Link is not
+related to the LightJockey software by Martin.
 
 ## License
 
@@ -256,6 +275,8 @@ warranty. The program shows its own license and those of the bundled libraries u
 <br>
 
 <p align="center">
-  <sub>Idea SKYPLAYSER/NEXTPHILM<br>
+  <sub><a href="https://skyplayser.github.io/LJ-Link/impressum.html">Legal notice (Impressum)</a> ·
+  <a href="https://skyplayser.github.io/LJ-Link/datenschutz.html">Privacy</a><br><br>
+  Idea SKYPLAYSER/NEXTPHILM<br>
   Prompted with ❤️ made by Claude</sub>
 </p>

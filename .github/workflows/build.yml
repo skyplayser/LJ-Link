@@ -57,12 +57,34 @@ jobs:
         shell: bash
         run: |
           f=$(ls build/installers/*.${{ matrix.ext }})
-          mv "$f" "build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}"
+          mv "$f" "build/installers/LJ-Link-${{ matrix.suffix }}.${{ matrix.ext }}"
+          # Transition copy under the old name: installs older than 1.7.8 only look for LJ-Link-PRO-*.
+          # TODO(R-06): remove this copy about three releases (at least three months) after 1.7.8.
+          cp "build/installers/LJ-Link-${{ matrix.suffix }}.${{ matrix.ext }}" \
+             "build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}"
+
+      # The Java runtime that jpackage bundled (Temurin, GPL-2.0 with Classpath Exception): its exact version, so the
+      # release can attach the matching source archive (source code offer in THIRD_PARTY_NOTICES.md).
+      - name: Record bundled runtime version
+        shell: bash
+        run: |
+          mkdir -p build/runtime
+          # e.g. IMPLEMENTOR_VERSION="Temurin-21.0.9+10" -> Temurin-21.0.9+10 (tag jdk-21.0.9+10 at adoptium)
+          grep '^IMPLEMENTOR_VERSION=' "$JAVA_HOME/release" | tr -d '\r' | sed 's/^IMPLEMENTOR_VERSION="\(.*\)"$/\1/' \
+            > "build/runtime/runtime-${{ matrix.suffix }}.txt"
+          cat "build/runtime/runtime-${{ matrix.suffix }}.txt"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: LJ-Link-PRO-${{ matrix.suffix }}
-          path: build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}
+          name: LJ-Link-${{ matrix.suffix }}
+          path: |
+            build/installers/LJ-Link-${{ matrix.suffix }}.${{ matrix.ext }}
+            build/installers/LJ-Link-PRO-${{ matrix.suffix }}.${{ matrix.ext }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-${{ matrix.suffix }}
+          path: build/runtime/runtime-${{ matrix.suffix }}.txt
 
   release:
     name: Publish release
@@ -75,7 +97,29 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: LJ-Link-*
           merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          path: runtime
+          pattern: runtime-*
+          merge-multiple: true
+      # Source code of the copyleft parts in the installers, attached to every release (THIRD_PARTY_NOTICES.md):
+      # the official Temurin source archive of each bundled runtime version and the Remote Tea sources from Maven Central.
+      - name: Fetch source archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          versions=$(cat runtime/*.txt | sed 's/^Temurin-//' | sort -u)
+          [ -n "$versions" ] || { echo "Unknown runtime version"; exit 1; }
+          for v in $versions; do
+            echo "Temurin $v"
+            gh release download "jdk-$v" --repo adoptium/temurin21-binaries --pattern 'OpenJDK21U-jdk-sources_*.tar.gz' --dir dist
+          done
+          curl -fsSL -o dist/remotetea-oncrpc-1.1.4-sources.jar \
+            https://repo1.maven.org/maven2/org/acplt/remotetea/remotetea-oncrpc/1.1.4/remotetea-oncrpc-1.1.4-sources.jar
+          ls -l dist
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

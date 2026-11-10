@@ -28,9 +28,11 @@ function setStatus(kind, text) {
   $("status-text").textContent = t(text);
 }
 
-async function post(url) {
+/** POST to the program. Always JSON: the program refuses POSTs without this content type (protection against other web pages). */
+const JSON_HEADERS = { "Content-Type": "application/json" };
+async function post(url, body) {
   try {
-    await fetch(url, { method: "POST" });
+    await fetch(url, { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(body === undefined ? {} : body) });
   } catch (e) {
     setStatus("bad", "Program not reachable");
   }
@@ -126,12 +128,81 @@ function renderFound(devices) {
 let ws;
 function connect() {
   ws = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws");
-  ws.onopen = () => setStatus("", "Ready");
+  ws.onopen = () => {
+    // Maybe a restarted server: its clock and message counter start anew.
+    serverClock.reset();
+    for (const d of decks.values()) d.posSeq = null;
+    setStatus("", "Ready");
+  };
   ws.onmessage = (ev) => handle(JSON.parse(ev.data));
   ws.onclose = () => {
+    // Also when the server dropped this browser because it did not take messages (asleep): just connect again.
+    serverClock.reset();
     setStatus("bad", "Connection lost – reconnecting …");
     setTimeout(connect, 1500);
   };
+}
+
+/**
+ * Offset between the server clock (`t` in `pos` messages, ms) and performance.now(): the smallest
+ * "received - sent" seen in the last 8-10 s, i.e. the fastest delivery. A message that took longer than that was late
+ * by the difference, and its position is placed at the time it was really valid instead of when it arrived.
+ * Re-estimated all the time from a sliding window, so it follows clock drift and can never grow with the uptime; it
+ * only removes extra delay (bursts, a busy network), not the constant minimum delay, which is a few ms on a LAN.
+ *
+ * After a gap of more than one bucket without messages (a stalled browser that now reads its backlog; a page that was
+ * frozen) the window holds no sample from before it, and the first messages read would set the offset although they
+ * are old. So the offset known before the gap is held for HOLD_MS more: backlog messages are placed in the past and
+ * moved on to "now", and fresh messages bring the window back meanwhile. Only for gaps shorter than MAX_GAP_MS (clock
+ * drift over that is a few ms); the held value is never carried into another hold, so nothing can build up over time.
+ */
+const serverClock = {
+  BUCKET_MS: 2000,
+  BUCKETS: 5,
+  HOLD_MS: 3000,
+  MAX_GAP_MS: 300000,
+  buckets: [],
+  held: null,
+  reset() { this.buckets = []; this.held = null; },
+  windowMin() {
+    let min = Infinity;
+    for (const b of this.buckets) min = Math.min(min, b.min);
+    return min;
+  },
+  /** Feeds one message (server time `t`, received at `recv`) and returns the current offset. */
+  offset(recv, t) {
+    const sample = recv - t;
+    const slot = Math.floor(recv / this.BUCKET_MS);
+    const last = this.buckets[this.buckets.length - 1];
+    if (last && last.slot === slot) {
+      last.min = Math.min(last.min, sample);
+    } else {
+      if (last && slot - last.slot > 1 && (slot - last.slot) * this.BUCKET_MS < this.MAX_GAP_MS) {
+        const before = this.windowMin();
+        this.held = Number.isFinite(before) ? { min: before, until: recv + this.HOLD_MS } : null;
+      }
+      this.buckets.push({ slot, min: sample });
+    }
+    this.buckets = this.buckets.filter((b) => b.slot > slot - this.BUCKETS);
+    if (this.held && recv > this.held.until) this.held = null;
+    return Math.min(this.windowMin(), this.held ? this.held.min : Infinity);
+  },
+};
+
+/** A `pos` message: position `p` (ms) with speed `v`, valid `a` ms before server time `t`; `s` counts the messages. */
+function applyPosition(d, msg, recv) {
+  if (typeof msg.s === "number") {
+    if (d.posSeq != null && msg.s < d.posSeq) return; // an older message after a newer one: ignore it
+    d.posSeq = msg.s;
+  }
+  let at = recv;
+  if (typeof msg.t === "number") {
+    const offset = serverClock.offset(recv, msg.t);
+    at = Math.min(recv, msg.t - (msg.a || 0) + offset);
+  }
+  d.pos = msg.p;
+  d.posAt = at;
+  d.vel = msg.v;
 }
 
 function handle(msg) {
@@ -151,7 +222,7 @@ function handle(msg) {
     if (ui.tab === "mixer") renderMixer();
   } else if (msg.type === "pos") {
     const d = decks.get(msg.deck);
-    if (d) { d.pos = msg.p; d.posAt = performance.now(); d.vel = msg.v; }
+    if (d) applyPosition(d, msg, performance.now());
   } else if (msg.type === "deckGone") {
     removeDeck(msg.deck);
   }
@@ -625,7 +696,7 @@ $("link-text").addEventListener("input", syncSpeedFromCommand);
 $("link-save").onclick = saveLink;
 $("link-test").onclick = async () => {
   await saveLink();
-  await fetch("/api/link/test", { method: "POST" });
+  await fetch("/api/link/test", { method: "POST", headers: JSON_HEADERS, body: "{}" });
   setTimeout(loadLink, 400);
 };
 
@@ -901,24 +972,44 @@ const MEMORY_COLOR = "#ff2a2a";
 
 /**
  * Position shown on screen. The server sends measured positions and speeds up to 50 times per second; between and
- * after them the position keeps moving with that speed and is pulled gently towards the newest sample, so
- * the playhead stays smooth even while scratching. Big jumps (cue, loop) snap at once.
+ * after them the position keeps moving with that speed and is pulled towards the newest sample, so the playhead stays
+ * smooth even while scratching. Big jumps (cue, loop) and stalls of the page (hidden tab, a frame over 250 ms) snap at
+ * once. The pull is time-based (the same at any frame rate) and grows with the error: small errors are mostly noise of
+ * the player's reports and are pulled in slowly, so the playhead does not jitter; big ones are real and are caught up
+ * quickly. There is no dead band, so no lag is left behind for good (ADR-024).
  */
+const SMOOTH = {
+  // Players with exact positions (CDJ-3000, Denon, demo).
+  fine: { slow: 1500, fast: 120, knee: 60 },
+  // Players without exact position reports (NXS2 and older) are off by up to 0.2 s between beats; their speed is exact,
+  // so they are trusted for longer before a difference counts. Below `below` ms the error is also averaged over about
+  // `filter` ms before it is pulled in, so that noise of each beat does not make the playhead pump; bigger errors are
+  // real and are pulled in unfiltered.
+  coarse: { slow: 6000, fast: 200, knee: 250, filter: 2000, below: 400 },
+};
+const SNAP_MS = 800;
+const STALL_MS = 250;
+
 function advance(d, now) {
   if (d.pos < 0) { d.smooth = null; d.cur = -1; return -1; }
   const v = d.vel || 0;
   const target = d.pos + (now - d.posAt) * v;
-  if (d.smooth == null || Math.abs(target - d.smooth) > 800) {
+  const dt = d.smoothAt == null ? Infinity : now - d.smoothAt;
+  if (d.smooth == null || dt > STALL_MS || dt < 0 || Math.abs(target - d.smooth) > SNAP_MS) {
     d.smooth = target;
+    d.errLow = 0;
   } else {
-    const dt = Math.min(100, now - (d.smoothAt || now));
     d.smooth += v * dt;
-    // Small deviations are noise of the player's position reports: ignore them, correct bigger ones gently.
-    const err = target - d.smooth;
-    // Players without exact position reports (NXS2) are off by up to 0.2 s between beats; their speed is exact, so trust it.
-    const coarse = d.data && d.data.coarse;
-    const dead = coarse ? 220 : 25;
-    if (Math.abs(err) > dead) d.smooth += (err - Math.sign(err) * dead) * (coarse ? 0.03 : 0.06);
+    let err = target - d.smooth;
+    const k = d.data && d.data.coarse ? SMOOTH.coarse : SMOOTH.fine;
+    if (k.filter) {
+      if (d.errLow == null || Math.abs(err) >= k.below) d.errLow = err;
+      else d.errLow += (err - d.errLow) * (1 - Math.exp(-dt / k.filter));
+      err = d.errLow;
+    }
+    const r = err / k.knee;
+    const tau = k.fast + (k.slow - k.fast) / (1 + r * r);
+    d.smooth += err * (1 - Math.exp(-dt / tau));
   }
   d.smoothAt = now;
   const dur = d.data ? d.data.durationMs : 0;
@@ -926,6 +1017,12 @@ function advance(d, now) {
   d.cur = d.smooth;
   return d.cur;
 }
+
+// Back from a hidden tab or a sleeping screen: the browser paused or throttled the animation, so start from the newest
+// position instead of catching up.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") for (const d of decks.values()) d.smooth = null;
+});
 
 function currentPos(d) {
   return d.cur == null ? -1 : d.cur;
@@ -1639,6 +1736,7 @@ $("report-github").onclick = async () => {
 async function loadVersion() {
   try {
     const v = await (await fetch("/api/version")).json();
+    $("update-box").checked = v.autoCheck !== false;
     const line = $("version-line");
     line.textContent = v.current === "dev" ? "" : t("Version {v}", { v: v.current });
     if (v.update) {
@@ -1667,6 +1765,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("setting
 $("zoom").oninput = () => { settings.zoom = Number($("zoom").value); saveSettings(); applySettings(); };
 $("seg-mode").onclick = (e) => { if (e.target.dataset.value) { settings.mode = e.target.dataset.value; saveSettings(); applySettings(); } };
 $("seg-theme").onclick = (e) => { if (e.target.dataset.value) { settings.theme = e.target.dataset.value; saveSettings(); applySettings(); } };
+$("update-box").onchange = () => { post("/api/updates", { on: $("update-box").checked }).then(loadVersion); };
 $("awake-box").onchange = () => { settings.keepAwake = $("awake-box").checked; saveSettings(); updateAwake(true); };
 // #awake-hint needs no handler of its own: the tap on it is caught by onAwakeTap.
 const ZOOM_STEPS = [4, 6, 8, 12, 16, 24, 32, 40];
@@ -1817,6 +1916,7 @@ $("btn-fullscreen").onclick = () => {
 fetch("/api/info").then((r) => r.json()).then((info) => {
   ui.controller = info.controller;
   $("controls").classList.toggle("hidden", !info.controller);
+  $("updates-setting").classList.toggle("hidden", !info.controller);
   $("remote-note").classList.toggle("hidden", info.controller);
   $("lan").textContent = info.urls.length ? t("Open on the tablet (same Wi-Fi): ") + info.urls.join(t("  or  ")) : "";
   render();

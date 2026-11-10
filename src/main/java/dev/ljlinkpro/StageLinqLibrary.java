@@ -27,10 +27,23 @@ final class StageLinqLibrary implements AutoCloseable {
 
     record TrackData(byte[] waveform, byte[] bands, int[] beatTimes, byte[] beatBars, List<Map<String, Object>> cues, byte[] art) {}
 
+    /** Libraries up to this size are copied into memory, so the temporary file can be deleted right away. */
+    static final long MEMORY_LIMIT = 256L * 1024 * 1024;
+    private static final String TEMP_PREFIX = "ljlinkpro-";
+    private static final String TEMP_SUFFIX = "-m.db";
+
     private final Connection db;
+    /** The temporary copy that stays while the library is open (only for very large libraries), else null. */
+    private final Path keptFile;
 
     StageLinqLibrary(Path file) throws SQLException {
         db = DriverManager.getConnection("jdbc:sqlite:" + file.toAbsolutePath());
+        keptFile = null;
+    }
+
+    private StageLinqLibrary(Connection db, Path keptFile) {
+        this.db = db;
+        this.keptFile = keptFile;
     }
 
     /**
@@ -292,12 +305,75 @@ final class StageLinqLibrary implements AutoCloseable {
         return list;
     }
 
-    /** Copies the downloaded bytes to a temporary file the database can open. */
+    /**
+     * Opens the downloaded library. The bytes go to a temporary file (SQLite needs one) that is copied into an in-memory
+     * database and deleted again straight away, so the DJ's library does not stay on this computer. Only a library larger
+     * than {@link #MEMORY_LIMIT} is read from the file; that file is deleted when the library is closed, at the latest
+     * when the program quits, and leftovers from a crash are removed at the next start ({@link #deleteLeftovers}).
+     */
     static StageLinqLibrary open(String source, byte[] data) throws IOException, SQLException {
-        Path file = Path.of(System.getProperty("java.io.tmpdir"), "ljlinkpro-" + source.replaceAll("[^A-Za-z0-9]+", "_") + "-m.db");
+        return open(source, data, Path.of(System.getProperty("java.io.tmpdir")), MEMORY_LIMIT);
+    }
+
+    static StageLinqLibrary open(String source, byte[] data, Path tempDir, long memoryLimit) throws IOException, SQLException {
+        // A unique name per copy: reconnecting (the new library opens before the old one closes) and two devices with the
+        // same source name never share a file. The prefix keeps the pattern that deleteLeftovers looks for.
+        Path file = Files.createTempFile(tempDir, TEMP_PREFIX + ProcessHandle.current().pid() + "-"
+                + source.replaceAll("[^A-Za-z0-9]+", "_") + "-", TEMP_SUFFIX);
         Files.write(file, data);
-        file.toFile().deleteOnExit();
-        return new StageLinqLibrary(file);
+        file.toFile().deleteOnExit(); // fallback only
+        boolean keep = data.length > memoryLimit;
+        try {
+            if (keep) {
+                return new StageLinqLibrary(DriverManager.getConnection("jdbc:sqlite:" + file.toAbsolutePath()), file);
+            }
+            Connection memory = DriverManager.getConnection("jdbc:sqlite::memory:");
+            try (java.sql.Statement st = memory.createStatement()) {
+                // sqlite-jdbc command: copies the whole database file into the in-memory database.
+                st.executeUpdate("restore from '" + file.toAbsolutePath().toString().replace("'", "''") + "'");
+            } catch (SQLException e) {
+                memory.close();
+                throw e;
+            }
+            return new StageLinqLibrary(memory, null);
+        } finally {
+            if (!keep) {
+                Files.deleteIfExists(file);
+            }
+        }
+    }
+
+    /**
+     * Deletes temporary library copies ({@code ljlinkpro-<pid>-<source>-<random>-m.db}) that a program which is no longer running
+     * left behind, for example after a crash. Copies of a running LJ Link (another instance) stay. Returns how many were
+     * deleted.
+     */
+    static int deleteLeftovers(Path tempDir) {
+        int deleted = 0;
+        try (var files = Files.newDirectoryStream(tempDir, TEMP_PREFIX + "*" + TEMP_SUFFIX)) {
+            for (Path f : files) {
+                String name = f.getFileName().toString();
+                String middle = name.substring(TEMP_PREFIX.length(), name.length() - TEMP_SUFFIX.length());
+                String pid = middle.contains("-") ? middle.substring(0, middle.indexOf('-')) : "";
+                // Names from before 1.7.8 have no process number; they are always leftovers.
+                try {
+                    boolean running = pid.matches("\\d{1,9}")
+                            && ProcessHandle.of(Long.parseLong(pid)).map(ProcessHandle::isAlive).orElse(false);
+                    if (!running && Files.deleteIfExists(f)) {
+                        deleted++;
+                    }
+                } catch (IOException | RuntimeException e) {
+                    System.err.println("Could not delete " + f + ": " + e);
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            System.err.println("Could not clean up old library copies: " + e);
+        }
+        return deleted;
+    }
+
+    static int deleteLeftovers() {
+        return deleteLeftovers(Path.of(System.getProperty("java.io.tmpdir")));
     }
 
     /** Cues in the shape the display expects. */
@@ -315,6 +391,13 @@ final class StageLinqLibrary implements AutoCloseable {
             db.close();
         } catch (SQLException e) {
             // closing is best effort
+        }
+        if (keptFile != null) {
+            try {
+                Files.deleteIfExists(keptFile);
+            } catch (IOException e) {
+                // deleteOnExit and the cleanup at the next start remove it
+            }
         }
     }
 }

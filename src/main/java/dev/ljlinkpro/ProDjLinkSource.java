@@ -82,6 +82,8 @@ final class ProDjLinkSource implements DeckSource {
     private final java.util.Map<Integer, String> trackKeys = new java.util.concurrent.ConcurrentHashMap<>();
     /** The latest beat packet of every player, for the diagnostics (its tempo is a second, independent reading). */
     private final java.util.Map<Integer, Beat> lastBeat = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Per player: bridges short gaps of TimeFinder's position (see {@link PositionHold}). */
+    private final java.util.Map<Integer, PositionHold> holds = new java.util.concurrent.ConcurrentHashMap<>();
     /** The effective tempo of the status packets of the last {@link TempoTrace#WINDOW_NANOS} per player. */
     private final java.util.Map<Integer, TempoTrace> statusTempo = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<Integer, TempoTrace> beatTempo = new java.util.concurrent.ConcurrentHashMap<>();
@@ -469,9 +471,10 @@ final class ProDjLinkSource implements DeckSource {
                     d.name = a.getDeviceName();
                 }
                 long t = TimeFinder.getInstance().isRunning() ? TimeFinder.getInstance().getTimeFor(n) : -1;
-                if (t < 0) {
-                    t = positionFromBeatGrid(n);
-                }
+                // A short -1 is bridged instead of switching to the coarser beat-grid position and back (ADR-024).
+                double rate = !d.playing ? 0 : Math.abs(d.velocity) > 0.05 ? d.velocity : d.speed;
+                t = holds.computeIfAbsent(n, k -> new PositionHold())
+                        .next(t, System.nanoTime(), d.hasTrack, d.trackVersion, rate, () -> positionFromBeatGrid(n));
                 d.samplePosition(t);
             }
             long now = System.nanoTime();
@@ -581,6 +584,7 @@ final class ProDjLinkSource implements DeckSource {
         statusTempo.remove(player);
         beatTempo.remove(player);
         trackKeys.remove(player);
+        holds.remove(player);
     }
 
     /**

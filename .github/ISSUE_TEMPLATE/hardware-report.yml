@@ -1,5 +1,5 @@
 name: Hardware report
-description: Tell us which devices you tested and what worked
+description: Tell us which devices you used with LJ Link and what worked
 title: "Hardware: <models>"
 labels: ["hardware"]
 body:

@@ -31,12 +31,16 @@ Lade die Datei für deinen Computer von der [Releases-Seite](../../../releases):
 
 | System | Datei |
 |---|---|
-| Mac mit Apple-Chip (M1 und neuer) | `LJ-Link-PRO-macos-arm64.dmg` |
-| Mac mit Intel-Prozessor | `LJ-Link-PRO-macos-intel.dmg` |
-| Windows | `LJ-Link-PRO-windows.exe` |
+| Mac mit Apple-Chip (M1 und neuer) | `LJ-Link-macos-arm64.dmg` |
+| Mac mit Intel-Prozessor | `LJ-Link-macos-intel.dmg` |
+| Windows | `LJ-Link-windows.exe` |
+
+Bis Version 1.7.7 hießen die Dateien `LJ-Link-PRO-…`; für eine Übergangszeit liegen sie zusätzlich unter dem alten Namen
+bei.
 
 Die Installer sind noch nicht bei Apple bzw. Microsoft signiert. Deshalb warnen beide Systeme **einmal** beim ersten Start.
-Das sagt nichts über die Sicherheit aus. So geht es weiter:
+Eine Signatur kostet Geld; ohne sie kann macOS bzw. Windows den Entwickler nicht prüfen. Lade das Programm deshalb nur von
+der offiziellen Seite. So geht es weiter:
 
 ### Mac: „LJ Link“ nicht geöffnet
 
@@ -57,7 +61,7 @@ xattr -dr com.apple.quarantine "/Applications/LJ Link.app"
 
 ### Windows: „Der Computer wurde durch Windows geschützt“
 
-1. `LJ-Link-PRO-windows.exe` starten.
+1. `LJ-Link-windows.exe` starten.
 2. Im blauen SmartScreen-Fenster auf **Weitere Informationen** klicken.
 3. **Trotzdem ausführen** klicken und den Installer durchklicken.
 4. Beim ersten Start fragt die Firewall: **Private Netzwerke** anhaken und **Zugriff zulassen**. Ohne das findet LJ Link keine
@@ -170,7 +174,7 @@ Oben rechts im Menü (☰) und in der Werkzeugleiste:
   LJ Link angezeigt wird. Im Browser am Computer selbst wirkt das sofort; auf einem iPad oder Tablet über das Netzwerk
   einmal auf die Seite tippen, dann versucht LJ Link es. Auf dem iPad ist das bisher nicht zuverlässig, dort die
   automatische Sperre auf **Nie** stellen (siehe [Tablet](#tablet-oder-zweiter-bildschirm)). Auf dem Mac verhindert LJ Link außerdem
-  den Ruhezustand des Computers, solange ein Browser verbunden ist. Alpha: am Mac getestet; auf dem iPad bisher
+  den Ruhezustand des Computers, solange ein Browser verbunden ist. Alpha: läuft am Mac; auf dem iPad bisher
   nicht zuverlässig, Android und Windows noch nicht getestet.
 - **Verbindung trennen** beendet die laufende Verbindung.
 

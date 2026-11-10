@@ -10,7 +10,7 @@ Was ein Live-Deck braucht, und woher die Daten bei jeder Software kommen könnte
 |---|---|---|---|---|---|
 | **Serato** (läuft schon) | Log ✅ | Datei-Tags ✅ | Datei-Tags ✅ | Link ✅ (nur Tempo) | ❌ → Phase über Link (B2) |
 | **VirtualDJ** | Plugin / OS2L | eigene Analyse (B1) | `database.xml` / Plugin | OS2L / Plugin | Plugin ✅ |
-| **rekordbox** (FLX-Nutzer) | `master.db` (Verlauf, verzögert) / Brücke | ANLZ-Dateien ✅ | ANLZ ✅ | Brücke (rkbx_link) | Brücke (rkbx_link) |
+| **rekordbox** (FLX-Nutzer) | offen (vorher rechtlich prüfen) | ANLZ-Dateien ✅ | ANLZ ✅ | offen (vorher rechtlich prüfen) | offen (vorher rechtlich prüfen) |
 | **Traktor** | Broadcast-Metadaten / MIDI | eigene Analyse (B1) | `collection.nml` ✅ | MIDI / Link | MIDI Beat Phase |
 | **Wolfmix** (Ausgang) | – | – | – | OS2L senden | OS2L-Beats |
 
@@ -78,19 +78,14 @@ Ergebnis: echte Live-Decks mit Playhead, ähnlich wie bei Denon.
 4. Einrichtung: mittel. Mapping importieren, unter Windows loopMIDI. Eine bebilderte Anleitung ist Pflicht.
 
 ### rekordbox (Performance-Modus, FLX-Controller) – schwierig
-rekordbox sendet von sich aus nichts. Ableton Link kann es laut rkbx_link nur empfangen, nicht senden.
+rekordbox sendet von sich aus nichts. Ableton Link kann es nach bisherigem Stand nur empfangen, nicht senden. **(prüfen)**
 
-1. **Bibliothek:** `master.db` (SQLCipher, der Schlüssel ist öffentlich bekannt, siehe pyrekordbox) und die ANLZ-Dateien (`.DAT/.EXT/.2EX`).
+1. **Bibliothek:** die ANLZ-Dateien (`.DAT/.EXT/.2EX`). Die rekordbox-6/7-Bibliothek direkt zu lesen ist nicht geplant – vor einer Umsetzung rechtlich prüfen (ADR-025).
    - Daraus kommen Wellenform (Farbe), Beatgrid, Cues und Phrasen.
    - Die Parser stecken schon in beat-link/crate-digger, die wir nutzen. **Wellenformen in Pioneer-Qualität sind also realistisch.**
 2. **Live-Status:**
-   - **a) Brücke rkbx_link** (fremdes Tool, liest den rekordbox-Speicher). Es gibt Position, Beatgrid und Tempo per OSC oder Link aus. LJ Link würde diesen OSC-Strom empfangen.
-     - Vorteil: Wir lesen selbst keinen fremden Speicher.
-     - Nachteile:
-       - kostenpflichtig für neue Versionen,
-       - vor allem Windows, Mac nur eingeschränkt,
-       - kann mit jedem rekordbox-Update brechen.
-   - **b) Verlauf in `master.db`:** gespielte Tracks, mit Verzögerung. Reicht nur für „was läuft gerade ungefähr“.
+   - **a) Zusatzwerkzeuge Dritter**, die den Live-Status von rekordbox ausgeben: nicht geplant – vor einer Umsetzung rechtlich prüfen (ADR-025).
+   - **b) Verlauf aus der Bibliothek:** nicht geplant, siehe 1.
    - **c)** MIDI-Ausgänge aus rekordbox MIDI Learn (LED-Rückmeldung). **(prüfen)**
    - Ob rekordbox im Performance-Modus über Pro DJ Link sichtbar ist (mit DJM-Mischpult per LAN). **(prüfen, dann ginge es über beat-link)**
 3. **Eigenes Speicherlesen nicht einplanen.** Es ist fragil, braucht auf dem Mac Sonderrechte und ist rechtlich heikel.
@@ -109,21 +104,19 @@ rekordbox sendet von sich aus nichts. Ableton Link kann es laut rkbx_link nur em
 | 3 | Wellenform aus Audio (B1) | M | VirtualDJ, Traktor, Serato FLAC/M4A |
 | 4 | Traktor: NML + MIDI-Mapping (B3) | M | Traktor-Decks |
 | 5 | VirtualDJ-Plugin | M | VirtualDJ-Decks mit Position |
-| 6 | rekordbox: Bibliothek + rkbx_link-Brücke | M | FLX-Nutzer (mit fremdem Tool) |
+| 6 | rekordbox: Weg offen, vorher rechtlich prüfen (ADR-025) | M | FLX-Nutzer |
 | 7 | Ableton Link als Teilnehmer (B2) | L | Phase für alle, Link senden |
 
 ## Bekannte Risiken
 
-- **Installation von Dritt-Software:** rkbx_link, loopMIDI, VirtualDJ-Plugin. Jede Zusatzinstallation kostet Nutzer. Anleitungen mit Bildern werden nötig.
+- **Installation von Dritt-Software:** loopMIDI, VirtualDJ-Plugin. Jede Zusatzinstallation kostet Nutzer. Anleitungen mit Bildern werden nötig.
 - **Herstellerupdates:**
-  - Speicherbrücken (rkbx_link) brechen oft.
   - Bei den Dateiformaten (NML, ANLZ, Serato-Tags) ist das Risiko gering.
 - **M4A/AAC dekodieren:** Lizenz und Größe von ffmpeg, oder System-Decoder pro Betriebssystem.
 - **Kein Testgerät oder keine Lizenz:** Für Traktor, VirtualDJ und rekordbox brauchen wir jeweils eine installierte Version zum Testen. **(klären: was ist vorhanden?)**
 - **Markennamen:** Traktor, rekordbox, VirtualDJ und Serato nur beschreibend nennen („funktioniert mit …“), keine Logos.
 
 ## Quellen
-- rkbx_link: https://github.com/grufkork/rkbx_link
 - VirtualDJ Plugin-SDK (Rust-Wrapper, zeigt die Abfragen): https://docs.rs/virtualdj-plugin-sdk/latest/aarch64-unknown-linux-gnu/struct.PluginContext.html
 - VirtualDJ GetInfo-Abfragen: https://virtualdj.com/forums/56155/VirtualDJ_Plugins/Queries_used_by_GetInfo().html
 - Traktor Beat Phase per MIDI: https://community.native-instruments.com/discussion/comment/160233

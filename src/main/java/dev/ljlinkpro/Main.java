@@ -59,6 +59,9 @@ public final class Main {
             }
         }
 
+        // Engine library copies that a crashed run left in the temp folder (normally deleted right after loading).
+        StageLinqLibrary.deleteLeftovers();
+
         Hub hub = new Hub();
         Session session = new Session(hub);
         LinkService link = new LinkService(hub);
@@ -86,25 +89,37 @@ public final class Main {
             ws.onError(vjLink::removeClient);
         });
 
+        // Every /api/ route except the read-only ones for tablets is local: only the browser on this computer may use it,
+        // never another web page (CSRF, DNS rebinding). See ControlGuard.
+        ControlGuard.install(app);
+
         final int[] boundPort = {port};
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
         app.get("/api/diagnostics", ctx -> {
-            if (!isLocal(ctx)) {
-                ctx.status(403);
-                return;
-            }
             ctx.contentType("text/plain; charset=utf-8").result(Diagnostics.report(hub, session, link, ableton));
         });
         app.get("/api/version", ctx -> {
-            Updater.Release r = Updater.latestCached();
             String current = Updater.currentVersion();
             Map<String, Object> m = new java.util.LinkedHashMap<>();
             m.put("current", current);
-            m.put("update", r != null && Updater.isNewer(r.version(), current) ? r.version() : null);
+            m.put("autoCheck", Updater.autoCheck());
+            if (Updater.autoCheck()) {
+                // Asks GitHub at most once an hour, always from this computer (also when a tablet loads the page).
+                Updater.Release r = Updater.latestCached();
+                m.put("update", r != null && Updater.isNewer(r.version(), current) ? r.version() : null);
+            }
             ctx.json(m);
         });
+        // "Check for updates automatically" (default on). Off: GitHub is only asked from the program icon menu.
+        app.post("/api/updates", ctx -> control(ctx, () -> {
+            try {
+                AppSettings.set(Updater.AUTO_CHECK_KEY, Hub.JSON.readTree(ctx.body()).path("on").asBoolean(true));
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
+        }));
         app.get("/api/info", ctx -> ctx.json(Map.of(
-                "controller", isLocal(ctx),
+                "controller", ControlGuard.isController(ctx),
                 "urls", NetworkCheck.lanUrls(boundPort[0]),
                 "adapters", NetworkCheck.adapters())));
         app.get("/api/deck/{n}/waveform", ctx -> {
@@ -142,10 +157,6 @@ public final class Main {
         });
         app.get("/api/deck/{n}/info", ctx -> ctx.json(Privacy.filterInfo(session.info(Integer.parseInt(ctx.pathParam("n"))))));
         app.get("/api/link", ctx -> {
-            if (!isLocal(ctx)) {
-                ctx.status(403);
-                return;
-            }
             ctx.json(Map.of("config", link.config(), "status", link.status(), "decks", link.candidates(), "sendDemo", link.sendDemo(), "manualBpm", link.manualBpm()));
         });
         app.post("/api/link", ctx -> control(ctx, () -> {
@@ -156,10 +167,6 @@ public final class Main {
             }
         }));
         app.get("/api/link/scan", ctx -> {
-            if (!isLocal(ctx)) {
-                ctx.status(403);
-                return;
-            }
             ctx.json(DeskScanner.scan());
         });
         app.post("/api/link/source", ctx -> control(ctx, () -> {
@@ -185,10 +192,6 @@ public final class Main {
             }
         }));
         app.get("/api/ableton", ctx -> {
-            if (!isLocal(ctx)) {
-                ctx.status(403);
-                return;
-            }
             ctx.json(ableton.status());
         });
         app.post("/api/ableton", ctx -> control(ctx, () -> {
@@ -199,7 +202,7 @@ public final class Main {
                 ctx.status(400);
             }
         }));
-        // Control endpoints are only available on the computer running LJ Link, not to tablets in the LAN.
+        // Control endpoints are only available on the computer running LJ Link, not to tablets in the LAN (ControlGuard).
         app.post("/api/search/start", ctx -> control(ctx, session::startSearch));
         app.post("/api/denon/start", ctx -> control(ctx, session::startSearch));
         app.post("/api/demo/start", ctx -> control(ctx, session::startDemo));
@@ -211,10 +214,6 @@ public final class Main {
             Tray.setLanguage(lang);
         }));
         app.get("/api/check", ctx -> {
-            if (!isLocal(ctx)) {
-                ctx.status(403);
-                return;
-            }
             ctx.json(NetworkCheck.check(ctx.queryParam("ip")));
         });
 
@@ -258,21 +257,11 @@ public final class Main {
         }
     }
 
+    /** Runs a control action; ControlGuard has already checked that the request comes from this computer. */
     private static void control(Context ctx, Runnable action) {
-        if (!isLocal(ctx)) {
-            ctx.status(403);
-            return;
-        }
         action.run();
-        ctx.status(204);
-    }
-
-    private static boolean isLocal(Context ctx) {
-        try {
-            String addr = ctx.req().getRemoteAddr().replaceAll("^\\[|\\]$", "");
-            return java.net.InetAddress.getByName(addr).isLoopbackAddress();
-        } catch (java.net.UnknownHostException e) {
-            return false;
+        if (ctx.status().getCode() < 300) {
+            ctx.status(204);
         }
     }
 

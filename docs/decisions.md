@@ -57,31 +57,31 @@ plain float at a configurable address. Settings are stored in `~/.ljlinkpro/link
 Daslight mapping are NOT verified against real consoles and must be checked on site. Beat/phrase/deck-state output is not built yet.
 
 ## ADR-011: Name and logo
-The product is called LJ Link (not BoothView, which is trademarked). Java package `dev.ljlinkpro`, config in
+The product is called LJ Link (not BoothView, to avoid a conflict with an existing name). Java package `dev.ljlinkpro`, config in
 `~/.ljlinkpro/`. The logo (waveform bars shooting light beams) is drawn in code in `Logo.java` and mirrored in
-`web/logo.svg`; `packaging/LJ-Link-PRO.icns|ico|png` are generated from it (`java dev.ljlinkpro.Logo <dir>`, then `iconutil`)
+`web/logo.svg`; `packaging/LJ-Link.icns|ico|png` (until 1.7.7 `LJ-Link-PRO.*`) are generated from it (`java dev.ljlinkpro.Logo <dir>`, then `iconutil`)
 and passed to jpackage as the installer and app icon.
 
-## ADR-012: CDJ look of the waveforms
+## ADR-012: Player look of the waveforms
 Three-band waveforms are sent as layers and painted like the players: detail = independent bands low (blue), mid (amber),
 high (white); overview = cumulative layers painted outermost first. RGB/blue tracks are sent as height plus color. Loops are
-orange (saved loops dimmer, the active loop brighter), memory cues red, hot cues in their rekordbox colors with letters.
+orange (saved loops dimmer, the active loop brighter), memory cues red, hot cues in the colors stored in the DJ's library, with letters.
 Paused players report no moving position, so it is derived from the last beat number and the beat grid.
 
 ## ADR-013: Live position channel and RGB default
-Positions travel on their own compact `pos` WebSocket message (`{"type":"pos","deck":n,"p":ms,"v":speed}`), sampled every 20 ms
+Positions travel on their own compact `pos` WebSocket message (`{"type":"pos","deck":n,"p":ms,"v":speed}`, extended in ADR-024), sampled every 20 ms
 on the server (about 45-50 messages/s per deck, measured). The speed `v` is measured from consecutive samples, so it follows
 scratching; changes faster than about 6x speed count as jumps (cue, loop) and keep the old speed. The browser extrapolates
 with `v` and pulls the shown position towards the newest sample (snaps at jumps over 800 ms). The CDJ-3000 reports exact
 positions about 30 times per second; NXS/NXS2 only via beats and status, so their scratching can only be followed roughly.
-The server now asks beat-link for RGB waveforms (as shown on the players); the palette is an approximation of the CDJ look
+The server now asks beat-link for RGB waveforms (as shown on the players); the palette is an approximation of the look on the players
 (detail: beat-link's green/blue swap undone; overview: red and blue swapped; colors brightened) and still differs in hue.
 Loops: only the CDJ-3000 reports the active loop; other players show saved loops from the cue list.
 
-## ADR-014: App window, CDJ-3000 style, docs and website
+## ADR-014: App window, player layout, docs and website
 The interface opens in a Chromium app window (`--app=URL`, own profile in `~/.ljlinkpro/window-profile`) when Chrome, Edge
 or Brave is installed, so it feels like a normal program; otherwise it falls back to the default browser (`--no-app-window`
-forces that). The deck panel follows the CDJ-3000 display (PLAYER/TRACK boxes, time with milliseconds, tempo, BPM box, MT,
+forces that). The deck panel follows the layout DJs know from current players (PLAYER/TRACK boxes, time with milliseconds, tempo, BPM box, MT,
 SYNC, KEY). Screenshots for the README, guide and website are taken from the demo mode with headless Chrome
 (`/#shot,manual`, `/#shot,info-1`, `/#shot,settings`, `/#shot,day`); `shot` hides network addresses. The website is the
 folder `site/`, published by `.github/workflows/pages.yml` once GitHub Pages is enabled (source: GitHub Actions).
@@ -270,3 +270,128 @@ track-change events and only sends decks on a change. So LJ Link gets its own re
 - The demo now plays a DJ set: phrases 16/8/16/8/16/16 bars, the other deck starts beat-aligned and synced at the outro,
   faders, EQ (bass swap) and crossfader move, the new deck becomes master when the old track ends (about every two
   minutes), every other track loops the last bar of its breakdown four times, cues sit on the phrase starts.
+
+## ADR-024: Browser sending decoupled, `pos` with server time, bridged position gaps
+Status: Alpha (2026-11-10), for 1.7.7. Tested against the demo and with an artificially hanging client only; real
+players and the reported long-running delay (Discord, jnsp) are not reproduced. Background: `docs/handoffs/2026-11-10-waveform-verzoegerung-support.md`.
+
+- **One sender per browser.** `Hub` used to send on its single ticker thread, and Javalin 6.7's `WsContext.send` blocks
+  (Jetty `sendString`), so one slow or sleeping browser (iPad in Wi-Fi, throttled tab) delayed every other browser and
+  the ticks then came in bursts. Now every browser is a `WsClient` with its own queue, drained by its own task on a
+  cached thread pool. Messages are keyed (`state`, `mixer`, `deck:n`, `pos:n`): a newer message replaces a waiting one
+  with the same key and moves to the end, so no backlog can build up. `deckGone` is never replaced; it drops whatever
+  still waits for that deck, and late messages for a removed deck are dropped (deck numbers are never reused).
+- **Stalled browsers are dropped, eventually.** A send only blocks once the operating system's socket buffers (server and
+  browser side) are full. A send that has then been blocked for more than 5 s (`WsClient.STALL_NANOS`), or more than 1000
+  waiting messages, disconnects the browser hard (`Session.disconnect`, a close frame would wait behind the blocked send).
+  So a hanging browser is not dropped after 5 s but only after its buffers filled up, which takes seconds to minutes
+  depending on the system (QS: a stopped raw client after about 40 s; a stopped Chrome on macOS not within 90 s, its
+  buffers grow). The other browsers stay live meanwhile either way, which is the point. The page reconnects after 1.5 s
+  by itself and gets the full state again. The client count for the sleep guard (ADR-022) follows as before. The
+  problem report shows how many browsers were dropped.
+- **`pos` only on change.** A position goes out when position or speed changed, otherwise as a keepalive once per second
+  (a paused deck no longer gets 50 identical messages a second). Playing decks still get up to 50 per second.
+- **Server time in `pos`.** `{"type":"pos","deck":n,"p":ms,"v":speed,"s":seq,"t":serverMs,"a":ageMs}`: `t` is a monotonic
+  server clock in ms when the message was made, `a` the age of the sample then, `s` a counter over all `pos` messages.
+  The page drops a message older (`s`) than the last one of the deck. It estimates the clock offset as the smallest
+  `received - t` over a sliding window of 8-10 s (2 s buckets), re-estimated with every message, and places the position
+  at the time it was valid (`t - a + offset`) instead of its arrival. So a late message no longer shifts the waveform.
+  Assumption: the fastest delivery in the window is the normal one; a constant delay (a few ms on a LAN) cannot be
+  measured without a round trip and stays. Window and counter reset on every (re)connect.
+  After a gap of more than one 2 s bucket without `pos` messages (a stalled or frozen page that then reads its backlog
+  from the socket buffers) the window would only hold the old backlog messages, and they would count as current. So the
+  offset from before the gap is held for 3 s more (only for gaps under 5 min, where clock drift is a few ms; a held value
+  is never carried into another hold, so nothing can build up with the uptime). Backlog messages are then placed in the
+  past and carried on to now, and fresh messages refill the window meanwhile. Trade-off: if the server's own clock
+  stood still during the gap (the server computer slept and the connection survived), positions are off by that time
+  for those 3 s and then snap; on macOS the sleep guard keeps the server awake while browsers are connected.
+- **Shown position (app.js `advance`).** No more 100 ms cap per frame (a stall left a lasting lag) and no dead band (it
+  kept up to 25 ms, with NXS2 up to 220 ms, behind for good). The pull towards the newest sample is time-based with a time
+  constant that falls as the error grows: `tau = fast + (slow - fast) / (1 + (err/knee)^2)`, exact players 1500/120 ms,
+  knee 60 ms; coarse players (NXS2 and older) 6000/200 ms, knee 250 ms. A frame gap over 250 ms, a jump over 800 ms or the
+  tab becoming visible again snap to the newest position. Simulated: an exact player's 300 ms error is under 50 ms after
+  0.8 s; noise of ±15 ms changes the shown speed by about ±1 %.
+  Coarse players only: while the error is under 400 ms it is low-pass filtered with a 2 s time constant before the pull
+  (`errLow += (err - errLow) * (1 - exp(-dt/2000))`); from 400 ms on it is used unfiltered, the 800 ms snap is unchanged.
+  Assumption: an NXS2's error is up to ±0.2 s between beats (from a code comment, not measured); its speed is exact.
+  Simulated with the real `advance` code (60 fps, 50 messages/s, 120 s, shown speed over 100 ms, p1/p99), ±150 ms
+  noise: stepwise per beat ±4 % → ±1 %, independent per message ±1.8 % → ±0.3 %, sawtooth per beat ±2.5 % → ±0.3 %;
+  a 300 ms offset is under 50 ms after 7.0 s (8.3 s before) with 3 ms overshoot, 600 ms after 2.9 s (9.5 s) with 40 ms
+  overshoot. Exact players are unchanged. Not checked on a real NXS2.
+- **Bridged TimeFinder gaps (`PositionHold`).** beat-link 8.0.0 `TimeFinder.getTimeFor` returns -1 when it has no entry
+  for the player; it removes the entry on a status packet without beat grid or with beat number < 0, on a beat packet
+  without beat grid (unless precise positions arrive), and when the device is lost (checked in the sources). The
+  fallback `positionFromBeatGrid` is only exact on the beat. A -1 after a good position is now bridged for up to 1.5 s by
+  carrying the last good position on at the deck's speed (held while paused); only then does the beat grid take over,
+  until TimeFinder knows the position again. No bridging without a track, after another track was loaded, or when
+  TimeFinder never had the position (beat port taken: beat grid at once, as before). A short -1 therefore no longer
+  reaches `Deck.samplePosition`, which would stop the measured speed. After a real loss of 1.5 s the old behaviour holds.
+- Not changed: the VJ-Link stream (`VjLink`) still sends on its own ticker; a hanging VJ program only delays other VJ
+  programs, not the browsers.
+
+## ADR-025: rekordbox library and live-status bridges need a new legal review first
+LJ Link reads Pioneer data only through Pro DJ Link (beat-link) and the analysis files the players share. Reading the
+rekordbox 6/7 library directly (an encrypted database) or taking the live status of rekordbox from a third-party tool
+that reads its memory is not planned. Before either is built there is a new legal review, recorded here as an ADR; the
+public roadmap only says "not planned – review first" and names no keys, tools or ways around the encryption.
+
+## ADR-026: Ableton Link: protocol only, no code of Ableton's library
+`AbletonLinkPeer.java` implements the Link protocol in Java without using or translating code of Ableton's Link library
+(C++, GPL-2.0-or-later). Spot check on 10 Nov 2026 against github.com/Ableton/link (`Measurement.hpp`, `Sessions.hpp`,
+`NodeId.hpp`), comparing structure, identifiers, constants and comments:
+- **Structure:** one Java class with a scheduler, records and maps; Ableton's library is header-only C++ with templates
+  over clock and IO context and separate classes (Measurement, Sessions, Peers, Controller). No class or function layout
+  is mirrored.
+- **Identifiers and comments:** no shared names apart from the protocol's own (message headers `_asdp_v`/`_link_v`,
+  payload keys `tmln`, `sess`, `stst`, `mep4`, `__gt`, `_pgt`, `__ht`). No comment text or licence header is taken over;
+  our comments describe the protocol in our own words.
+- **Behaviour and numbers:** these follow the library, because other peers must agree with us: the two clock-offset
+  samples per pong (ghost time minus the mean of the host times; mean of the ghost times minus the host time), more than
+  100 samples and their median, a ping every 50 ms with at most 5 retries, re-measuring the joined session every 30 s,
+  joining a session whose ghost time is more than 0.5 s ahead (tie: smaller session id), and adopting the timeline with
+  the larger beat origin. They were taken from reading the source as protocol facts, not as code.
+- **Differences:** the node id is 8 random alphanumeric bytes (the library uses random bytes), measurement and retries
+  run on our own 50 ms tick, and the phase lead from the deck's beat grid (`lead`, `deckBeat`) has no counterpart in
+  the library.
+Result: protocol and parameters only, no code copied. The point to watch is that the session and measurement rules
+were read from GPL source; if this is ever questioned, the answer is this ADR plus the git history of the file. Not a
+legal opinion.
+
+## ADR-027: Repository name, account and old releases
+The public repository stays `skyplayser/LJ-Link` and the account `skyplayser` is not renamed. There is never a new
+repository called `LJ-Link-PRO`: versions 1.4.1 and older ask GitHub for updates under the old name and reach the
+current repository only through GitHub's redirect, which a repository with that name would break. Release pages of old
+versions point to the current version ("Please use the latest version."); assets are only removed with the developer's
+approval.
+
+## ADR-028: Local API guard (R-15)
+All routes under `/api/` are local by default; only `/api/ping`, `/api/version`, `/api/info` and `/api/deck/*`
+(read-only, for tablets) and the WebSockets `/ws` and `/vjlink` are open to the LAN. A central Javalin `before` filter
+(`ControlGuard`) requires a loopback client, a `Host` of `localhost`, `127.0.0.1` or `[::1]` (own port), an `Origin` (if
+sent) equal to `http://` + host, and `Content-Type: application/json` for POST (403/415 otherwise). This blocks CSRF and
+DNS rebinding from web pages opened on the show computer; new routes are protected unless explicitly made public.
+A `Sec-Fetch-Site` header other than `same-origin` or `none` is refused, also for GET, so other pages cannot trigger
+`/api/check` or `/api/link/scan` with `<img>` or `<script>`.
+
+## ADR-029: Update integrity (R-16)
+The updater only installs a download whose SHA-256 equals the asset `digest` from the GitHub release API. In addition,
+once `Updater.SIGNING_PUBLIC_KEY` is set, `<asset>.sig` must hold a valid Ed25519 signature over the 32-byte SHA-256,
+made offline with the developer's key (`scripts/sign-release.sh`); a missing or invalid signature means no installation,
+only a link to the release page. While the key is the empty placeholder (1.7.8), only the checksum is checked and the
+dialog says "not signed". The private key never goes to GitHub.
+
+## ADR-030: Asset names (R-06)
+From 1.7.8 installers are named `LJ-Link-*`; a copy under `LJ-Link-PRO-*` is attached for about three releases (at least
+three months) because older installs only look for that name. The updater looks for the new name first, then the old
+one, and identifies itself as `LJ-Link/<version>`. Package `dev.ljlinkpro`, `~/.ljlinkpro`, the defaults domain and
+`/ljlinkpro/bpm` stay.
+
+## ADR-031: Engine library copy (R-25)
+The downloaded `m.db` is restored into an in-memory SQLite database and the temp file deleted at once; only libraries
+above 256 MB stay as a file while open. Leftovers of ended runs are deleted at start. Temp copies get unique names
+(`ljlinkpro-<pid>-<source>-<random>-m.db`).
+
+## ADR-032: Third-party notices check (R-14)
+`checkThirdPartyNotices` (runs with `check`/`test`) fails the build when a shipped JAR is missing from
+`THIRD_PARTY_NOTICES.md` (by `group:name` and version). Temurin and Remote Tea sources are attached to each release by
+the workflow; written offer (T-16) in the notices and the license page.

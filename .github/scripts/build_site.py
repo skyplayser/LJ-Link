@@ -97,9 +97,9 @@ def structured_data(page, lang, url, home):
             "applicationSubCategory": "DJ and lighting software", "operatingSystem": "macOS 12+, Windows 10, Windows 11",
             "isAccessibleForFree": True, "downloadUrl": REPO + "/releases/latest", "installUrl": url + "#download",
             "image": BASE + "images/logo.png", "screenshot": shots, "featureList": features,
-            "keywords": "lightjockey, lighting jockey, LJ, Lichtjockey, DJ waveforms, Pro DJ Link, Pioneer CDJ, "
-                        "CDJ-3000, StageLinQ, Denon Prime, grandMA2, grandMA3, Daslight, BPM, tap tempo, "
-                        "Veranstaltungstechnik",
+            # Descriptive words only; maker and product names stay in the text where they describe compatibility.
+            "keywords": "lightjockey, lighting jockey, LJ, Lichtjockey, DJ waveforms, BPM to light desk, tap tempo, "
+                        "lighting console, Lichtpult, Veranstaltungstechnik",
             "author": author, "sameAs": [REPO]})
         graph.append(app)
     else:  # a guide: an article about the app, below the home page

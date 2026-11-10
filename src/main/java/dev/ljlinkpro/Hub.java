@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,13 +24,28 @@ final class Hub {
     private final java.util.concurrent.atomic.AtomicInteger nextDeck = new java.util.concurrent.atomic.AtomicInteger(1);
     private final java.util.concurrent.atomic.AtomicInteger nextScope = new java.util.concurrent.atomic.AtomicInteger();
     private final Map<Integer, String> lastSent = new ConcurrentHashMap<>();
-    private final Map<Integer, Long> lastPositionSample = new ConcurrentHashMap<>();
-    private final Set<WsContext> clients = ConcurrentHashMap.newKeySet();
+    /** What was last sent as the position of each deck, for sending only changes (plus a keepalive). */
+    private final Map<Integer, SentPosition> lastPosition = new ConcurrentHashMap<>();
+    /** Connected browsers, each with its own sender (ADR-024). Keyed by the {@link WsContext} (or a test's own key). */
+    private final Map<Object, WsClient> clients = new ConcurrentHashMap<>();
     private final ScheduledExecutorService ticker = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "hub-ticker");
         t.setDaemon(true);
         return t;
     });
+    /** Runs the senders of the browsers: one task per browser at a time, so a slow one only blocks its own thread. */
+    private final java.util.concurrent.Executor senders;
+    /** Start of the server clock in {@code pos} messages ({@code t}, monotonic milliseconds). */
+    private static final long CLOCK_ORIGIN = System.nanoTime();
+    /** A deck whose position did not change gets its position again after this long anyway (keepalive). */
+    static final long POSITION_KEEPALIVE_NANOS = 1_000_000_000L;
+    /** Counts {@code pos} messages, so a browser can drop one that arrives after a newer one. */
+    private final java.util.concurrent.atomic.AtomicLong positionSequence = new java.util.concurrent.atomic.AtomicLong();
+    private final long stallNanos;
+    /** Browsers disconnected because they stopped taking messages, for the diagnostics. */
+    private final java.util.concurrent.atomic.AtomicInteger stalledDrops = new java.util.concurrent.atomic.AtomicInteger();
+
+    private record SentPosition(String pv, long atNanos) {}
 
     /** Told the number of connected browsers whenever it changes (used by {@link SleepGuard}). */
     private volatile java.util.function.IntConsumer clientCountListener = n -> { };
@@ -96,7 +110,8 @@ final class Hub {
             if (d != null) {
                 decks.remove(d.number);
                 lastSent.remove(d.number);
-                broadcast(Map.of("type", "deckGone", "deck", d.number));
+                lastPosition.remove(d.number);
+                broadcastDeckGone(d.number);
             }
         }
 
@@ -178,9 +193,35 @@ final class Hub {
     }
 
     Hub() {
+        this(WsClient.STALL_NANOS);
+    }
+
+    /** {@code stallNanos}: how long one send to a browser may block before that browser is disconnected. */
+    Hub(long stallNanos) {
+        this(stallNanos, true);
+    }
+
+    /**
+     * {@code ticking}: false for tests that call {@link #positionTick(long)} and {@link #dropStalledClients()} themselves,
+     * so no second thread sends at the same time.
+     */
+    Hub(long stallNanos, boolean ticking) {
+        this(stallNanos, ticking, Executors.newCachedThreadPool(r -> {
+            Thread t = new Thread(r, "hub-send");
+            t.setDaemon(true);
+            return t;
+        }));
+    }
+
+    /** {@code senders} runs the browsers' send tasks; a test may run them at once on the calling thread. */
+    Hub(long stallNanos, boolean ticking, java.util.concurrent.Executor senders) {
+        this.stallNanos = stallNanos;
+        this.senders = senders;
         Privacy.addListener(this::broadcastState);
-        ticker.scheduleAtFixedRate(this::tick, 100, 100, TimeUnit.MILLISECONDS);
-        ticker.scheduleAtFixedRate(this::positionTick, 20, 20, TimeUnit.MILLISECONDS);
+        if (ticking) {
+            ticker.scheduleAtFixedRate(this::tick, 100, 100, TimeUnit.MILLISECONDS);
+            ticker.scheduleAtFixedRate(this::positionTick, 20, 20, TimeUnit.MILLISECONDS);
+        }
     }
 
     private String mixerJson() {
@@ -225,15 +266,20 @@ final class Hub {
         return list;
     }
 
+    /** How many decks still have a remembered last sent position or deck message (for tests: none after removal). */
+    int sentPositionCount() {
+        return lastPosition.size() + lastSent.size();
+    }
+
     /** Removes everything: all scopes and decks (the sources were stopped). */
     void reset() {
         for (Integer n : decks.keySet()) {
-            broadcast(Map.of("type", "deckGone", "deck", n));
+            broadcastDeckGone(n);
         }
         decks.clear();
         scopes.clear();
         lastSent.clear();
-        lastPositionSample.clear();
+        lastPosition.clear();
         broadcastState();
     }
 
@@ -305,23 +351,63 @@ final class Hub {
     }
 
     void addClient(WsContext ctx) {
-        synchronized (clientCountLock) {
-            if (clients.add(ctx)) {
-                clientCountListener.accept(clients.size());
+        addClient(ctx, new WsClient.Sink() {
+            @Override
+            public boolean isOpen() {
+                return ctx.session.isOpen();
             }
+
+            @Override
+            public void send(String text) {
+                ctx.send(text);
+            }
+
+            @Override
+            public void disconnect() {
+                ctx.session.disconnect();
+            }
+        });
+    }
+
+    /** Connects a browser (or a test's fake) under {@code key} and queues the full current state for it. */
+    void addClient(Object key, WsClient.Sink sink) {
+        WsClient client = new WsClient(sink, senders);
+        synchronized (clientCountLock) {
+            if (clients.putIfAbsent(key, client) != null) {
+                return;
+            }
+            clientCountListener.accept(clients.size());
         }
-        send(ctx, stateJson());
-        send(ctx, mixerJson());
+        client.offer("state", stateJson());
+        client.offer("mixer", mixerJson());
         for (Deck d : decks.values()) {
-            send(ctx, deckJson(d));
-            send(ctx, positionJson(d));
+            client.offerDeck("deck", d.number, deckJson(d));
+            client.offerDeck("pos", d.number, positionJson(d, System.nanoTime()));
         }
     }
 
-    void removeClient(WsContext ctx) {
+    void removeClient(Object key) {
+        WsClient gone;
         synchronized (clientCountLock) {
-            if (clients.remove(ctx)) {
+            gone = clients.remove(key);
+            if (gone != null) {
                 clientCountListener.accept(clients.size());
+            }
+        }
+        if (gone != null) {
+            gone.close();
+        }
+    }
+
+    /** Disconnects browsers whose send has been blocked too long (asleep, gone); they reconnect by themselves. */
+    void dropStalledClients() {
+        long now = System.nanoTime();
+        for (Map.Entry<Object, WsClient> e : clients.entrySet()) {
+            if (e.getValue().stalled(now, stallNanos)) {
+                System.err.println("A browser did not take messages for " + stallNanos / 1_000_000 + " ms; disconnecting it (it reconnects by itself).");
+                e.getValue().kill();
+                stalledDrops.incrementAndGet();
+                removeClient(e.getKey());
             }
         }
     }
@@ -393,23 +479,16 @@ final class Hub {
     }
 
     private void broadcastState() {
-        broadcast(stateJson0());
-    }
-
-    private void broadcast(Map<String, Object> msg) {
-        String text = write(msg);
-        for (WsContext c : clients) {
-            send(c, text);
+        String text = write(stateJson0());
+        for (WsClient c : clients.values()) {
+            c.offer("state", text);
         }
     }
 
-    private static void send(WsContext ctx, String text) {
-        try {
-            if (ctx.session.isOpen()) {
-                ctx.send(text);
-            }
-        } catch (RuntimeException e) {
-            // A broken client must never disturb the others or the monitoring itself.
+    private void broadcastDeckGone(int deck) {
+        String text = write(Map.of("type", "deckGone", "deck", deck));
+        for (WsClient c : clients.values()) {
+            c.deckGone(deck, text);
         }
     }
 
@@ -421,23 +500,60 @@ final class Hub {
         }
     }
 
-    private static String positionJson(Deck d) {
-        return "{\"type\":\"pos\",\"deck\":" + d.number + ",\"p\":" + d.positionMs + ",\"v\":"
-                + String.format(java.util.Locale.ROOT, "%.4f", d.velocity) + "}";
+    /** Position and speed as sent, the part that tells whether anything changed. */
+    private static String positionValues(Deck.PositionSnapshot s) {
+        return "\"p\":" + s.ms() + ",\"v\":" + String.format(java.util.Locale.ROOT, "%.4f", s.velocity());
     }
 
-    /** Compact position messages at up to 50 Hz, only when a new sample arrived. */
-    private void positionTick() {
+    /**
+     * {@code {"type":"pos","deck":n,"p":ms,"v":speed,"s":sequence,"t":serverMs,"a":ageMs}}: {@code t} is the server clock
+     * (monotonic ms) when the message was made, {@code a} how old the sample {@code p} was then. The browser estimates
+     * its offset to the server clock from {@code t} and so knows when {@code p} was valid, even if the message was late.
+     */
+    private String positionJson(Deck d, long nowNanos) {
+        return positionJson(d.number, d.positionSnapshot(), nowNanos);
+    }
+
+    private String positionJson(int deck, Deck.PositionSnapshot s, long nowNanos) {
+        // Never sampled (a deck without a position): the age is meaningless, keep the number small.
+        long age = s.atNanos() == 0 ? 0 : Math.max(0, Math.min(60_000, (nowNanos - s.atNanos()) / 1_000_000));
+        return "{\"type\":\"pos\",\"deck\":" + deck + "," + positionValues(s) + ",\"s\":" + positionSequence.incrementAndGet()
+                + ",\"t\":" + serverMillis(nowNanos) + ",\"a\":" + age + "}";
+    }
+
+    static long serverMillis(long nanos) {
+        return (nanos - CLOCK_ORIGIN) / 1_000_000;
+    }
+
+    /**
+     * Compact position messages, checked every 20 ms: sent when a new sample brought another position or speed, and
+     * otherwise once per {@link #POSITION_KEEPALIVE_NANOS} (a paused deck no longer gets 50 identical messages a second).
+     */
+    void positionTick() {
+        positionTick(System.nanoTime());
+    }
+
+    /** {@link #positionTick()} at the given time ({@link System#nanoTime()} scale); tests pass their own. */
+    void positionTick(long now) {
         try {
             for (Deck d : decks.values()) {
-                long sample = d.positionSample;
-                Long last = lastPositionSample.put(d.number, sample);
-                if (last != null && last == sample) {
+                Deck.PositionSnapshot s = d.positionSnapshot();
+                SentPosition last = lastPosition.get(d.number);
+                String pv = positionValues(s);
+                boolean due = last == null || now - last.atNanos() >= POSITION_KEEPALIVE_NANOS;
+                boolean changed = last == null || !last.pv().equals(pv);
+                if (!due && !changed) {
                     continue;
                 }
-                String text = positionJson(d);
-                for (WsContext c : clients) {
-                    send(c, text);
+                lastPosition.put(d.number, new SentPosition(pv, now));
+                if (!decks.containsKey(d.number)) {
+                    // Removed meanwhile (removeDeck takes it out of decks first, then out of lastPosition): no leftover.
+                    lastPosition.remove(d.number);
+                    continue;
+                }
+                String text = positionJson(d.number, s, now);
+                for (WsClient c : clients.values()) {
+                    c.offerDeck("pos", d.number, text);
                 }
             }
         } catch (RuntimeException e) {
@@ -448,18 +564,19 @@ final class Hub {
     /** Sends decks that changed; playing decks are sent every tick so clients get fresh positions. */
     private void tick() {
         try {
+            dropStalledClients();
             String st = stateJson();
             if (!st.equals(lastState)) {
                 lastState = st;
-                for (WsContext c : clients) {
-                    send(c, st);
+                for (WsClient c : clients.values()) {
+                    c.offer("state", st);
                 }
             }
             String mixer = mixerJson();
             if (!mixer.equals(lastMixer)) {
                 lastMixer = mixer;
-                for (WsContext c : clients) {
-                    send(c, mixer);
+                for (WsClient c : clients.values()) {
+                    c.offer("mixer", mixer);
                 }
             }
             for (Deck d : decks.values()) {
@@ -467,9 +584,12 @@ final class Hub {
                 String prev = lastSent.get(d.number);
                 if (!base.equals(prev)) {
                     lastSent.put(d.number, base);
-                    String text = base;
-                    for (WsContext c : clients) {
-                        send(c, text);
+                    if (!decks.containsKey(d.number)) {
+                        lastSent.remove(d.number); // removed meanwhile, as in positionTick
+                        continue;
+                    }
+                    for (WsClient c : clients.values()) {
+                        c.offerDeck("deck", d.number, base);
                     }
                 }
             }
@@ -481,7 +601,8 @@ final class Hub {
     /** Overall state, sources and decks for a problem report. No track titles. */
     List<String> diagnostics() {
         List<String> out = new ArrayList<>();
-        out.add("Overall phase: " + phase() + ", browsers connected: " + clients.size());
+        out.add("Overall phase: " + phase() + ", browsers connected: " + clients.size()
+                + ", browsers dropped as stalled: " + stalledDrops.get());
         for (Scope sc : sortedScopes()) {
             out.add("Source " + sc.key + " (" + sc.kind + "): " + sc.phase + (sc.message.isBlank() ? "" : ", \"" + sc.message + "\"")
                     + ", decks " + sc.own.size() + ", mixer " + (Boolean.TRUE.equals(sc.mixerBase.get("present")) ? sc.mixerBase.get("name") : "none"));
