@@ -203,7 +203,7 @@ select, input {
 .deck.onair .live-tag { display: block; }
 .strip { display: flex; align-items: flex-end; justify-content: center; background: #3a3a3a; padding-bottom: 8px; }
 .deck.onair .strip, .deck.playing .strip { background: #c40000; }
-.deck-num { font-size: 20px; font-weight: 800; color: #fff; }
+.deck-num { font-size: 20px; font-weight: 800; color: var(--text); }
 .deck-side { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; padding: 12px 14px; min-width: 0; }
 .deck-top { display: flex; gap: 12px; min-width: 0; }
 .art { flex: 0 0 64px; width: 64px; height: 64px; background: #3a3a3a; overflow: hidden; }
@@ -373,6 +373,15 @@ label.check input { width: 20px; height: 20px; min-height: 0; accent-color: var(
 .report-preview { max-height: 260px; overflow: auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
 #report details { margin: 10px 0; }
 .report-sheet a { color: #60a5fa; }
+.stars-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; margin: 4px 0 8px; }
+/* The question takes its own line, so the stars and "Clear rating" stay side by side (also in German). */
+.stars-row > span { flex-basis: 100%; }
+.stars { display: flex; gap: 2px; }
+.stars .star { background: transparent; border: 0; padding: 0 4px; min-height: 44px; min-width: 40px; font-size: 30px; line-height: 1; color: var(--muted); opacity: .6; }
+.stars .star.on { color: #f5b301; opacity: 1; }
+.stars .star:hover { color: #f5b301; opacity: .8; }
+.stars .star.on:hover { opacity: 1; }
+.stars-row button.link { min-height: 0; padding: 4px 6px; }
 
 /* Keep the screen awake (ADR-022): the fallback video is a real, rendered element inside the viewport and on top (iOS may
    treat an invisible or covered video differently), but 2x2 px at opacity 0.01 it cannot be seen, and it cannot be touched. */

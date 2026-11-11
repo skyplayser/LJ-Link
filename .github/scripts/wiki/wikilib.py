@@ -42,7 +42,11 @@ def esc(s):
 
 
 # ------------------------------------------------------------------ inline text
-_TOK = re.compile(r"`([^`]+)`|\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)")
+# `code`, **bold**, [link](href) and *italic*. Code, bold and links are tried first at every position, so stars inside
+# code, link targets or a **bold** pair are never italic. *italic* needs a star that is not part of ** and not glued to a
+# letter or digit outside (so 2*3 or file*name stay plain), text that does not start or end with a space and has no star.
+_TOK = re.compile(r"`([^`]+)`|\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)"
+                  r"|(?<![*\w])\*(?![\s*])([^*\n]+?)(?<![\s*])\*(?![*\w])")
 
 
 def _tokens(s):
@@ -53,6 +57,8 @@ def _tokens(s):
             out.append(("c", m[1]))
         elif m[2] is not None:
             out.append(("b", m[2]))
+        elif m[5] is not None:
+            out.append(("i", m[5]))
         else:
             out.append(("a", m[3], m[4]))
         i = m.end()
@@ -61,7 +67,7 @@ def _tokens(s):
 
 
 def inline(en, de=None):
-    """Text with `code`, **bold** and [links](href) in both languages. The specials must appear in the same order."""
+    """Text with `code`, **bold**, *italic* and [links](href) in both languages. The specials must appear in the same order."""
     de = en if de is None else de
     te, td = _tokens(en), _tokens(de)
     if [t[0] for t in te] != [t[0] for t in td] or [t[2] for t in te if t[0] == "a"] != [t[2] for t in td if t[0] == "a"]:
@@ -75,8 +81,9 @@ def inline(en, de=None):
             out.append(esc(e[1]) if e[1] == d[1] else '<span data-de="%s">%s</span>' % (esc(d[1]), esc(e[1])))
         elif kind == "c":
             out.append("<code>%s</code>" % esc(e[1]) if e[1] == d[1] else '<code data-de="%s">%s</code>' % (esc(d[1]), esc(e[1])))
-        elif kind == "b":
-            out.append("<b>%s</b>" % esc(e[1]) if e[1] == d[1] else '<b data-de="%s">%s</b>' % (esc(d[1]), esc(e[1])))
+        elif kind in ("b", "i"):
+            out.append("<%s>%s</%s>" % (kind, esc(e[1]), kind) if e[1] == d[1]
+                       else '<%s data-de="%s">%s</%s>' % (kind, esc(d[1]), esc(e[1]), kind))
         else:
             ext = ' rel="noopener"' if e[2].startswith("http") else ""
             out.append('<a href="%s"%s>%s</a>' % (esc(e[2]), ext, esc(e[1])) if e[1] == d[1]

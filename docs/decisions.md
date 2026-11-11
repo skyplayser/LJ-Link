@@ -395,3 +395,17 @@ above 256 MB stay as a file while open. Leftovers of ended runs are deleted at s
 `checkThirdPartyNotices` (runs with `check`/`test`) fails the build when a shipped JAR is missing from
 `THIRD_PARTY_NOTICES.md` (by `group:name` and version). Temurin and Remote Tea sources are attached to each release by
 the workflow; written offer (T-16) in the notices and the license page.
+
+## ADR-033: Quit window with feedback and rating
+"Quit" in the program icon menu first shows a small window (`QuitDialog`): community note, optional 1-5 stars,
+"Give feedback", "Share link", "Quit" and "Don't show this again when quitting" (`skipQuitDialog` in the settings file,
+saved as soon as it is ticked). "Give feedback" does not quit (the web interface would be gone): it opens
+`/#report?stars=N` in the web interface. Closing the window (X or Escape) cancels. The quit of an update, a missing
+system tray and a headless JVM never show the window. The rating only goes into the report text ("Rating: N of 5 stars"
+first) that the user sends by hand; nothing is sent automatically. A rating alone is enough to send a report.
+The web settings have "Show note when quitting" (the inverse of `skipQuitDialog`), read and set through the local-only
+route `/api/quit-note` (GET, POST `{"on": bool}` with JSON, ControlGuard), shown only on the computer that runs LJ Link
+and only when the program icon is installed (`"tray"` in the GET answer). Enter in the window means "Quit" (default
+button, focused), since that is what the user chose. The GitHub link of the report window sets no label (a wish or a
+rating is not a bug). In the web the stars behave like radio buttons (clearing only with "Clear rating" or
+Delete/Backspace/0); in the Swing window clicking the chosen star again clears it, as there is no clear button there.

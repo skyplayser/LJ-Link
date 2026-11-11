@@ -118,6 +118,17 @@ public final class Main {
                 ctx.status(400);
             }
         }));
+        // "Show note when quitting": the QuitDialog of the program icon menu (default on). Local only, like all control
+        // routes (ControlGuard); a tablet neither sees nor changes it.
+        // "tray": whether the program icon is shown; without it there is no quit window and the switch is hidden.
+        app.get("/api/quit-note", ctx -> ctx.json(Map.of("on", !QuitDialog.skip(), "tray", Tray.installed())));
+        app.post("/api/quit-note", ctx -> control(ctx, () -> {
+            try {
+                QuitDialog.setSkip(!Hub.JSON.readTree(ctx.body()).path("on").asBoolean(true));
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
+        }));
         app.get("/api/info", ctx -> ctx.json(Map.of(
                 "controller", ControlGuard.isController(ctx),
                 "urls", NetworkCheck.lanUrls(boundPort[0]),
@@ -228,7 +239,7 @@ public final class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
         Runtime.getRuntime().addShutdownHook(new Thread(sleepGuard::close));
         if (useTray) {
-            boolean installed = Tray.install(url, () -> openInBrowser(url), () -> openInBrowser(url + "/#report"), () -> {
+            boolean installed = Tray.install(url, () -> openInBrowser(url), stars -> openInBrowser(url + QuitDialog.reportPath(stars)), () -> {
                 session.stop();
                 sleepGuard.close();
                 app.stop();

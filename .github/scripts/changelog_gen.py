@@ -3,14 +3,31 @@
     python3 .github/scripts/changelog_gen.py site
 
 Add every new version at the top of R (English and German, "What's new" and "Fixes"), run this, commit the page.
+A version that is not released yet gets None for both dates: it is marked "Not released yet", and "Latest" and the
+download button stay on the newest released version.
+
+    python3 .github/scripts/changelog_gen.py --check 1.7.9
+
+only checks that version 1.7.9 has an entry with a date (exit code 1 otherwise); the publishing script runs it first.
 It takes head and footer from site/pioneer-bpm-grandma.html; build_site.py then makes the German page.
 """
 import html, sys, re
 from pathlib import Path
-site = Path(sys.argv[1])
+site = Path(sys.argv[1]) if len(sys.argv) > 1 else sys.exit("usage: changelog_gen.py <site dir> | --check <version>")
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.9", "11 November 2026", "11. November 2026", [
+   ("Quitting from the program icon first shows a short note: LJ Link is a community project; give feedback with an optional rating of 1 to 5 stars, copy the link to share it, or quit. \"Give feedback\" opens the report window and keeps LJ Link running. \"Quit\" is the default button (Enter quits). Tick \"Don't show this again when quitting\" to quit at once next time. Nothing is sent from this window. Not tested by hand yet (alpha).",
+    "Beim Beenden über das Programm-Symbol erscheint vorher ein kurzer Hinweis: LJ Link ist ein Community-Projekt; Feedback geben mit optionaler Bewertung von 1 bis 5 Sternen, den Link zum Teilen kopieren oder beenden. „Feedback geben“ öffnet das Meldefenster, LJ Link läuft weiter. „Beenden“ ist der Standardknopf (Enter beendet). Mit dem Häkchen „Beim Beenden nicht mehr anzeigen“ beendet LJ Link beim nächsten Mal sofort. Aus diesem Fenster wird nichts gesendet. Noch nicht von Hand getestet (Alpha)."),
+   ("\"Report a problem\" is now \"Report a problem or request a feature\", for wishes too, with an optional star rating. The rating is the first line of the report you send yourself by email, on GitHub or as a file; a rating alone is enough to send. In the settings the button has its own block Feedback, and a GitHub report no longer suggests the label bug, since it can be a wish too. Alpha.",
+    "„Problem melden“ heißt jetzt „Problem melden oder Wunsch äußern“, auch für Wünsche, mit optionaler Sternebewertung. Die Bewertung steht als erste Zeile im Bericht, den du selbst per E-Mail, auf GitHub oder als Datei weitergibst; eine Bewertung allein reicht zum Senden. In den Einstellungen steht der Knopf in einem eigenen Block Feedback, und eine Meldung auf GitHub schlägt nicht mehr das Label bug vor, weil es auch ein Wunsch sein kann. Alpha."),
+   ("New setting Settings → Quit → Show note when quitting (on by default; shown only on the computer running LJ Link and only while the program icon is shown) brings the note back or switches it off. Alpha.",
+    "Neue Einstellung Einstellungen → Beenden → Hinweis beim Beenden anzeigen (standardmäßig an; nur auf dem Rechner mit LJ Link sichtbar und nur, wenn das Programm-Symbol angezeigt wird) holt den Hinweis zurück oder schaltet ihn ab. Alpha."),
+ ], [
+   ("The player number on each deck was invisible in the day (light) display. It now shows in both displays. Checked in demo mode.",
+    "Die Player-Nummer im Deck war in der Tag-Anzeige (hell) unsichtbar. Jetzt ist sie in beiden Anzeigen zu sehen. Im Demo-Modus geprüft."),
+ ]),
  ("1.7.8", "10 November 2026", "10. November 2026", [
    ("New setting Settings → Updates → Check for updates automatically (on by default, only on the computer running LJ Link). When it is off, LJ Link only asks GitHub when you choose \"Check for updates\" in the menu of the program icon.",
     "Neue Einstellung Einstellungen → Updates → Automatisch nach Updates suchen (standardmäßig an, nur auf dem Rechner mit LJ Link). Ist sie aus, fragt LJ Link GitHub nur, wenn du im Menü des Programm-Symbols „Nach Updates suchen“ wählst."),
@@ -222,6 +239,17 @@ R = [
  ]),
 ]
 
+if sys.argv[1] == "--check":
+    want = (sys.argv[2] if len(sys.argv) > 2 else "").lstrip("v")
+    entry = next((r for r in R if r[0] == want), None)
+    if entry is None:
+        sys.exit(f"Changelog: no entry for {want or '(no version given)'} in .github/scripts/changelog_gen.py. Add it first.")
+    if not entry[1] or not entry[2]:
+        sys.exit(f"Changelog: {want} has no date (still marked \"Not released yet\"). Set both dates in "
+                 ".github/scripts/changelog_gen.py, run it with site, commit, then publish.")
+    print(f"Changelog: {want} ({entry[1]}) ok")
+    sys.exit(0)
+
 def li(en, de): return f'<li data-de="{E(de)}">{E(en)}</li>'
 def block(cls, en, de, items):
     if not items:
@@ -230,15 +258,21 @@ def block(cls, en, de, items):
         body = "<ul>" + "".join(li(*i) for i in items) + "</ul>"
     return f'<div class="rel-part {cls}"><h3 data-de="{de}">{en}</h3>{body}</div>'
 
-latest = R[0][0]
+latest = next(r[0] for r in R if r[1])
 out = []
 toc = []
 for i, (v, den, dde, new, fix) in enumerate(R):
     vid = "v" + v.replace(".", "-")
     toc.append(f'<a href="#{vid}">{v}</a>')
-    badge = '<span class="badge stable" data-de="Aktuell">Latest</span>' if i == 0 else ""
+    if not den:
+        badge = '<span class="badge plan" data-de="Noch nicht veröffentlicht">Not released yet</span>'
+    elif v == latest:
+        badge = '<span class="badge stable" data-de="Aktuell">Latest</span>'
+    else:
+        badge = ""
+    date = f'<span class="rel-date" data-de="{dde}">{den}</span>' if den else ""
     out.append(f'''    <section class="release" id="{vid}">
-      <div class="rel-head"><h2>LJ Link {v}</h2>{badge}<span class="rel-date" data-de="{dde}">{den}</span></div>
+      <div class="rel-head"><h2>LJ Link {v}</h2>{badge}{date}</div>
       {block("new", "What's new", "Neu", new)}
       {block("fix", "Fixes", "Behoben", fix)}
     </section>''')

@@ -236,8 +236,9 @@ architecture and the decisions behind it are in [docs/decisions.md](docs/decisio
 ## Problems?
 
 The [troubleshooting page](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html) lists known problems and their solutions. To report a new one,
-use **Report a problem** in the program (menu ☰, or the menu of the program icon): describe what happens and leave *Include
-diagnostic data* ticked. The diagnostic data holds the version, network adapters, the devices found and their connection state,
+use **Report a problem or request a feature** in the program (menu ☰ → Feedback, or the menu of the program icon): describe what
+happens and leave *Include diagnostic data* ticked. Wishes are welcome there too, with an optional rating of 1 to 5 stars that
+becomes the first line of the report (alpha). The diagnostic data holds the version, network adapters, the devices found and their connection state,
 what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it
 by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue.
 

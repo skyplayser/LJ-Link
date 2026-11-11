@@ -1622,6 +1622,7 @@ function setLanguage(l, remember = true) {
   if (!$("settings").classList.contains("hidden")) loadLink();
   if (infoDeck != null) refreshInfo();
   renderCheckResults();
+  renderStars();
   loadAdapters();
   if (remember && ui.controller) post("/api/language?lang=" + lang);
 }
@@ -1642,8 +1643,53 @@ $("btn-cancel").onclick = () => post("/api/stop");
 
 const REPO = "skyplayser/LJ-Link";
 let reportDiag = "";
+// Optional rating 1-5 (0 = none). It only goes into the report the user sends by hand; nothing is sent automatically.
+let reportStars = 0;
 
-async function openReport() {
+function renderStars() {
+  const buttons = [...document.querySelectorAll("#report-stars .star")];
+  buttons.forEach((b, i) => {
+    const n = i + 1;
+    b.classList.toggle("on", n <= reportStars);
+    b.setAttribute("aria-checked", String(n === reportStars));
+    b.setAttribute("aria-label", t("{n} of 5 stars", { n }));
+    b.title = t("{n} of 5 stars", { n });
+    // Roving focus: only the chosen star (or the first one) is reached with Tab; the arrow keys move between them.
+    b.tabIndex = n === (reportStars || 1) ? 0 : -1;
+  });
+  $("report-stars-clear").classList.toggle("hidden", !reportStars);
+}
+
+function setStars(n, focus = false) {
+  reportStars = Math.max(0, Math.min(5, n | 0));
+  renderStars();
+  if (focus) document.querySelectorAll("#report-stars .star")[(reportStars || 1) - 1].focus();
+}
+
+for (const b of document.querySelectorAll("#report-stars .star")) {
+  const n = Number(b.dataset.n);
+  // Like a radio button: a click (or Space/Enter) chooses the star; it never clears the rating. Clearing is
+  // "Clear rating" or Delete/Backspace/0.
+  b.onclick = () => setStars(n);
+  b.addEventListener("keydown", (e) => {
+    const k = e.key;
+    if (k === "ArrowRight" || k === "ArrowUp") setStars(Math.min(5, reportStars + 1), true);
+    else if (k === "ArrowLeft" || k === "ArrowDown") setStars(Math.max(1, (reportStars || 2) - 1), true);
+    else if (k === "Home") setStars(1, true);
+    else if (k === "End") setStars(5, true);
+    else if (k === "Delete" || k === "Backspace" || k === "0") setStars(0, true);
+    else if (/^[1-5]$/.test(k)) setStars(Number(k), true);
+    else return;
+    e.preventDefault();
+  });
+}
+$("report-stars-clear").onclick = () => setStars(0, true);
+renderStars();
+
+/** {@code stars}: preset from the link /#report?stars=N (the quit window of the program icon); undefined keeps it. */
+async function openReport(stars) {
+  if (stars !== undefined) reportStars = Math.max(0, Math.min(5, stars | 0));
+  renderStars();
   $("settings").classList.add("hidden");
   $("report").classList.remove("hidden");
   $("report-status").textContent = "";
@@ -1664,14 +1710,42 @@ async function openReport() {
   $("report-text").focus();
 }
 
-function reportText() {
+/** The rating line ("Rating: 4 of 5 stars") or "" when no stars are chosen. */
+function ratingLine() {
+  return reportStars ? t("Rating: {n} of 5 stars", { n: reportStars }) : "";
+}
+
+/** Rating line and description, without diagnostics. */
+function reportHead() {
   const text = $("report-text").value.trim();
-  let out = text || t("(no description)");
+  const parts = [];
+  if (reportStars) parts.push(ratingLine());
+  if (text) parts.push(text);
+  else if (!reportStars) parts.push(t("(no description)"));
+  return parts.join("\n\n");
+}
+
+function reportText() {
+  let out = reportHead();
   if ($("report-diag").checked && reportDiag) out += "\n\n" + reportDiag;
   return out;
 }
 
-$("btn-report").onclick = openReport;
+/** A report needs a description or a rating; says so and returns false otherwise. */
+function reportReady() {
+  if ($("report-text").value.trim() || reportStars) return true;
+  $("report-status").textContent = t("Please describe the problem or your wish first, or choose a rating.");
+  $("report-text").focus();
+  return false;
+}
+
+/** First line of the description for a mail subject or issue title, else the rating line. */
+function reportTitle(max) {
+  const text = $("report-text").value.trim();
+  return (text ? text.split("\n")[0] : ratingLine()).slice(0, max);
+}
+
+$("btn-report").onclick = () => openReport();
 $("report-close").onclick = () => $("report").classList.add("hidden");
 $("report").addEventListener("click", (e) => { if (e.target === $("report")) $("report").classList.add("hidden"); });
 $("report-copy").onclick = async () => {
@@ -1694,16 +1768,15 @@ function saveReportFile() {
 }
 
 $("report-mail").onclick = async () => {
-  const text = $("report-text").value.trim();
-  if (!text) { $("report-status").textContent = t("Please describe the problem first."); $("report-text").focus(); return; }
-  const subject = "LJ Link: " + text.split("\n")[0].slice(0, 80);
+  if (!reportReady()) return;
+  const subject = "LJ Link: " + reportTitle(80);
   let body = reportText();
   let note = "";
   // Mail programs (above all on Windows) only take short links; long diagnostics go as a file to attach.
   if (encodeURIComponent(body).length > 1800 && $("report-diag").checked && reportDiag) {
     saveReportFile();
     try { await navigator.clipboard.writeText(reportDiag); } catch (e) { /* the file is enough */ }
-    body = text + "\n\n" + t("The diagnostic data is attached as a file (LJ-Link-report-….txt from the downloads folder).");
+    body = reportHead() + "\n\n" + t("The diagnostic data is attached as a file (LJ-Link-report-….txt from the downloads folder).");
     note = t("The diagnostic data was saved as a file: attach it to the mail (it is also in the clipboard).");
   }
   location.href = "mailto:" + REPORT_MAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
@@ -1711,11 +1784,10 @@ $("report-mail").onclick = async () => {
 };
 
 $("report-github").onclick = async () => {
-  const text = $("report-text").value.trim();
-  if (!text) { $("report-status").textContent = t("Please describe the problem first."); $("report-text").focus(); return; }
-  const title = text.split("\n")[0].slice(0, 90);
-  const version = (reportDiag.match(/^Version (\S+)/m) || [])[1] || "";
-  let body = text + "\n\n" + (version ? "Version: " + version + "\n" : "");
+  if (!reportReady()) return;
+  const title = reportTitle(90);
+  const version = (reportDiag.match(/^Version ([^\s,]+)/m) || [])[1] || "";
+  let body = reportHead() + "\n\n" + (version ? "Version: " + version + "\n" : "");
   let note = "";
   if ($("report-diag").checked && reportDiag) {
     const block = "\n<details><summary>Diagnostics</summary>\n\n```\n" + reportDiag + "```\n</details>\n";
@@ -1728,7 +1800,7 @@ $("report-github").onclick = async () => {
       body += "\n<!-- " + "Paste the diagnostic data below" + " -->\n";
     }
   }
-  window.open("https://github.com/" + REPO + "/issues/new?labels=bug&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body), "_blank");
+  window.open("https://github.com/" + REPO + "/issues/new?title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body), "_blank");
   $("report-status").textContent = (note ? note + " " : "") + t("A GitHub account is needed to send it. Without one: “Send by email”.");
 };
 
@@ -1757,7 +1829,7 @@ $("btn-error-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
-$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); };
+$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); };
 $("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
@@ -1766,6 +1838,18 @@ $("zoom").oninput = () => { settings.zoom = Number($("zoom").value); saveSetting
 $("seg-mode").onclick = (e) => { if (e.target.dataset.value) { settings.mode = e.target.dataset.value; saveSettings(); applySettings(); } };
 $("seg-theme").onclick = (e) => { if (e.target.dataset.value) { settings.theme = e.target.dataset.value; saveSettings(); applySettings(); } };
 $("update-box").onchange = () => { post("/api/updates", { on: $("update-box").checked }).then(loadVersion); };
+/** "Show note when quitting" (the window of the program icon's Quit); only on the computer that runs LJ Link. */
+async function loadQuitNote() {
+  try {
+    const res = await fetch("/api/quit-note");
+    if (!res.ok) throw new Error();
+    const q = await res.json();
+    $("quit-note-box").checked = q.on !== false;
+    // Without the program icon (--no-tray, no system tray) there is no quit window, so the switch would do nothing.
+    $("quit-note-setting").classList.toggle("hidden", q.tray !== true);
+  } catch (e) { $("quit-note-setting").classList.add("hidden"); }
+}
+$("quit-note-box").onchange = () => { post("/api/quit-note", { on: $("quit-note-box").checked }).then(loadQuitNote); };
 $("awake-box").onchange = () => { settings.keepAwake = $("awake-box").checked; saveSettings(); updateAwake(true); };
 // #awake-hint needs no handler of its own: the tap on it is caught by onAwakeTap.
 const ZOOM_STEPS = [4, 6, 8, 12, 16, 24, 32, 40];
@@ -1917,6 +2001,7 @@ fetch("/api/info").then((r) => r.json()).then((info) => {
   ui.controller = info.controller;
   $("controls").classList.toggle("hidden", !info.controller);
   $("updates-setting").classList.toggle("hidden", !info.controller);
+  if (info.controller) loadQuitNote();
   $("remote-note").classList.toggle("hidden", info.controller);
   $("lan").textContent = info.urls.length ? t("Open on the tablet (same Wi-Fi): ") + info.urls.join(t("  or  ")) : "";
   render();
@@ -1941,7 +2026,7 @@ setTimeout(() => {
   if (h.includes("mixer")) { ui.tab = "mixer"; applyTab(); }
   if (h.includes("detail")) { settings.view = "detail"; applySettings(); }
   if (h.includes("bpm")) openBpm();
-  if (h.includes("report")) openReport();
+  if (h.includes("report")) { const m = h.match(/stars=([1-5])/); openReport(m ? Number(m[1]) : undefined); }
   if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); }
   else if (h.includes("manual")) openManual();
   else { const m = h.match(/info-(\d+)/); if (m) openInfo(Number(m[1])); }

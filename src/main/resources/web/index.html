@@ -259,6 +259,18 @@
       <div class="hint">LJ Link asks GitHub for the newest version about 15 seconds after the start (only when the program icon is shown) and when the interface is loaded, at most once an hour. Only this computer asks, also when a tablet loads the page; GitHub sees its IP address and the program version. When this is off, GitHub is only asked when you choose “Check for updates” in the program icon menu.</div>
     </div>
 
+    <div class="setting hidden" id="quit-note-setting">
+      <div class="label">Quit</div>
+      <label class="check"><input type="checkbox" id="quit-note-box" checked> <span>Show note when quitting – Alpha</span></label>
+      <div class="hint">When you quit LJ Link from the program icon, a short note first asks for feedback (with an optional star rating) and offers the link to share. Nothing is sent from it.</div>
+    </div>
+
+    <div class="setting">
+      <span class="label">Feedback</span>
+      <div class="hint">Report a problem, request a feature or rate LJ Link. Only what you send yourself is sent.</div>
+      <div class="row"><button id="btn-report" class="secondary">Report a problem or request a feature</button></div>
+    </div>
+
     <div class="setting">
       <span class="label">About LJ Link</span>
       <div class="hint">© 2026 Philipp Spruck / NEXTPHILM · Eclipse Public License 2.0.</div>
@@ -270,7 +282,6 @@
     <div class="row">
       <button id="btn-settings-close" class="primary">Done</button>
       <button id="btn-stop" class="secondary hidden">Disconnect</button>
-      <button id="btn-report" class="secondary">Report a problem</button>
     </div>
   </div>
 </div>
@@ -294,8 +305,19 @@
 </div>
 <div id="report" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="report-title">
   <div class="sheet report-sheet">
-    <h2 id="report-title">Report a problem</h2>
-    <p class="hint">Describe what happens and what you expected. Which devices, what you did, what you see.</p>
+    <h2 id="report-title">Report a problem or request a feature</h2>
+    <div class="stars-row">
+      <span id="report-stars-label">How do you like LJ Link? (optional)</span>
+      <div id="report-stars" class="stars" role="radiogroup" aria-labelledby="report-stars-label">
+        <button type="button" class="star" role="radio" aria-checked="false" data-n="1">★</button>
+        <button type="button" class="star" role="radio" aria-checked="false" data-n="2">★</button>
+        <button type="button" class="star" role="radio" aria-checked="false" data-n="3">★</button>
+        <button type="button" class="star" role="radio" aria-checked="false" data-n="4">★</button>
+        <button type="button" class="star" role="radio" aria-checked="false" data-n="5">★</button>
+      </div>
+      <button type="button" id="report-stars-clear" class="link hidden">Clear rating</button>
+    </div>
+    <p class="hint">Describe the problem or your wish. For a problem: which devices, what you did, what you see.</p>
     <p class="hint"><a href="https://skyplayser.github.io/LJ-Link/help.html" target="_blank" rel="noopener">Known problems and solutions</a></p>
     <textarea id="report-text" rows="6" placeholder="Example: The CDJ-3000 shows up twice and says “No track loaded”, although a track is playing. Windows 11, cable to the switch."></textarea>
     <label class="check" id="report-diag-row"><input type="checkbox" id="report-diag" checked> <span>Include diagnostic data</span></label>

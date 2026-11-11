@@ -87,7 +87,7 @@ class ControlGuardTest {
             assertFalse(ControlGuard.isGuarded(open), open);
         }
         for (String local : new String[] {"/api/link", "/api/link/scan", "/api/link/test", "/api/diagnostics", "/api/check",
-                "/api/ableton", "/api/stop", "/api/language", "/api/updates", "/api/some-new-route"}) {
+                "/api/ableton", "/api/stop", "/api/language", "/api/updates", "/api/quit-note", "/api/some-new-route"}) {
             assertTrue(ControlGuard.isGuarded(local), local);
         }
     }

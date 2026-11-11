@@ -95,9 +95,16 @@ const DE = {
   "Waiting for a deck with a tempo …": "Warte auf ein Deck mit Tempo …",
   "The chosen deck has no tempo right now, nothing is sent.": "Das gewählte Deck hat gerade kein Tempo, es wird nichts gesendet.",
   "Auto": "Auto",
-  "Report a problem": "Problem melden",
+  "Report a problem or request a feature": "Problem melden oder Wunsch äußern",
+  "Feedback": "Feedback",
+  "Report a problem, request a feature or rate LJ Link. Only what you send yourself is sent.": "Melde ein Problem, äußere einen Wunsch oder bewerte LJ Link. Gesendet wird nur, was du selbst abschickst.",
+  "How do you like LJ Link? (optional)": "Wie gefällt dir LJ Link? (optional)",
+  "Clear rating": "Bewertung entfernen",
+  "{n} of 5 stars": "{n} von 5 Sternen",
+  "Rating: {n} of 5 stars": "Bewertung: {n} von 5 Sternen",
+  "Describe the problem or your wish. For a problem: which devices, what you did, what you see.": "Beschreibe das Problem oder deinen Wunsch. Bei einem Problem: welche Geräte, was du gemacht hast, was du siehst.",
+  "Please describe the problem or your wish first, or choose a rating.": "Beschreibe bitte zuerst das Problem oder deinen Wunsch, oder wähle eine Bewertung.",
   "Known problems and solutions": "Bekannte Probleme und Lösungen",
-  "Describe what happens and what you expected. Which devices, what you did, what you see.": "Beschreibe, was passiert und was du erwartet hättest: welche Geräte, was du gemacht hast, was du siehst.",
   "Include diagnostic data": "Diagnosedaten mitsenden",
   "Program and system version, network adapters, the devices that were found and their connection state, what each deck receives (waveform, beat grid, cues) and the last log lines. No track titles, no covers, no passwords.": "Programm- und Systemversion, Netzwerkadapter, gefundene Geräte und ihr Verbindungsstatus, was jedes Deck empfängt (Waveform, Beatgrid, Cues) und die letzten Log-Zeilen. Keine Tracktitel, keine Cover, keine Passwörter.",
   "Show diagnostic data": "Diagnosedaten ansehen",
@@ -111,7 +118,6 @@ const DE = {
   "Copied.": "Kopiert.",
   "Copying is not allowed here; use “Save as file”.": "Kopieren ist hier nicht erlaubt; nutze „Als Datei speichern“.",
   "Saved. Attach the file to your report or send it to us.": "Gespeichert. Hänge die Datei an deine Meldung an oder schick sie uns.",
-  "Please describe the problem first.": "Beschreibe bitte zuerst das Problem.",
   "The diagnostic data is in the clipboard: paste it into the issue (Ctrl/Cmd+V).": "Die Diagnosedaten sind in der Zwischenablage: füge sie in die Meldung ein (Strg/Cmd+V).",
   "Please also attach the file from “Save as file”.": "Hänge bitte zusätzlich die Datei aus „Als Datei speichern“ an.",
   "A GitHub account is needed to send it. Without one: “Send by email”.": "Zum Absenden brauchst du ein GitHub-Konto. Ohne Konto: „Per E-Mail senden“.",
@@ -242,6 +248,9 @@ const DE = {
   "LJ Link is an independent project. It is not an official product of, and is not endorsed by, any maker of DJ, lighting or music hardware or software. All product names and trademarks mentioned in LJ Link and its documentation belong to their respective owners and are used only to describe compatibility. Ableton and Link are trademarks of Ableton AG. LJ Link is not related to the LightJockey software by Martin.": "LJ Link ist ein unabhängiges Projekt. Es ist kein offizielles Produkt eines Herstellers von DJ-, Licht- oder Musik-Hardware oder -Software und wird von keinem dieser Hersteller unterstützt oder geprüft. Alle in LJ Link und seiner Dokumentation genannten Produktnamen und Marken gehören ihren jeweiligen Inhabern und werden nur genannt, um die Kompatibilität zu beschreiben. Ableton und Link sind Marken der Ableton AG. LJ Link hat nichts mit der Software LightJockey von Martin zu tun.",
   "Updates": "Updates",
   "Check for updates automatically": "Automatisch nach Updates suchen",
+  "Quit": "Beenden",
+  "Show note when quitting – Alpha": "Hinweis beim Beenden anzeigen – Alpha",
+  "When you quit LJ Link from the program icon, a short note first asks for feedback (with an optional star rating) and offers the link to share. Nothing is sent from it.": "Beim Beenden über das Programm-Symbol bittet LJ Link vorher kurz um Feedback (mit optionaler Sternebewertung) und bietet den Link zum Teilen an. Dabei wird nichts gesendet.",
   "LJ Link asks GitHub for the newest version about 15 seconds after the start (only when the program icon is shown) and when the interface is loaded, at most once an hour. Only this computer asks, also when a tablet loads the page; GitHub sees its IP address and the program version. When this is off, GitHub is only asked when you choose “Check for updates” in the program icon menu.": "LJ Link fragt etwa 15 Sekunden nach dem Start (nur wenn das Programm-Symbol angezeigt wird) und beim Laden der Oberfläche, höchstens einmal pro Stunde, bei GitHub nach der neuesten Version. Es fragt immer nur dieser Rechner, auch wenn ein Tablet die Seite lädt; GitHub sieht dabei seine IP-Adresse und die Programmversion. Ist das aus, wird GitHub nur gefragt, wenn du im Menü des Programm-Symbols „Nach Updates suchen“ wählst.",
   "Licenses": "Lizenzen",
   "Disconnect": "Verbindung trennen",
@@ -355,7 +364,7 @@ function t(text, vars) {
 const norm = (s) => s.replace(/\s+/g, " ").trim();
 const ATTRS = ["title", "placeholder", "aria-label"];
 // Parts of the page whose texts are generated by the program and already translated with t().
-const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, script, style";
+const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, #report-stars, script, style";
 
 /** Translates the static texts of the page (text nodes and some attributes), and back to English. */
 function translateStatic() {

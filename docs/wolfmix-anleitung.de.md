@@ -116,7 +116,7 @@ Zuerst immer: WTOOLS **vor** LJ Link starten oder beide neu starten.
 
 Jede Rückmeldung hilft, aus der Beta eine stabile Funktion zu machen. Schreib uns, auch wenn es **nicht** geht:
 
-- **In LJ Link:** Menü (☰) → **Problem melden** (mit Diagnosebericht; ab 1.7.4 stehen darin auch die Tempo-Rohdaten
+- **In LJ Link:** Menü (☰) → **Feedback** → **Problem melden oder Wunsch äußern** (mit Diagnosebericht; ab 1.7.4 stehen darin auch die Tempo-Rohdaten
   jedes Pioneer-Players), per E-Mail, als GitHub-Issue oder im [Discord](https://discord.gg/N6DMca4Bjk).
 - Bitte dazuschreiben: Wolfmix-Modell (MK1/MK2/MK3) und Firmware-Version, WTOOLS-Version, Betriebssystem, Ableton Link oder
   OS2L, ob LJ Link und WTOOLS auf demselben Computer liefen, und was genau passiert ist (Test-Knopf, echte Tracks,

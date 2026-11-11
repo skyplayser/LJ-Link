@@ -8,7 +8,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 
 /**
- * Menu bar icon (macOS) / notification area icon (Windows). Offers "open" and "quit".
+ * Menu bar icon (macOS) / notification area icon (Windows). Offers "open" and "quit"; "quit" first shows the
+ * {@link QuitDialog} (feedback and share), unless the user switched it off.
  * The icon is the LJ Link logo, drawn in code ({@link Logo}).
  */
 final class Tray {
@@ -21,6 +22,12 @@ final class Tray {
     private static MenuItem reportItem;
     private static TrayIcon trayIcon;
     private static volatile Updater.Release available;
+    private static volatile boolean installed;
+
+    /** True once the icon is in the menu bar / notification area (then "Quit" can show the {@link QuitDialog}). */
+    static boolean installed() {
+        return installed;
+    }
 
     /** Menu texts in English (default) and German. */
     static void setLanguage(String lang) {
@@ -30,7 +37,7 @@ final class Tray {
             privacyItem.setLabel(de ? "Privatsphäre-Modus (Titel, Album, Cover ausblenden)"
                     : "Privacy mode (hide title, album, cover)");
             quitItem.setLabel(de ? "Beenden" : "Quit");
-            reportItem.setLabel(de ? "Problem melden …" : "Report a problem …");
+            reportItem.setLabel(de ? "Problem melden oder Wunsch äußern …" : "Report a problem or request a feature …");
             updateLabel();
         }
     }
@@ -58,8 +65,12 @@ final class Tray {
         }
     }
 
-    /** @return true if the icon was installed; false if the platform has no system tray (then run without one). */
-    static boolean install(String url, Runnable open, Runnable report, Runnable quit) {
+    /**
+     * @param report opens the report window of the web interface with the given stars preset (0 = no rating)
+     * @param quit   quits at once; used as is for the quit of an update, the menu item shows {@link QuitDialog} first
+     * @return true if the icon was installed; false if the platform has no system tray (then run without one).
+     */
+    static boolean install(String url, Runnable open, java.util.function.IntConsumer report, Runnable quit) {
         if (!SystemTray.isSupported()) {
             return false;
         }
@@ -73,9 +84,9 @@ final class Tray {
             MenuItem info = new MenuItem(url);
             info.setEnabled(false);
             quitItem = new MenuItem();
-            quitItem.addActionListener(e -> quit.run());
+            quitItem.addActionListener(e -> QuitDialog.quitFromMenu(report, quit));
             reportItem = new MenuItem();
-            reportItem.addActionListener(e -> report.run());
+            reportItem.addActionListener(e -> report.accept(0));
             updateItem = new MenuItem();
             updateItem.addActionListener(e -> {
                 Updater.Release r = available;
@@ -108,6 +119,7 @@ final class Tray {
             icon.addActionListener(e -> open.run());
             SystemTray.getSystemTray().add(icon);
             trayIcon = icon;
+            installed = true;
             UpdateDialog.checkLater(quit, Tray::found);
             return true;
         } catch (AWTException | RuntimeException e) {
