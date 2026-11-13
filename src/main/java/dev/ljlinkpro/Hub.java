@@ -76,6 +76,7 @@ final class Hub {
         volatile String phase = "searching";
         volatile String mode = "live";
         volatile String message = "";
+        volatile String note;
         volatile List<DeviceInfo> devices = List.of();
         volatile Map<String, Object> mixerBase = Map.of("present", false);
         private final Map<Integer, Deck> own = new ConcurrentHashMap<>();
@@ -138,6 +139,15 @@ final class Hub {
 
         void setMixer(Map<String, Object> base) {
             mixerBase = base;
+        }
+
+        /** A quiet note shown in the app while this source is connected (for example ShowKontrol on the network); null removes it. */
+        void setNote(String text) {
+            String before = note;
+            note = text;
+            if (!java.util.Objects.equals(before, text)) {
+                broadcastState();
+            }
         }
 
         void setState(String phase, String mode, String message) {
@@ -457,6 +467,13 @@ final class Hub {
             }
         }
         m.put("searchWarnings", searchWarnings);
+        List<String> notes = new ArrayList<>();
+        for (Scope sc : sortedScopes()) {
+            if (sc.note != null && !sc.note.isBlank()) {
+                notes.add(sc.note);
+            }
+        }
+        m.put("notes", notes);
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);
@@ -596,6 +613,43 @@ final class Hub {
         } catch (RuntimeException e) {
             System.err.println("Hub tick failed: " + e);
         }
+    }
+
+    /**
+     * One short line per source for the summary of a problem report: state, message, decks, mixer. {@code active}: the
+     * sources that found something or failed; otherwise the ones still searching or idle with nothing (they go last).
+     */
+    List<String> summarySources(boolean active) {
+        List<String> out = new ArrayList<>();
+        for (Scope sc : sortedScopes()) {
+            boolean found = !sc.own.isEmpty() || Boolean.TRUE.equals(sc.mixerBase.get("present"))
+                    || "monitoring".equals(sc.phase) || "error".equals(sc.phase);
+            if (found != active) {
+                continue;
+            }
+            String msg = sc.message.length() > 90 ? sc.message.substring(0, 89) + "…" : sc.message;
+            Object packets = sc.mixerBase.get("statusPackets");
+            out.add("Source " + sc.key + ": " + sc.phase + (msg.isBlank() ? "" : " \"" + msg + "\"") + ", decks " + sc.own.size()
+                    + ", mixer " + (Boolean.TRUE.equals(sc.mixerBase.get("present")) ? sc.mixerBase.get("name") : "none")
+                    + (packets == null ? "" : " (mixer status " + packets + ")"));
+        }
+        return out;
+    }
+
+    /** One short line per deck for the summary of a problem report: what arrived and what is missing. No track titles. */
+    List<String> summaryDecks() {
+        List<Deck> list = new ArrayList<>(decks.values());
+        list.sort(java.util.Comparator.comparingInt(d -> d.number));
+        List<String> out = new ArrayList<>();
+        for (Deck d : list) {
+            out.add("Deck " + d.number + " " + d.name + ": " + (d.hasTrack ? "track" : "no track") + (d.playing ? ", playing" : "")
+                    + String.format(java.util.Locale.ROOT, ", %.2f BPM", d.effectiveBpm)
+                    + (d.title != null && !d.title.isBlank() ? ", title known" : ", no title")
+                    + (d.waveform != null ? ", waveform" : ", no waveform") + (d.detail != null ? ", detail" : ", no detail")
+                    + ", grid " + (d.beatTimes == null ? 0 : d.beatTimes.length) + (d.art != null ? ", art" : "")
+                    + (d.noWaveformSource ? ", NO WAVEFORM SOURCE" : "") + (d.metaHint == null ? "" : ", metadata hint " + d.metaHint));
+        }
+        return out;
     }
 
     /** Overall state, sources and decks for a problem report. No track titles. */

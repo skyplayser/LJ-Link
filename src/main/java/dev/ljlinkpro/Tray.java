@@ -10,7 +10,7 @@ import java.awt.TrayIcon;
 /**
  * Menu bar icon (macOS) / notification area icon (Windows). Offers "open" and "quit"; "quit" first shows the
  * {@link QuitDialog} (feedback and share), unless the user switched it off.
- * The icon is the LJ Link logo, drawn in code ({@link Logo}).
+ * The icon is the simplified LJ Link logo (the five faders on the dark tile), drawn in code ({@link Logo#tray}).
  */
 final class Tray {
     private Tray() {}
@@ -113,8 +113,10 @@ final class Tray {
             menu.add(reportItem);
             menu.add(quitItem);
 
-            TrayIcon icon = new TrayIcon(Logo.render(64, true), "LJ Link", menu);
+            TrayIcon icon = new TrayIcon(Logo.tray(64), "LJ Link", menu);
             icon.setImageAutoSize(true);
+            // The address with its port: not always 8080 (another program may use it, issue #3).
+            icon.setToolTip("LJ Link – " + url.replaceFirst("^https?://", ""));
             // Double click on Windows opens the interface; on macOS the menu opens on a single click.
             icon.addActionListener(e -> open.run());
             SystemTray.getSystemTray().add(icon);

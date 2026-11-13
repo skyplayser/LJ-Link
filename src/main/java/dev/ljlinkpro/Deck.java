@@ -48,6 +48,8 @@ final class Deck {
     volatile int trackNumber;
     /** True for sources that cannot deliver waveforms (yet), so the display says so instead of waiting. */
     volatile boolean noWaveformSource;
+    /** "onelibrary" or "missing" when an analysed track has had no metadata for a while (see ProDjLinkSource#metadataHint). */
+    volatile String metaHint;
     /** Channel fader 0..1 and EQ -1..1; null when the source cannot report them (Pro DJ Link only reports ON AIR). */
     volatile Double fader;
     volatile Double eqHi;
@@ -248,6 +250,7 @@ final class Deck {
         loop = null;
         cues = java.util.List.of();
         phrases = null;
+        metaHint = null;
     }
 
     /** Stores a new position sample; velocity is estimated from the previous sample. */
@@ -384,6 +387,7 @@ final class Deck {
         m.put("loopBeats", loopBeats);
         m.put("pitch", pitchPercent);
         m.put("noWaveform", noWaveformSource);
+        m.put("metaHint", metaHint);
         m.put("fader", fader);
         m.put("eq", eqHi == null ? null : java.util.Map.of("hi", eqHi, "mid", eqMid, "low", eqLow));
         m.put("trackNumber", trackNumber);

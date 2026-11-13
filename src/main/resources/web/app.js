@@ -81,9 +81,13 @@ function render() {
   const warn = $("warnings");
   warn.textContent = (st.warnings || []).map(w => t(w)).join(" · ");
   warn.classList.toggle("hidden", !(st.warnings || []).length || st.phase !== "monitoring");
+  const notes = $("notes");
+  notes.textContent = (st.notes || []).map(w => t(w)).join(" · ");
+  notes.classList.toggle("hidden", !(st.notes || []).length || st.phase !== "monitoring");
+  // Also outside monitoring: hides the zoom/VIEW toolbar after the demo or a source stops.
+  applyTab();
   if (st.phase === "monitoring") {
     show("monitor");
-    applyTab();
     setStatus("live", st.mode === "demo" ? "Demo mode" : "Connected");
     $("no-decks").classList.toggle("hidden", decks.size > 0);
     return;
@@ -92,6 +96,10 @@ function render() {
     show("search");
     setStatus("warn", "Search running");
     $("search-message").textContent = t(st.message || "");
+    // Quiet notes also while searching: ShowKontrol on this computer is only seen before LJ Link joins.
+    const searchNotes = $("search-notes");
+    searchNotes.textContent = (st.notes || []).map(w => t(w)).join(" · ");
+    searchNotes.classList.toggle("hidden", !(st.notes || []).length);
     const searchWarn = $("search-warnings");
     searchWarn.textContent = (st.searchWarnings || []).map(w => t(w)).join(" · ");
     searchWarn.classList.toggle("hidden", !(st.searchWarnings || []).length);
@@ -233,7 +241,13 @@ function handle(msg) {
 const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true };
 let settings = { ...DEFAULTS };
 try {
-  Object.assign(settings, JSON.parse(localStorage.getItem("ljlinkpro.settings") || "{}"));
+  // Only the known keys with the type of their default: nothing else (e.g. "__proto__") gets into the settings.
+  const saved = JSON.parse(localStorage.getItem("ljlinkpro.settings") || "{}");
+  if (saved && typeof saved === "object") {
+    for (const k of Object.keys(DEFAULTS)) {
+      if (Object.prototype.hasOwnProperty.call(saved, k) && typeof saved[k] === typeof DEFAULTS[k]) settings[k] = saved[k];
+    }
+  }
 } catch (e) { /* storage unavailable: use defaults */ }
 
 function saveSettings() {
@@ -860,6 +874,30 @@ function setText(d, key, node, text) {
   if (d.shown[key] !== text) { d.shown[key] = text; node.textContent = text; }
 }
 
+const WIKI_TRACKS = "https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#tracks-and-waveforms";
+
+/** The message over an empty waveform, optionally with a link to the help on tracks and waveforms. */
+function setWaveMsg(d, text, link) {
+  const key = text + "|" + (link || "");
+  if (d.shown.waveMsg === key) return;
+  d.shown.waveMsg = key;
+  const msg = d.q(".wave-msg");
+  msg.textContent = "";
+  if (!text) return;
+  const span = document.createElement("span");
+  span.textContent = text;
+  if (link) {
+    const a = document.createElement("a");
+    a.className = "wave-help";
+    a.href = WIKI_TRACKS;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = link;
+    span.append(" ", a);
+  }
+  msg.append(span);
+}
+
 function updateDeck(m) {
   const isNew = !decks.has(m.deck);
   const d = decks.get(m.deck) || createDeck(m.deck);
@@ -876,7 +914,9 @@ function updateDeck(m) {
   d.el.classList.toggle("master", !!m.master);
   const shownTitle = isShot() && m.title ? testTitle(m.deck) : m.title;
   const shownArtist = isShot() && m.artist ? testArtist(m.deck) : m.artist;
-  d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || "Loading track …")) : "No track loaded");
+  // No metadata after a while (ProDjLinkSource.metadataHint): a short hint instead of an endless "Loading track …".
+  const waiting = m.metaHint === "onelibrary" ? "Not supported" : m.metaHint === "missing" ? "No track data" : "Loading track …";
+  d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || waiting)) : "No track loaded");
   d.q(".deck-artist").textContent = m.hasTrack && !ui.state.privacy ? (shownArtist || "") : "";
   d.q(".remain-main small").textContent = t("REMAIN");
   // The real tempo of the player (two decimals). The steadied tempo that goes to the light desks is in the tooltip.
@@ -916,11 +956,11 @@ function updateDeck(m) {
     img.hidden = false;
   } else { img.hidden = true; d.artVersion = -1; }
 
-  const msg = d.q(".wave-msg");
-  if (!m.hasTrack) msg.textContent = "";
-  else if (m.hasDetail || m.hasWaveform) msg.textContent = "";
-  else if (m.noWaveform) msg.textContent = t("No waveform found for this track");
-  else msg.textContent = t("Waveform loading … (not available for streaming tracks)");
+  if (!m.hasTrack || m.hasDetail || m.hasWaveform) setWaveMsg(d, "");
+  else if (m.noWaveform) setWaveMsg(d, t("No waveform found for this track"));
+  else if (m.metaHint === "onelibrary") setWaveMsg(d, t("Title and waveform from this player are not supported yet: LJ Link cannot read the newer OneLibrary format of this model (Alpha). BPM, time and beats still work."), t("Help"));
+  else if (m.metaHint === "missing") setWaveMsg(d, t("Title and waveform are not arriving from this player."), t("What can I do?"));
+  else setWaveMsg(d, t("Waveform loading … (not available for streaming tracks)"));
 
   if (m.hasWaveform && d.waveVersion !== m.waveformVersion) loadData(d, "waveform", m.waveformVersion);
   if (!m.hasWaveform) { d.wave = null; d.waveVersion = -1; d.cache = null; }
@@ -1384,7 +1424,11 @@ function mixerSection(m) {
   if (!m.present) {
     note.textContent = t("The mixer appears on the network as soon as it is connected to the switch with a cable.");
   } else if (!m.levels) {
-    note.textContent = t("Pro DJ Link only transmits whether a channel is on air (ON AIR). The position of the faders and the EQ knobs are not sent and cannot be shown here.");
+    // A mixer found by its announcement that sends no mixer status (Alpha): say so honestly; ON AIR comes from the players.
+    note.textContent = m.statusPackets === "none"
+      ? t("Mixer recognised (Alpha), but it sends no data LJ Link can read (tempo, master). ON AIR per channel comes from the players.") + " "
+        + t("The position of the faders and the EQ knobs are not sent and cannot be shown here.")
+      : t("Pro DJ Link only transmits whether a channel is on air (ON AIR). The position of the faders and the EQ knobs are not sent and cannot be shown here.");
   } else if (m.simulated) {
     note.textContent = t("Demo mode: faders and knobs are simulated.");
   } else {
@@ -1524,6 +1568,7 @@ function closeInfo() {
 }
 
 $("decks").addEventListener("click", (e) => {
+  if (e.target.closest("a")) return; // the help link over the waveform
   const el = e.target.closest(".deck");
   if (!el) return;
   const n = Number(el.dataset.deck);
@@ -1623,8 +1668,22 @@ function setLanguage(l, remember = true) {
   if (infoDeck != null) refreshInfo();
   renderCheckResults();
   renderStars();
+  renderPortNote();
   loadAdapters();
   if (remember && ui.controller) post("/api/language?lang=" + lang);
+}
+
+/** Another program used the usual port, so LJ Link runs on the next free one (issue #3); with the tablet address. */
+function renderPortNote() {
+  const info = ui.info, note = $("port-note");
+  let text = "";
+  if (info && info.port && info.portWanted && info.port !== info.portWanted) {
+    text = info.urls && info.urls.length
+      ? t("Port {p} is in use by another program, so LJ Link runs on port {q}. On a tablet in the same network: {url}", { p: info.portWanted, q: info.port, url: info.urls[0] })
+      : t("Port {p} is in use by another program, so LJ Link runs on port {q}.", { p: info.portWanted, q: info.port });
+  }
+  note.textContent = text;
+  note.classList.toggle("hidden", !text);
 }
 
 /* ---------- Wiring ---------- */
@@ -1693,6 +1752,7 @@ async function openReport(stars) {
   $("settings").classList.add("hidden");
   $("report").classList.remove("hidden");
   $("report-status").textContent = "";
+  $("report-attach").classList.add("hidden");
   reportDiag = "";
   $("report-preview").textContent = t("Loading …");
   try {
@@ -1753,34 +1813,90 @@ $("report-copy").onclick = async () => {
   catch (e) { $("report-status").textContent = t("Copying is not allowed here; use “Save as file”."); }
 };
 $("report-save").onclick = () => {
-  saveReportFile();
-  $("report-status").textContent = t("Saved. Attach the file to your report or send it to us.");
+  const file = saveReportFile();
+  $("report-status").textContent = t("Saved as {file} in your downloads folder. Attach the file to your report or send it to us.", { file });
 };
 const REPORT_MAIL = "fehlermelden@nextphilm.de";
+// Longest mailto link we hand over: Windows and Outlook cut links at about 2000 characters (assumption, ADR-034).
+const MAILTO_MAX = 2000;
 
+/** Saves the report into the browser's downloads folder and returns the file name. */
 function saveReportFile() {
+  const name = "LJ-Link-report-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".txt";
   const blob = new Blob([reportText()], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "LJ-Link-report-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".txt";
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  return name;
+}
+
+function mailtoLink(subject, body) {
+  return "mailto:" + REPORT_MAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+}
+
+/** The short part at the top of the diagnostics (Diagnostics.SUMMARY_HEADER), as lines; most important first. */
+function reportSummaryLines() {
+  const m = reportDiag.match(/^== Summary ==\n([\s\S]*?)\n\n/m);
+  return m ? m[1].split("\n").filter((l) => l.trim()) : [];
+}
+
+/**
+ * The mail text when the whole report is too long for a link: first the request to attach the file (a mailto link can
+ * never attach one), then the description, then as many summary lines as fit.
+ */
+function shortMailBody(subject, file) {
+  const head = t("PLEASE ATTACH: the file {file} from your downloads folder. The mail program does not attach it by itself.", { file })
+    + "\n\n" + reportHead();
+  const lines = reportSummaryLines();
+  const label = "\n\n" + t("Summary of the diagnostic data (the whole data is in the file):") + "\n";
+  for (let n = lines.length; n > 0; n--) {
+    const body = head + label + lines.slice(0, n).join("\n") + (n < lines.length ? "\n…" : "");
+    if (mailtoLink(subject, body).length <= MAILTO_MAX) return { body, summary: n };
+  }
+  return { body: head, summary: 0 };
+}
+
+/** The clearly visible box after "Send by email": which file to attach, and where it is. */
+function showAttachBox(file, inClipboard, summary) {
+  const box = $("report-attach");
+  box.replaceChildren();
+  const title = document.createElement("strong");
+  title.textContent = t("Please attach the file to the mail yourself");
+  const text = document.createElement("p");
+  text.textContent = t("Your mail program cannot attach files by itself. The diagnostic data was just saved in your downloads folder (where your browser saves downloads, usually “Downloads”). Attach this file to the mail before you send it:");
+  const name = document.createElement("code");
+  name.className = "report-attach-file";
+  name.textContent = file;
+  const more = document.createElement("p");
+  more.textContent = [
+    summary ? t("The most important lines are already in the mail text.") : "",
+    inClipboard ? t("The diagnostic data is also in the clipboard: if the file is missing, paste it into the mail (Ctrl/Cmd+V).")
+      : t("If the file is missing, use “Save as file”."),
+  ].filter(Boolean).join(" ");
+  box.append(title, text, name, more);
+  box.classList.remove("hidden");
+  box.scrollIntoView({ block: "nearest" });
 }
 
 $("report-mail").onclick = async () => {
   if (!reportReady()) return;
   const subject = "LJ Link: " + reportTitle(80);
   let body = reportText();
-  let note = "";
-  // Mail programs (above all on Windows) only take short links; long diagnostics go as a file to attach.
-  if (encodeURIComponent(body).length > 1800 && $("report-diag").checked && reportDiag) {
-    saveReportFile();
-    try { await navigator.clipboard.writeText(reportDiag); } catch (e) { /* the file is enough */ }
-    body = reportHead() + "\n\n" + t("The diagnostic data is attached as a file (LJ-Link-report-….txt from the downloads folder).");
-    note = t("The diagnostic data was saved as a file: attach it to the mail (it is also in the clipboard).");
+  $("report-attach").classList.add("hidden");
+  // Mail programs (above all on Windows) only take short links and a mailto link can never carry a file: long
+  // diagnostics are saved as a file that the user attaches, and the summary goes into the mail text.
+  if (mailtoLink(subject, body).length > MAILTO_MAX && $("report-diag").checked && reportDiag) {
+    const file = saveReportFile();
+    let inClipboard = false;
+    try { await navigator.clipboard.writeText(reportDiag); inClipboard = true; } catch (e) { /* the file is enough */ }
+    const short = shortMailBody(subject, file);
+    body = short.body;
+    showAttachBox(file, inClipboard, short.summary);
   }
-  location.href = "mailto:" + REPORT_MAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-  $("report-status").textContent = (note ? note + " " : "") + t("Your mail program opens with the report to {mail}. If nothing opens, send it by hand to that address.", { mail: REPORT_MAIL });
+  location.href = mailtoLink(subject, body);
+  $("report-status").textContent = t("Your mail program opens with the report to {mail}. If nothing opens, send it by hand to that address.", { mail: REPORT_MAIL });
 };
 
 $("report-github").onclick = async () => {
@@ -1993,8 +2109,9 @@ $("tab-waveform").onclick = () => { $("settings").classList.add("hidden"); ui.ta
 $("tab-mixer").onclick = () => { $("settings").classList.add("hidden"); if (ui.state.phase === "monitoring") { ui.tab = "mixer"; applyTab(); } };
 $("lang-select").onchange = () => setLanguage($("lang-select").value);
 $("btn-fullscreen").onclick = () => {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen?.();
+  // Both return a promise that rejects when the browser refuses (no user gesture, iframe, kiosk); nothing to do then.
+  const p = document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.();
+  if (p && typeof p.catch === "function") p.catch(() => {});
 };
 
 fetch("/api/info").then((r) => r.json()).then((info) => {
@@ -2004,6 +2121,8 @@ fetch("/api/info").then((r) => r.json()).then((info) => {
   if (info.controller) loadQuitNote();
   $("remote-note").classList.toggle("hidden", info.controller);
   $("lan").textContent = info.urls.length ? t("Open on the tablet (same Wi-Fi): ") + info.urls.join(t("  or  ")) : "";
+  ui.info = info;
+  renderPortNote();
   render();
   // The program icon menu follows the language chosen on this computer.
   if (info.controller) post("/api/language?lang=" + lang);

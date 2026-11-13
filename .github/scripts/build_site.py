@@ -24,7 +24,7 @@ from PIL import Image
 
 BASE = "https://skyplayser.github.io/LJ-Link/"
 REPO = "https://github.com/skyplayser/LJ-Link"
-NO_WEBP = {"logo", "og"}  # used by other sites and apps as PNG
+NO_WEBP = {"logo", "logo-wordmark-dark", "logo-wordmark-light", "og"}  # used by other sites and apps as PNG
 WIDTHS = (1400, 2800)
 
 

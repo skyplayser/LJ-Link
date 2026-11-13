@@ -57,6 +57,7 @@ plain float at a configurable address. Settings are stored in `~/.ljlinkpro/link
 Daslight mapping are NOT verified against real consoles and must be checked on site. Beat/phrase/deck-state output is not built yet.
 
 ## ADR-011: Name and logo
+*The logo and icon path part is superseded by ADR-036 (new logo "Fader"); the name part still applies.*
 The product is called LJ Link (not BoothView, to avoid a conflict with an existing name). Java package `dev.ljlinkpro`, config in
 `~/.ljlinkpro/`. The logo (waveform bars shooting light beams) is drawn in code in `Logo.java` and mirrored in
 `web/logo.svg`; `packaging/LJ-Link.icns|ico|png` (until 1.7.7 `LJ-Link-PRO.*`) are generated from it (`java dev.ljlinkpro.Logo <dir>`, then `iconutil`)
@@ -409,3 +410,172 @@ and only when the program icon is installed (`"tray"` in the GET answer). Enter 
 button, focused), since that is what the user chose. The GitHub link of the report window sets no label (a wish or a
 rating is not a bug). In the web the stars behave like radio buttons (clearing only with "Clear rating" or
 Delete/Backspace/0); in the Swing window clicking the chosen star again clears it, as there is no clear button there.
+
+## ADR-034: Report mail without the false "attached" claim; summary in the diagnostics
+A `mailto:` link can never carry a file. When the whole report makes the link longer than `MAILTO_MAX` (2000
+characters, whole link; assumption: Windows/Outlook cut mailto links at about 2000, not measured), "Send by email" saves
+the report into the browser's downloads folder, copies the diagnostics to the clipboard and writes into the mail first
+"PLEASE ATTACH: the file <exact name> from your downloads folder. The mail program does not attach it by itself.", then
+the description, then as many lines of the new summary as fit. The dialog shows a clearly visible box (`#report-attach`,
+`role="alert"`) with the file name and where it is; the browser's download folder cannot be read, so it says "usually
+Downloads". The diagnostics start with `== Summary ==` (`Diagnostics.SUMMARY_HEADER`): version and system, IPv4
+adapters, network warnings, every source in one line, per source its key lines (`DeckSource.summary()`; Pro DJ Link:
+own player number and beat-link's adapter, MetadataFinder/CrateDigger and mounted media, mixer status count, a note
+when a mixer is announced but sends no readable mixer status, every device seen by announcement with number, name,
+address, local adapter in its network and packet counts), then one short line per deck. Most important first, since
+the mail drops lines from the end. Devices are remembered from their announcement also after they left, so a DJM-A9
+shows up as device 33 even without mixer status. Packet counters are diagnostic only and change no behaviour. IPv6
+addresses are never listed (they can contain the hardware address), only counted; with `preferIPv4Stack` Java sees none.
+
+## ADR-035: Mixer by announcement, metadata hint, ShowKontrol note, clean quit (Alpha, no hardware)
+Background: support report DJM-A9 with 4x CDJ-3000X (handoffs 2026-11-13). beat-link stays at 8.0.0;
+`setUseStandardPlayerNumber(false)` is unchanged.
+- Mixer: a device counts as mixer by its announcement when its number is 33-40 or its name starts with "DJM"
+  (`ProDjLinkSource.isMixer`; assumption). The Mixer tab then shows it with model, number and address. `statusPackets`
+  in the mixer message is "waiting" until the virtual CDJ has listened 5 s, then "none" if no `MixerStatus` arrived
+  (honest note in the tab: recognised, but no readable data; ON AIR comes from the players) or "ok" with BPM/master.
+  A mixer that leaves is removed. The channel strips are unchanged (they come from the players' status).
+- Metadata hint: an analysed track (rekordbox id set) without a title for 30 s gets `metaHint` "onelibrary" for the
+  models beat-link main lists in `isUsingDeviceLibraryPlus` (CDJ-3000X, XDJ-AZ, OPUS-QUAD; checked in beat-link main
+  `DeviceAnnouncement`/`OpusProvider`; CDJ-1500X is not listed there and is not included) and "missing" otherwise. The
+  deck shows a short title ("Not supported" / "No track data") and a sentence over the waveform with a link to the
+  wiki (troubleshooting, tracks and waveforms). Diagnostics: model per player, OneLibrary flag, mounted media with
+  "db"/"no db" (CrateDigger has the export.pdb or not), and the last CrateDigger problems from the log with their cause.
+- ShowKontrol: a device whose name contains "SHOWKONTROL" (it announces itself as "TCS-SHOWKONTROL") gives a quiet note
+  in the app (`notes` in the state message, per source; shown while searching and while monitoring) and a diagnostics
+  line; nothing is filtered. When the announcement came from one of this computer's own addresses, the note ("runs on
+  this computer") is kept for the whole search: once the virtual CDJ runs, beat-link 8.0.0 ignores announcements from
+  its own address (`DeviceFinder.addIgnoredAddress`), so ShowKontrol seems to leave although it still runs.
+- Summary order (for the mail): version, all WARNING/NOTE lines, Pro DJ Link lines (own number, players, media, mixer
+  count, compact "Seen …" lines), adapters, sources that found something, decks, then sources that found nothing.
+- Quit: `ProDjLinkSource.stop()` removes all of its listeners from beat-link's singletons, stops the finders, the
+  BeatFinder (port 50001; it was left running before), the virtual CDJ (always, not only when its start was confirmed)
+  and the DeviceFinder. Joining and stopping exclude each other (`lifecycle` lock), so a join in progress cannot leave
+  the virtual CDJ online after stop. Callbacks after stop are ignored. The slow quit (8 s and more) came from Bonjour:
+  JmDNS closed one adapter after the other and waited for each; now all are closed in parallel and quitting waits at
+  most 1.5 s (`Bonjour.CLOSE_TIMEOUT_MS`).
+
+## ADR-036: New logo "Fader" (suite style)
+The developer chose the logo "Fader" on 2026-11-13; it replaces the waveform bars with light beams (ADR-011). It follows
+the suite style (as VJ-Link): a dark rounded tile (gradient #1A1E2A to #0D1016, edge #2A2F3D), the letters "LJ" in Inter
+Display ExtraBold and five console faders with caps in the suite colours (#FF3B3B, #FFB020, #3DDC84, #22C8F0, #B45CFF,
+rails #272C39). The reference is `render.cjs` of the suite logo package (kept outside this repository).
+- Installer icons: `packaging/LJ-Link.icns|ico|png` are the files of the logo package (rendered in a browser), not
+  generated by `Logo.main` any more; `Logo.main` still writes PNGs with the same geometry (checked against
+  `LJ-Link.png` by `LogoTest`).
+- Letters as outlines: the glyphs "L" and "J" were taken from the TTF with Java AWT (`GlyphVector.getGlyphOutline`,
+  320 px, baseline 520, letter spacing -4 px, no kerning pair L-J) and stored as one SVG path in `Logo.LETTERS` and
+  `web/logo.svg`. No font is shipped or loaded. The OFL 1.1 does not cover artwork made with a font; we still name Inter
+  in THIRD_PARTY_NOTICES.md and ship the license text (`legal/OFL-Inter.txt`).
+- `web/logo.svg` uses the viewBox 100 100 824 824: the tile fills the image (favicon, header, start screen); the macOS
+  icon margin is only in the installer icons. The CSS no longer rounds the logo images (the SVG has its own corners).
+- Menu bar / tray (`Logo.tray`): assumption that "LJ" is unreadable at 16-22 px, so the tray icon shows only the five
+  faders on the tile, which fills the image. It stays a coloured image, not a macOS template icon (as before).
+
+## ADR-037: Web interface in the suite design of VJ-Link
+Decided by the developer on 2026-11-13: the web interface uses the design tokens of VJ-Link (`--bg #0C0E13`,
+`--panel #151821`, `--raise #1E222E`, `--line #2A2F3D`, `--text #DCE1EA`, `--dim #7E879A`, `--live`, `--ok`, `--warn`,
+`--sA`…`--sE`, `--mono`, system-ui 13px, small caps headings, 2px focus ring, pills, panels and segmented controls),
+but the accent is cyan `#22C8F0` from the "Fader" logo instead of the suite pink. The day theme stays as a light
+variant of the same tokens. `SuiteDesignTest` checks tokens, that no old variable is left and the contrast.
+- Old names mapped: `--muted` → `--dim`, `--panel-2` → `--raise`, `--bad` and `--onair` → `--live`, `--radius` removed
+  (radii inline as in the suite). LJ-only tokens: `--accent-text` (text on the accent), `--master` (orange of the tempo
+  master and MT, CDJ convention), `--wave-bg`, `--playhead` (read by `app.js`), `--shade` (dialog backdrop).
+- Primary buttons are cyan with dark text (white on cyan would be 2:1). Day: accent `#006F8E`, ok `#0D7345`, text,
+  dim text, accent, ok, warn, live and master reach WCAG AA (4.5:1) on bg and panel; text, dim, accent, ok, warn and
+  live also on raised controls (status pill, badges). Night: the suite `--dim` on `--raise` is 4.4:1 and `--live` on
+  `--raise` 4.49:1 (suite values kept; hints sit on bg or panel, 4.9:1 or more).
+- White text on red (LIVE tag, mixer ON AIR) uses the LJ-only token `--live-fill`: night `#E02828` (4.7:1 with white;
+  the suite `#FF3B3B` would be 3.5:1), day the same as `--live`. Frames, glow and the deck strip keep `--live`.
+- Text size (decided by the developer on 2026-11-13 after QS): base text 15px instead of the suite 13px, hints 13px,
+  tabs, small caps headings, pills, VIEW and the zoom text 12px, everywhere. The booth is read from further away than a
+  desktop app. Deck values are not affected.
+- Touch: with `pointer: coarse` every button, tab, segment, tool button (−, +, VIEW), checkbox row, slider, the
+  `summary` in the report and "Clear rating" is at least 44px high; the media query repeats the more specific desktop
+  selectors so it wins. On the desktop buttons are 36-40px. Inline text links are not enlarged (WCAG 2.5.8 exception).
+- The waveform area is not dimmed as a whole: the 75 % opacity sits on the canvases (and the remaining time next to
+  the overview), the background is the same 75 % mix with the panel. So the notes over an empty waveform ("No track
+  data", OneLibrary) keep their full contrast (`--dim` on the waveform background 5.6:1 at night).
+- Stars in the report: empty stars are `--dim` outlines, chosen stars are filled `--warn`, 3:1 or more as graphics in
+  both themes (the old `--sB` on white was 1.8:1).
+- Unchanged on purpose: sizes of deck number, PLAYER/TRACK/BPM boxes, elapsed and remaining time, ON AIR frame and LIVE
+  tag, waveform heights, layout (400px deck column, 820px and 640px breakpoints), all waveform and cue colours and the
+  black waveform background at night. Waveforms stay at 75 % opacity for every deck (the old CSS had two rules, the
+  unconditional one won; kept so the waveforms look as before).
+- Changed colours outside the tokens: channel bar and mixer faders cyan (were blue `#2F7BFF`), SYNC chip cyan, number
+  boxes, knobs and the deck strip follow the theme (were fixed light grey and unreadable in the day theme), notes are
+  suite notes (cyan edge = information, amber edge = warning) instead of the dark yellow box, which was dark in the day
+  theme too. The report box after "Send by email" keeps a strong amber frame.
+- No blur behind dialogs (the suite uses `backdrop-filter`): it would be recomputed for every frame of the waveform
+  canvases on tablets.
+- The Swing windows (quit note, update) use the system look and get no accent colour; they stay as they are.
+
+## ADR-038: Own player number chosen by LJ Link and given up on conflict; beat packets without status (issue #2, Alpha)
+An XDJ-AZ announced itself as 1-4, 7 and 33 from one address; LJ Link's virtual CDJ had 7 as well and beat-link kept
+sending "device number defense" packets to the XDJ-AZ. Checked in the beat-link 8.0.0 sources: self-assignment starts
+at 7 (or 1 with `setUseStandardPlayerNumber(true)`), skips numbers in `DeviceFinder.getCurrentDevices()` after a 4 s
+watch period and goes up to 15. Defending cannot be switched off: `DeviceFinder` calls `defendDeviceNumber` for every
+announcement with our number while the virtual CDJ runs. The only levers are `setDeviceNumber` before `start()` and
+stopping the virtual CDJ.
+- LJ Link chooses its number itself (`ProDjLinkSource.chooseOwnNumber`): the first from 7 to 15 that no device announced
+  since the search started (also devices that left again), that LJ Link did not give up already, and not 7 when an
+  XDJ-AZ is seen. The last part is an assumption from one diagnostics report; it is not known whether the XDJ-AZ
+  announces 7 by itself or only in reply to LJ Link. LJ Link waits the same 4 s after the first device as beat-link.
+  If the number is refused, beat-link's own self-assignment is tried once.
+- When a device announces LJ Link's number while it runs (checked for every new device and once a second), LJ Link
+  stops its virtual CDJ and joins again with another number instead of defending it. One defense packet may still go
+  out before (beat-link delivers announcements to listeners on the Swing thread). At most 3 changes per search; if the
+  device copies every number, LJ Link keeps the last one and says so in the diagnostics.
+- `Beat.isBeatWithinBarMeaningful()` throws a NullPointerException while no status packet of that player arrived (it
+  reads `VirtualCdj.getLatestStatusFor(beat)` without a null check). That was the "Problem delivering beat announcement
+  to listener" flood. LJ Link reads the status itself; without one the beat in the bar counts as unknown (0).
+- The TimeFinder NullPointerException ("lastPosition is null", beat without beat grid and without status) is inside
+  beat-link and not fixable from outside. The log shows each message at most 3 times a minute and then counts it
+  (`LogBuffer.Throttle`), also on the console; the diagnostics add "[log] repeated N more times …". Only the exception
+  line that followed the message when it was shown, and the "at"/"Caused by" lines after it, are left out with it;
+  any other line (also another exception) counts as a message of its own, so nothing foreign is lost.
+- LJ Link's own stop of the virtual CDJ (number change) is counted only under the VirtualCdj's monitor, which
+  `VirtualCdj.stop()` also takes; a stop by beat-link in between is therefore never mistaken for ours.
+- Two adapters in the players' network deliver every broadcast twice. Status packets twice do no harm (same content);
+  a beat packet twice could give the light desk two beats if it polls between the copies. The same beat (player,
+  address, beat in bar) again within 30 ms is now ignored and counted as "Beat duplicate" in the diagnostics.
+- Not checked on hardware: the XDJ-AZ behaviour, whether status packets then arrive (BPM, ON AIR), and whether a number
+  above 7 makes a difference to any player.
+
+## ADR-039: Free port before start, a new server per port (issue #3)
+With port 8080 in use LJ Link quit: `Main.start` called `start(p)` on the same Javalin instance for 8080-8089, but
+Javalin 6.7.0 throws "Server already started - Javalin instances cannot be reused" on the second call (checked in
+`JettyServer.kt`). Also, Jetty binds all addresses with SO_REUSEADDR; on Windows that can succeed although another
+program listens on the port (seen the same way on macOS with a program bound to 127.0.0.1 only), and the browser then
+reaches the other program.
+- Each port is checked first (`Main.portTaken`): a plain `ServerSocket` bind to all addresses with Java's defaults
+  (exclusive on Windows) must work, and nothing may answer on 127.0.0.1 (a timeout counts as taken). Then a new Javalin
+  instance with all routes is built and started; if Jetty still fails, the next port gets a new instance.
+- The port in use is shown in the log ("Port 8080 is in use by another program; LJ Link uses port 8081 instead."), in the
+  tray tooltip ("LJ Link – localhost:8081"; the menu already showed the address) and on the start page
+  (`/api/info` has `port` and `portWanted`).
+- LJ Link opens and shows `http://127.0.0.1:PORT`, not `localhost` (QS round 2): browsers try `localhost` as `[::1]`
+  first, and with `java.net.preferIPv4Stack=true` (needed for beat-link, see `Main`) LJ Link can neither bind nor
+  check `[::1]`; a program there (for example a Node.js server on "localhost") would get the browser. ControlGuard
+  already accepted `127.0.0.1`; 127.0.0.1 is a secure context like localhost (Wake Lock); Bonjour announces the LAN
+  addresses and is not affected.
+- Browsers keep settings per address. After an earlier version (a language is saved in the settings file) LJ Link
+  opens `http://localhost:PORT/#move-settings=<token>`; `settings-move.js` (loaded before `i18n.js` and `app.js`)
+  sends the settings to `http://127.0.0.1:PORT/#import-settings=<token>.<data>`. That page removes the hash at once and
+  imports only after `POST /api/settings-move` accepted the token (`SettingsMove`: 128 bit, issued by `Main` only for
+  this, valid 5 minutes, redeemed once; the route is local and same-origin through ControlGuard). Only known keys with
+  valid values are taken (language, zoom 4-40, mode, theme, view, keepAwake, hidden group ids, link preset; looked up
+  with `hasOwnProperty`, so no `__proto__`), existing entries stay, then the marker `ljlinkpro.moveDone` stops every
+  later import. Without a valid token nothing is imported (QS round 2: another web page could plant settings through
+  the hash). `app.js` also copies only the known keys from storage instead of `Object.assign`. The hash leaves the
+  address bar and the tab history at once; the browser's global history still lists both addresses with the token,
+  where it is worthless (one use, 5 minutes). When the browser cannot be opened, the log shows the address without
+  hash, so no token gets into the diagnostics.
+- `browserSettingsMoved` in the settings file is set when the token was redeemed, when there is nothing to move (a new
+  installation), or after 2 starts that opened the move address without success (`browserSettingsMoveAttempts`). A
+  start without browser does not count, so the move is made up later. If another program sits on `[::1]` at that
+  port, at most 2 starts reach it; from then on LJ Link opens 127.0.0.1 and the old browser settings stay behind
+  (QS round 3).
+- All ten ports in use: the log says so, and a message window (menu language, with the hint on `--port`) is shown,
+  unless Java runs headless. Then LJ Link quits with exit code 1.
+- Not checked on Windows; "another program on 127.0.0.1" and on `[::1]` were reproduced on macOS.

@@ -53,7 +53,7 @@ public final class Main {
             if (isAppAt(p)) {
                 System.out.println("LJ Link is already running on port " + p);
                 if (openBrowser) {
-                    openInBrowser("http://localhost:" + p);
+                    openInBrowser(localUrl(p));
                 }
                 return;
             }
@@ -69,6 +69,116 @@ public final class Main {
         SleepGuard sleepGuard = SleepGuard.forThisProcess();
         hub.onClientCount(sleepGuard::clients);
 
+        // VJ-Link interface: its own stream for VJ programs, always on (see VjLink).
+        VjLink vjLink = new VjLink(hub, Updater.currentVersion());
+        vjLink.start();
+        final int[] boundPort = {port, port};
+        Started started;
+        try {
+            started = start(port, () -> createApp(hub, session, link, ableton, vjLink, boundPort), Main::portTaken);
+        } catch (RuntimeException e) {
+            // Without a console nobody would see why LJ Link did not start (issue #3): say it in a window, too.
+            System.err.println(noFreePortText(port, port + 9, false) + " (" + e.getMessage() + ")");
+            if (!java.awt.GraphicsEnvironment.isHeadless()) {
+                String text = noFreePortText(port, port + 9, "de".equals(AppSettings.language()));
+                try {
+                    javax.swing.SwingUtilities.invokeAndWait(() -> javax.swing.JOptionPane.showMessageDialog(null,
+                            text, "LJ Link", javax.swing.JOptionPane.ERROR_MESSAGE));
+                } catch (Exception dialog) {
+                    System.err.println("Message window unavailable: " + dialog);
+                }
+            }
+            sleepGuard.close();
+            System.exit(1);
+            return;
+        }
+        Javalin app = started.app();
+        int bound = started.port();
+        boundPort[0] = bound;
+        Bonjour.announce(bound, Updater.currentVersion());
+        String url = localUrl(bound);
+        if (bound != port) {
+            System.out.println("Port " + port + " is in use by another program; LJ Link uses port " + bound + " instead.");
+        }
+        System.out.println("LJ Link is running: " + url);
+        for (String u : NetworkCheck.lanUrls(bound)) {
+            System.out.println("  On the network (e.g. tablet): " + u);
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
+        Runtime.getRuntime().addShutdownHook(new Thread(sleepGuard::close));
+        if (useTray) {
+            boolean installed = Tray.install(url, () -> openInBrowser(url), stars -> openInBrowser(url + QuitDialog.reportPath(stars)), () -> {
+                session.stop();
+                sleepGuard.close();
+                app.stop();
+                System.exit(0);
+            });
+            if (installed) {
+                System.out.println("Menu bar / system tray icon: click it to open the web interface, switch privacy mode or quit.");
+            }
+        }
+        // Only after an earlier version (its page saved a language) are there browser settings on localhost to move.
+        if (!SettingsMove.done() && AppSettings.getString("language", null) == null) {
+            SettingsMove.markDone();
+        }
+        // At most MAX_MOVE_ATTEMPTS starts try the move; if it never arrives (e.g. another program on [::1] gets
+        // "localhost"), LJ Link gives up on it and opens 127.0.0.1 from then on (QS round 3).
+        int attempts = AppSettings.getInt(SettingsMove.ATTEMPTS_KEY, 0);
+        if (!SettingsMove.done() && !SettingsMove.tryMove(false, attempts)) {
+            SettingsMove.markDone();
+        }
+        if (openBrowser) {
+            if (SettingsMove.tryMove(SettingsMove.done(), attempts)) {
+                AppSettings.set(SettingsMove.ATTEMPTS_KEY, attempts + 1);
+                openInBrowser(moveUrl(bound, SettingsMove.issue(System.currentTimeMillis())));
+            } else {
+                openInBrowser(url);
+            }
+        }
+    }
+
+    /** The address for the log when the browser could not be opened: no hash (no move token), always 127.0.0.1. */
+    static String forLog(String url) {
+        int hash = url.indexOf('#');
+        String plain = hash < 0 ? url : url.substring(0, hash);
+        return plain.replaceFirst("^http://localhost:", "http://127.0.0.1:");
+    }
+
+    /**
+     * The address LJ Link opens and shows: 127.0.0.1, not "localhost". Browsers try "localhost" as [::1] first, and with
+     * IPv4 only (see main) LJ Link can neither bind nor check [::1]: another program there (e.g. a Node.js server on
+     * "localhost") would get the browser (issue #3). 127.0.0.1 always reaches LJ Link.
+     */
+    static String localUrl(int port) {
+        return "http://127.0.0.1:" + port;
+    }
+
+    /**
+     * The first start with the new address opens localhost with {@code #move-settings=<token>}: browsers keep the
+     * settings per address, so that page hands them over to 127.0.0.1, which redeems the one-time token
+     * (settings-move.js, {@link SettingsMove}).
+     */
+    static String moveUrl(int port, String token) {
+        return "http://localhost:" + port + "/#move-settings=" + token;
+    }
+
+    /** Shown when every port from {@code from} to {@code to} is in use (log in English, window in the menu language). */
+    static String noFreePortText(int from, int to, boolean de) {
+        return de
+                ? "LJ Link kann nicht starten: Die Ports " + from + " bis " + to + " sind alle von anderen Programmen belegt.\n"
+                + "Schließe eines davon oder starte LJ Link mit einem anderen Port, zum Beispiel: --port 18095"
+                : "LJ Link cannot start: ports " + from + " to " + to + " are all in use by other programs.\n"
+                + "Close one of them or start LJ Link with another port, for example: --port 18095";
+    }
+
+    /**
+     * A new server with all routes. Built once per port that is tried: a Javalin instance cannot be started a second time
+     * after a failed start (issue #3).
+     *
+     * @param boundPort [0] the port the server runs on, [1] the port that was asked for
+     */
+    private static Javalin createApp(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton, VjLink vjLink,
+            int[] boundPort) {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/web", Location.CLASSPATH);
             config.showJavalinBanner = false;
@@ -79,9 +189,6 @@ public final class Main {
             ws.onClose(hub::removeClient);
             ws.onError(hub::removeClient);
         });
-        // VJ-Link interface: its own stream for VJ programs, always on (see VjLink).
-        VjLink vjLink = new VjLink(hub, Updater.currentVersion());
-        vjLink.start();
         app.ws("/vjlink", ws -> {
             ws.onConnect(vjLink::addClient);
             ws.onMessage(ctx -> vjLink.onMessage(ctx, ctx.message()));
@@ -92,8 +199,8 @@ public final class Main {
         // Every /api/ route except the read-only ones for tablets is local: only the browser on this computer may use it,
         // never another web page (CSRF, DNS rebinding). See ControlGuard.
         ControlGuard.install(app);
+        SettingsMove.install(app, SettingsMove::done, SettingsMove::markDone);
 
-        final int[] boundPort = {port};
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
         app.get("/api/diagnostics", ctx -> {
             ctx.contentType("text/plain; charset=utf-8").result(Diagnostics.report(hub, session, link, ableton));
@@ -132,6 +239,8 @@ public final class Main {
         app.get("/api/info", ctx -> ctx.json(Map.of(
                 "controller", ControlGuard.isController(ctx),
                 "urls", NetworkCheck.lanUrls(boundPort[0]),
+                "port", boundPort[0],
+                "portWanted", boundPort[1],
                 "adapters", NetworkCheck.adapters())));
         app.get("/api/deck/{n}/waveform", ctx -> {
             byte[] data = hub.waveform(Integer.parseInt(ctx.pathParam("n")));
@@ -228,36 +337,13 @@ public final class Main {
             ctx.json(NetworkCheck.check(ctx.queryParam("ip")));
         });
 
-        int bound = start(app, port);
-        boundPort[0] = bound;
-        Bonjour.announce(bound, Updater.currentVersion());
-        String url = "http://localhost:" + bound;
-        System.out.println("LJ Link is running: " + url);
-        for (String u : NetworkCheck.lanUrls(bound)) {
-            System.out.println("  On the network (e.g. tablet): " + u);
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
-        Runtime.getRuntime().addShutdownHook(new Thread(sleepGuard::close));
-        if (useTray) {
-            boolean installed = Tray.install(url, () -> openInBrowser(url), stars -> openInBrowser(url + QuitDialog.reportPath(stars)), () -> {
-                session.stop();
-                sleepGuard.close();
-                app.stop();
-                System.exit(0);
-            });
-            if (installed) {
-                System.out.println("Menu bar / system tray icon: click it to open the web interface, switch privacy mode or quit.");
-            }
-        }
-        if (openBrowser) {
-            openInBrowser(url);
-        }
+        return app;
     }
 
     private static boolean isAppAt(int port) {
         try {
             java.net.HttpURLConnection c = (java.net.HttpURLConnection)
-                    java.net.URI.create("http://localhost:" + port + "/api/ping").toURL().openConnection();
+                    java.net.URI.create(localUrl(port) + "/api/ping").toURL().openConnection();
             c.setConnectTimeout(500);
             c.setReadTimeout(500);
             try (var in = c.getInputStream()) {
@@ -306,19 +392,58 @@ public final class Main {
         }
     }
 
-    /** Binds the first free port starting at {@code port}. */
-    private static int start(Javalin app, int port) {
+    /** The server that runs and its port. */
+    record Started(Javalin app, int port) {}
+
+    /**
+     * Starts a fresh server on the first free port from {@code port} to {@code port + 9}. Ports another program uses are
+     * skipped before Jetty tries them ({@code taken}); if Jetty still cannot bind, the next port gets a new instance,
+     * because a Javalin instance cannot be started twice (that made LJ Link quit when 8080 was in use, issue #3).
+     */
+    static Started start(int port, java.util.function.Supplier<Javalin> factory, java.util.function.IntPredicate taken) {
+        RuntimeException last = null;
         for (int p = port; p < port + 10; p++) {
+            if (taken.test(p)) {
+                System.out.println("Port " + p + " is in use by another program.");
+                continue;
+            }
+            Javalin app = factory.get();
             try {
                 app.start(p);
-                return p;
+                return new Started(app, p);
             } catch (RuntimeException e) {
-                if (p == port + 9) {
-                    throw e;
+                last = e;
+                System.out.println("Port " + p + " could not be used: " + e.getMessage());
+                try {
+                    app.stop();
+                } catch (RuntimeException ignored) {
+                    // nothing was started
                 }
             }
         }
-        throw new IllegalStateException("No free port");
+        throw last != null ? last : new IllegalStateException("No free port from " + port + " to " + (port + 9));
+    }
+
+    /**
+     * True when another program uses the port. Jetty binds all addresses with SO_REUSEADDR, which on Windows can succeed
+     * although another program listens on the port (then the browser reaches that program). So: a plain bind to all
+     * addresses with Java's defaults (exclusive on Windows) must work, and nothing may answer on 127.0.0.1 (a program that
+     * bound only the loopback address).
+     */
+    static boolean portTaken(int port) {
+        try (java.net.ServerSocket s = new java.net.ServerSocket()) {
+            s.bind(new java.net.InetSocketAddress(port));
+        } catch (IOException e) {
+            return true;
+        }
+        try (java.net.Socket c = new java.net.Socket()) {
+            c.connect(new java.net.InetSocketAddress(java.net.InetAddress.getLoopbackAddress(), port), 300);
+            return true;
+        } catch (java.net.SocketTimeoutException e) {
+            return true; // a listener that does not accept (its queue is full); a free port refuses at once
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private static void openInBrowser(String url) {
@@ -337,7 +462,7 @@ public final class Main {
         try {
             new ProcessBuilder(cmd).start();
         } catch (IOException e) {
-            System.out.println("Please open in your browser: " + url);
+            System.out.println("Please open in your browser: " + forLog(url));
         }
     }
 

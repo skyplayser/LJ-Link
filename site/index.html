@@ -25,10 +25,10 @@
 <meta property="og:image" content="https://skyplayser.github.io/LJ-Link/images/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="LJ Link showing live DJ waveforms for the lighting jockey" data-de-content="LJ Link zeigt dem Lichtjockey die DJ-Waveforms live">
+<meta property="og:image:alt" content="LJ Link logo with five colored faders: Show your LJ what the sound does." data-de-content="Logo von LJ Link mit fünf farbigen Fadern: Zeig deinem LJ, was der Sound macht.">
 <meta property="og:url" content="https://skyplayser.github.io/LJ-Link/" data-de-content="https://skyplayser.github.io/LJ-Link/de/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image:alt" content="LJ Link showing live DJ waveforms for the lighting jockey" data-de-content="LJ Link zeigt dem Lichtjockey die DJ-Waveforms live">
+<meta name="twitter:image:alt" content="LJ Link logo with five colored faders: Show your LJ what the sound does." data-de-content="Logo von LJ Link mit fünf farbigen Fadern: Zeig deinem LJ, was der Sound macht.">
 <!-- structured-data -->
 <link rel="stylesheet" href="style.css">
 </head>
@@ -74,7 +74,7 @@
     </div>
   </div>
 
-  <div class="whatsnew"><a class="btn" href="changelog.html"><span class="new-dot" aria-hidden="true"></span><span data-de="Neu in der aktuellen Version 1.7.9">What's new in the latest version 1.7.9</span><span aria-hidden="true">→</span></a></div>
+  <div class="whatsnew"><a class="btn" href="changelog.html"><span class="new-dot" aria-hidden="true"></span><span data-de="Neu in der aktuellen Version 1.7.10">What's new in the latest version 1.7.10</span><span aria-hidden="true">→</span></a></div>
 
   <section id="features">
     <p class="eyebrow" data-de="Funktionen">Features</p>
@@ -221,7 +221,7 @@
   <section id="compat">
     <p class="eyebrow" data-de="Kompatibilität">Compatibility</p>
     <h2 data-de="Geräte, mit denen es läuft – auch ältere CDJs und Mixer">Gear it works with – older CDJs and mixers too</h2>
-    <p class="lead" data-de="Nicht nur CDJ-3000 und DJM-A9: Jeder Pioneer-Player mit LINK-Anschluss schickt sein Tempo über Pro DJ Link. Mit dem CDJ-2000NXS2 und dem DJM-2000NXS läuft LJ Link.">Not only CDJ-3000 and DJM-A9: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. LJ Link runs with the CDJ-2000NXS2 and the DJM-2000NXS.</p>
+    <p class="lead" data-de="CDJ-3000, CDJ-2000NXS2 und weitere Pro-DJ-Link-Geräte: Jeder Pioneer-Player mit LINK-Anschluss schickt sein Tempo über Pro DJ Link. Mit CDJ-3000, CDJ-2000NXS2 und DJM-2000NXS läuft LJ Link; andere Modelle sollten laufen oder sind Alpha, siehe Tabelle.">CDJ-3000, CDJ-2000NXS2 and more Pro DJ Link gear: every Pioneer player with a LINK port sends its tempo over Pro DJ Link. LJ Link runs with the CDJ-3000, CDJ-2000NXS2 and DJM-2000NXS; other models should work or are alpha, see the table.</p>
     <div class="table">
       <table>
         <tr><th data-de="Gerät">Device</th><th>Status</th></tr>
@@ -229,7 +229,10 @@
         <tr><td>CDJ-2000NXS2</td><td class="ok" data-de="läuft: Waveforms, Cues, Position (zwischen Beats geschätzt)">works: waveforms, cues, position (estimated between beats)</td></tr>
         <tr><td>DJM-2000NXS</td><td class="ok" data-de="läuft als Mixer: ON AIR je Kanal">works as mixer: ON AIR per channel</td></tr>
         <tr><td>Denon Prime 4+</td><td class="ok" data-de="läuft: Titel, Tempo, Position, Fader, Waveform, Beatgrid, Cues">works: title, tempo, position, faders, waveform, beat grid, cues</td></tr>
-        <tr><td>CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-1000MK2, XDJ-700, XDJ-XZ, XDJ-AZ, DJM-900NXS, DJM-900NXS2, DJM-A9, DJM-V10</td><td class="plan" data-de="sollte funktionieren, nicht getestet">expected to work, not tested</td></tr>
+        <tr><td>CDJ-3000X</td><td class="part" data-de="teilweise, Alpha: Tempo, BPM, Zeit, Play/Pause; noch keine Titel, Waveforms und kein Beatgrid (wahrscheinlich wegen OneLibrary)">partly, alpha: tempo, BPM, time, play/pause; no titles, waveforms or beat grid yet (most likely because of OneLibrary)</td></tr>
+        <tr><td>XDJ-AZ, OPUS-QUAD</td><td class="plan" data-de="nicht getestet; vermutlich wie CDJ-3000X (OneLibrary) noch ohne Titel und Waveforms">not tested; probably like the CDJ-3000X (OneLibrary), no titles or waveforms yet</td></tr>
+        <tr><td>DJM-A9</td><td class="part" data-de="ab 1.7.10 erkannt, Alpha – Tempo/Master nur, wenn der Mixer sie sendet">from 1.7.10 detected, alpha – tempo/master only if the mixer sends them</td></tr>
+        <tr><td>CDJ-2000NXS, CDJ-900NXS, XDJ-1000, XDJ-1000MK2, XDJ-700, XDJ-XZ, DJM-900NXS, DJM-900NXS2, DJM-V10</td><td class="plan" data-de="sollte funktionieren, nicht getestet">expected to work, not tested</td></tr>
         <tr><td>Denon SC6000, Prime 4, Prime Go</td><td class="plan" data-de="sollte funktionieren (gleiches Protokoll), nicht getestet">expected to work (same protocol), not tested</td></tr>
         <tr><td>Serato DJ Pro</td><td class="part" data-de="am selben Rechner: Track, BPM, Tonart, Waveform-Übersicht, Beatgrid – ohne Abspielposition">on the same computer: track, BPM, key, waveform overview, beat grid – no play position</td></tr>
         <tr><td>Ableton Link</td><td class="part" data-de="Tempo einer Link-Session (Serato, Traktor, Live), noch nicht mit echter Session geprüft">tempo of a Link session (Serato, Traktor, Live), not yet tried with a real session</td></tr>

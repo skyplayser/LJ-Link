@@ -17,4 +17,9 @@ interface DeckSource {
     default java.util.List<String> diagnostics() {
         return java.util.List.of();
     }
+
+    /** The few most important of those lines, short, for the summary at the top of a problem report (and the mail text). */
+    default java.util.List<String> summary() {
+        return java.util.List.of();
+    }
 }

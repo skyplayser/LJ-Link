@@ -70,6 +70,7 @@
       <div class="works-soon">Serato and Traktor are planned.</div>
     </div>
 
+    <p id="port-note" class="hint hidden"></p>
     <p id="version-line" class="version-line"></p>
   </section>
 
@@ -79,6 +80,7 @@
     <h1 id="search-title">Searching …</h1>
     <p class="lead" id="search-message"></p>
     <div id="search-warnings" class="note warn hidden"></div>
+    <div id="search-notes" class="note hidden"></div>
     <ul id="found-list" class="found"></ul>
     <div id="search-help" class="note hidden">
       <strong>Nothing found yet?</strong>
@@ -140,6 +142,7 @@
   <section id="view-monitor" class="view wide hidden">
     <div id="lan" class="hint"></div>
     <div id="warnings" class="note warn hidden"></div>
+    <div id="notes" class="note hidden"></div>
     <div id="decks"></div>
     <div id="mixer-view" class="hidden">
       <div id="mixer-list"></div>
@@ -318,7 +321,7 @@
       <button type="button" id="report-stars-clear" class="link hidden">Clear rating</button>
     </div>
     <p class="hint">Describe the problem or your wish. For a problem: which devices, what you did, what you see.</p>
-    <p class="hint"><a href="https://skyplayser.github.io/LJ-Link/help.html" target="_blank" rel="noopener">Known problems and solutions</a></p>
+    <p class="hint"><a class="help-link" href="https://skyplayser.github.io/LJ-Link/help.html" target="_blank" rel="noopener">Known problems and solutions</a></p>
     <textarea id="report-text" rows="6" placeholder="Example: The CDJ-3000 shows up twice and says “No track loaded”, although a track is playing. Windows 11, cable to the switch."></textarea>
     <label class="check" id="report-diag-row"><input type="checkbox" id="report-diag" checked> <span>Include diagnostic data</span></label>
     <div class="hint" id="report-diag-hint">Program and system version, network adapters, the devices that were found and their connection state, what each deck receives (waveform, beat grid, cues) and the last log lines. No track titles, no covers, no passwords.</div>
@@ -330,6 +333,7 @@
       <button id="report-copy" class="secondary">Copy</button>
       <button id="report-close" class="secondary">Close</button>
     </div>
+    <div id="report-attach" class="report-attach hidden" role="alert"></div>
     <div class="hint" id="report-status"></div>
   </div>
 </div>
@@ -344,6 +348,7 @@
     <div id="info-body"></div>
   </div>
 </div>
+<script src="settings-move.js"></script>
 <script src="i18n.js"></script>
 <script src="keep-awake-video.js"></script>
 <script src="app.js"></script>

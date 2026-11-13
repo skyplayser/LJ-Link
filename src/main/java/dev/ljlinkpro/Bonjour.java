@@ -68,15 +68,57 @@ final class Bonjour {
         return out;
     }
 
+    /** How long quitting waits for the Bonjour goodbyes; JmDNS waits several seconds per adapter otherwise. */
+    static final long CLOSE_TIMEOUT_MS = 1500;
+
+    /**
+     * Withdraws the announcements on all adapters at once and waits at most {@link #CLOSE_TIMEOUT_MS}: the goodbye packets
+     * go out at the start, the rest of JmDNS's close only waits. Before, closing one adapter after the other kept LJ Link
+     * running for 8 s and more after "Quit".
+     */
     synchronized void close() {
+        List<Runnable> tasks = new ArrayList<>();
         for (JmDNS dns : running) {
-            try {
-                dns.unregisterAllServices();
-                dns.close();
-            } catch (java.io.IOException | RuntimeException e) {
-                // shutting down anyway
-            }
+            tasks.add(() -> {
+                try {
+                    dns.unregisterAllServices();
+                    dns.close();
+                } catch (java.io.IOException | RuntimeException e) {
+                    // shutting down anyway
+                }
+            });
         }
         running.clear();
+        int open = closeAll(tasks, CLOSE_TIMEOUT_MS);
+        if (open > 0) {
+            System.err.println("Bonjour: " + open + " announcement(s) still closing, not waiting longer");
+        }
+    }
+
+    /** Runs the tasks in parallel on daemon threads and waits at most {@code timeoutMs}; returns how many are still running. */
+    static int closeAll(List<Runnable> tasks, long timeoutMs) {
+        List<Thread> threads = new ArrayList<>();
+        for (Runnable task : tasks) {
+            Thread t = new Thread(task, "bonjour-close");
+            t.setDaemon(true);
+            t.start();
+            threads.add(t);
+        }
+        long deadline = System.nanoTime() + timeoutMs * 1_000_000;
+        int open = 0;
+        for (Thread t : threads) {
+            long left = (deadline - System.nanoTime()) / 1_000_000;
+            try {
+                if (left > 0) {
+                    t.join(left);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            if (t.isAlive()) {
+                open++;
+            }
+        }
+        return open;
     }
 }

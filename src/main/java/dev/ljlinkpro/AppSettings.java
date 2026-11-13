@@ -39,6 +39,11 @@ final class AppSettings {
         return read().path(key).asBoolean(fallback);
     }
 
+    static synchronized int getInt(String key, int fallback) {
+        JsonNode n = read().path(key);
+        return n.isInt() ? n.asInt() : fallback;
+    }
+
     static synchronized String getString(String key, String fallback) {
         JsonNode n = read().path(key);
         return n.isTextual() ? n.asText() : fallback;

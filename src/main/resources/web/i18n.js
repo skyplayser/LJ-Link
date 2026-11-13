@@ -117,13 +117,18 @@ const DE = {
   "(no description)": "(keine Beschreibung)",
   "Copied.": "Kopiert.",
   "Copying is not allowed here; use “Save as file”.": "Kopieren ist hier nicht erlaubt; nutze „Als Datei speichern“.",
-  "Saved. Attach the file to your report or send it to us.": "Gespeichert. Hänge die Datei an deine Meldung an oder schick sie uns.",
+  "Saved as {file} in your downloads folder. Attach the file to your report or send it to us.": "Als {file} in deinem Download-Ordner gespeichert. Hänge die Datei an deine Meldung an oder schick sie uns.",
   "The diagnostic data is in the clipboard: paste it into the issue (Ctrl/Cmd+V).": "Die Diagnosedaten sind in der Zwischenablage: füge sie in die Meldung ein (Strg/Cmd+V).",
   "Please also attach the file from “Save as file”.": "Hänge bitte zusätzlich die Datei aus „Als Datei speichern“ an.",
   "A GitHub account is needed to send it. Without one: “Send by email”.": "Zum Absenden brauchst du ein GitHub-Konto. Ohne Konto: „Per E-Mail senden“.",
   "Send by email": "Per E-Mail senden",
-  "The diagnostic data is attached as a file (LJ-Link-report-….txt from the downloads folder).": "Die Diagnosedaten hängen als Datei an (LJ-Link-report-….txt aus dem Download-Ordner).",
-  "The diagnostic data was saved as a file: attach it to the mail (it is also in the clipboard).": "Die Diagnosedaten wurden als Datei gespeichert: Hänge sie an die Mail an (sie sind auch in der Zwischenablage).",
+  "PLEASE ATTACH: the file {file} from your downloads folder. The mail program does not attach it by itself.": "BITTE ANHÄNGEN: die Datei {file} aus deinem Download-Ordner. Das Mailprogramm hängt sie nicht selbst an.",
+  "Summary of the diagnostic data (the whole data is in the file):": "Kurzfassung der Diagnosedaten (vollständig in der Datei):",
+  "Please attach the file to the mail yourself": "Bitte hänge die Datei selbst an die Mail an",
+  "Your mail program cannot attach files by itself. The diagnostic data was just saved in your downloads folder (where your browser saves downloads, usually “Downloads”). Attach this file to the mail before you send it:": "Dein Mailprogramm kann Dateien nicht selbst anhängen. Die Diagnosedaten wurden gerade in deinem Download-Ordner gespeichert (dort, wo dein Browser Downloads ablegt, meist „Downloads“). Hänge diese Datei an die Mail an, bevor du sie abschickst:",
+  "The most important lines are already in the mail text.": "Die wichtigsten Zeilen stehen schon im Mailtext.",
+  "The diagnostic data is also in the clipboard: if the file is missing, paste it into the mail (Ctrl/Cmd+V).": "Die Diagnosedaten liegen auch in der Zwischenablage: Fehlt die Datei, füge sie in die Mail ein (Strg/Cmd+V).",
+  "If the file is missing, use “Save as file”.": "Fehlt die Datei, nutze „Als Datei speichern“.",
   "Your mail program opens with the report to {mail}. If nothing opens, send it by hand to that address.": "Dein Mailprogramm öffnet sich mit der Meldung an {mail}. Öffnet sich nichts, schick sie von Hand an diese Adresse.",
   "Example: The CDJ-3000 shows up twice and says “No track loaded”, although a track is playing. Windows 11, cable to the switch.": "Beispiel: Der CDJ-3000 erscheint doppelt und zeigt „Kein Track geladen“, obwohl ein Track läuft. Windows 11, Kabel am Switch.",
   "Send to speed master": "An Speedmaster senden",
@@ -150,6 +155,16 @@ const DE = {
   "Searching for Denon devices (StageLinQ) …": "Suche nach Denon-Geräten (StageLinQ) …",
   "Denon device found – connecting …": "Denon-Gerät gefunden – verbinde …",
   "No waveform found for this track": "Für diesen Track wurde keine Waveform gefunden",
+  "Not supported": "Nicht unterstützt",
+  "No track data": "Keine Trackdaten",
+  "The position of the faders and the EQ knobs are not sent and cannot be shown here.": "Die Stellung der Fader und die EQ-Regler werden nicht gesendet und können hier nicht angezeigt werden.",
+  "ShowKontrol runs on this computer. Both programs at the same time on one computer can disturb each other.": "ShowKontrol läuft auf diesem Computer. Beide Programme gleichzeitig auf einem Computer können sich stören.",
+  "Title and waveform from this player are not supported yet: LJ Link cannot read the newer OneLibrary format of this model (Alpha). BPM, time and beats still work.": "Titel und Waveform von diesem Player werden noch nicht unterstützt: LJ Link kann das neuere OneLibrary-Format dieses Modells noch nicht lesen (Alpha). BPM, Zeit und Beats funktionieren trotzdem.",
+  "Title and waveform are not arriving from this player.": "Titel und Waveform kommen von diesem Player nicht an.",
+  "What can I do?": "Was kann ich tun?",
+  "Help": "Hilfe",
+  "Mixer recognised (Alpha), but it sends no data LJ Link can read (tempo, master). ON AIR per channel comes from the players.": "Mixer erkannt (Alpha), sendet aber keine Daten, die LJ Link lesen kann (Tempo, Master). ON AIR je Kanal kommt von den Playern.",
+  "ShowKontrol is running on the network. Both programs at the same time on one computer can disturb each other.": "ShowKontrol läuft im Netz. Beide Programme gleichzeitig auf einem Computer können sich stören.",
   "This device reports the fader positions. The EQ knobs are not transmitted.": "Dieses Gerät meldet die Fader-Stellungen. Die EQ-Regler werden nicht gesendet.",
   "Protocol": "Protokoll",
   "Channel fader": "Kanal-Fader",
@@ -166,6 +181,8 @@ const DE = {
   "Back": "Zurück",
   "No active network connection found. Please check the network cable.": "Keine aktive Netzwerkverbindung gefunden. Bitte Netzwerkkabel prüfen.",
   "Open on the tablet (same Wi-Fi): ": "Auf dem Tablet öffnen (gleiches WLAN): ",
+  "Port {p} is in use by another program, so LJ Link runs on port {q}. On a tablet in the same network: {url}": "Port {p} ist von einem anderen Programm belegt, deshalb läuft LJ Link auf Port {q}. Auf einem Tablet im selben Netzwerk: {url}",
+  "Port {p} is in use by another program, so LJ Link runs on port {q}.": "Port {p} ist von einem anderen Programm belegt, deshalb läuft LJ Link auf Port {q}.",
   "  or  ": "  oder  ",
   "Checking …": "Prüfe …",
   "Check not possible.": "Prüfung nicht möglich.",
@@ -364,7 +381,7 @@ function t(text, vars) {
 const norm = (s) => s.replace(/\s+/g, " ").trim();
 const ATTRS = ["title", "placeholder", "aria-label"];
 // Parts of the page whose texts are generated by the program and already translated with t().
-const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, #report-stars, script, style";
+const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, #report-stars, #report-attach, script, style";
 
 /** Translates the static texts of the page (text nodes and some attributes), and back to English. */
 function translateStatic() {

@@ -117,4 +117,20 @@ final class Session {
         }
         return out;
     }
+
+    /** The short lines of every running source, for the summary of a problem report. */
+    synchronized List<String> summary() {
+        List<String> out = new ArrayList<>();
+        for (DeckSource s : active) {
+            try {
+                out.addAll(s.summary());
+            } catch (RuntimeException e) {
+                out.add(s.getClass().getSimpleName() + " summary failed: " + e);
+            }
+        }
+        if (active.isEmpty()) {
+            out.add("No search running");
+        }
+        return out;
+    }
 }

@@ -37,6 +37,13 @@ The source code of every component is available at the address in the table. Rem
 library (`remotetea-oncrpc-1.1.4.jar` in the program folder); under the LGPL you may replace it with a modified version.
 The OpenJDK runtime keeps its own legal notices in the `legal` folder of the bundled runtime.
 
+## Logo font
+
+The letters "LJ" in the LJ Link logo (`logo.svg` and the installer icons) are outlines of the font Inter Display
+ExtraBold, Copyright © 2016 The Inter Project Authors (https://github.com/rsms/inter), licensed under the SIL Open Font
+License 1.1. The font itself is not included in the program, only the drawn outlines of these two letters. The license text
+is included as `legal/OFL-Inter.txt`.
+
 ## Source code offer
 
 The installers contain the OpenJDK runtime of Eclipse Temurin (GPL-2.0 with Classpath Exception) and Remote Tea

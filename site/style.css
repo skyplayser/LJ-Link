@@ -23,7 +23,7 @@ header.top nav a:hover { color: var(--text); }
 
 /* Hero */
 .hero { text-align: center; padding: 64px 0 24px; }
-.hero .logo { width: 116px; height: 116px; border-radius: 28px; box-shadow: 0 12px 48px rgba(59, 130, 246, .28); }
+.hero .logo { width: 116px; height: 116px; border-radius: 28px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 14px 44px rgba(0, 0, 0, .55); }
 h1 { font-size: clamp(36px, 6.2vw, 64px); line-height: 1.05; margin: 22px 0 14px; letter-spacing: -.025em; }
 h1 .kicker { display: block; font-size: clamp(14px, 1.8vw, 16px); line-height: 1.4; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 14px; }
 h1 .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa 45%, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }

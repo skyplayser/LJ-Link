@@ -1,37 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LJ Link">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 100 824 824" role="img" aria-label="LJ Link">
+  <!-- LJ Link logo "Fader" (suite style). Same geometry as Logo.java and packaging/LJ-Link.* on a 1024 grid;
+       the viewBox crops the icon margin so the tile fills the image. Letters: outlines of Inter Display ExtraBold
+       (SIL Open Font License 1.1, see THIRD_PARTY_NOTICES.md); no font is loaded. -->
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#18202d"/>
-      <stop offset="1" stop-color="#06080c"/>
-    </linearGradient>
-    <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#ffe26e" stop-opacity="1"/>
-      <stop offset="1" stop-color="#ffe26e" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7cb7ff"/>
-      <stop offset="1" stop-color="#2563eb"/>
+    <linearGradient id="tile" gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="924" y2="924">
+      <stop offset="0" stop-color="#1A1E2A"/>
+      <stop offset="1" stop-color="#0D1016"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <!-- light beams fanning out of the waveform -->
-  <g fill="url(#beam)" opacity=".88">
-    <polygon points="76,350 116,350 92,70 28,70"/>
-    <polygon points="136,290 176,290 164,70 106,70"/>
-    <polygon points="196,210 236,210 226,70 186,70"/>
-    <polygon points="256,270 296,270 280,70 232,70"/>
-    <polygon points="316,170 356,170 356,70 310,70"/>
-    <polygon points="376,310 416,310 424,70 360,70"/>
-    <polygon points="436,360 476,360 490,70 420,70"/>
+  <rect x="101.5" y="101.5" width="821" height="821" rx="196" fill="url(#tile)" stroke="#2A2F3D" stroke-width="3"/>
+  <path fill="#F2F4F8" d="M348.8 520L348.8 287.2L405.1 287.2L405.1 472.2L508.2 472.2L508.2 520L348.8 520ZM598.1 523.6Q560.6 523.6 539.7 504Q518.9 484.4 518.9 447.8L518.9 430.8L571.2 430.8L571.2 448.3Q571.2 462 578.2 469.4Q585.1 476.7 597.3 476.7Q609.5 476.7 616.4 469.4Q623.3 462 623.3 448.3L623.3 287.2L679.5 287.2L679.5 449.2Q679.5 485 658.1 504.3Q636.7 523.6 598.1 523.6Z"/>
+  <!-- five faders: rails and caps in the suite colours -->
+  <g fill="#272C39">
+    <rect x="270.29" y="600" width="20.14" height="220" rx="10.07"/>
+    <rect x="386.11" y="600" width="20.14" height="220" rx="10.07"/>
+    <rect x="501.93" y="600" width="20.14" height="220" rx="10.07"/>
+    <rect x="617.75" y="600" width="20.14" height="220" rx="10.07"/>
+    <rect x="733.57" y="600" width="20.14" height="220" rx="10.07"/>
   </g>
-  <!-- waveform bars -->
-  <g fill="url(#bar)">
-    <rect x="76" y="350" width="40" height="70" rx="14"/>
-    <rect x="136" y="290" width="40" height="130" rx="14"/>
-    <rect x="196" y="210" width="40" height="210" rx="14"/>
-    <rect x="256" y="270" width="40" height="150" rx="14"/>
-    <rect x="316" y="170" width="40" height="250" rx="14"/>
-    <rect x="376" y="310" width="40" height="110" rx="14"/>
-    <rect x="436" y="360" width="40" height="60" rx="14"/>
-  </g>
+  <rect x="230" y="703.66" width="100.71" height="52.8" rx="14.78" fill="#FF3B3B"/>
+  <rect x="345.82" y="646.82" width="100.71" height="52.8" rx="14.78" fill="#FFB020"/>
+  <rect x="461.64" y="730.42" width="100.71" height="52.8" rx="14.78" fill="#3DDC84"/>
+  <rect x="577.46" y="675.24" width="100.71" height="52.8" rx="14.78" fill="#22C8F0"/>
+  <rect x="693.29" y="626.75" width="100.71" height="52.8" rx="14.78" fill="#B45CFF"/>
 </svg>

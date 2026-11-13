@@ -47,7 +47,7 @@ when a tablet loads the page; GitHub sees its IP address and the program version
 - **A red LIVE frame** around the deck that is on air, so you never light the wrong track.
 - **A Mixer tab** with one strip per channel, and a click on any player opens everything the interface reports about it.
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
-- **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-AZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
+- **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-XZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
 - **Denon / Engine DJ** (Prime 4, Prime 4+, Prime Go, SC6000) over StageLinQ: title, artist, tempo and pitch, play state, master, exact position, the real **fader positions** of the mixer, and the waveform with beat grid, bar starts, hot cues and loops read from the device's library. Passive: it never changes anything on the device.
 - **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC) and any OSC program that reads a number ; Daslight over Ableton Link (recommended) or an OSC tap on every beat for its BPM Tap button (both work with Daslight); and, as an untested alpha, OSC taps for ChamSys MagicQ. *Search for the desk* finds a grandMA2
   (onPC or console) in the network; otherwise enter its IP address by hand.
@@ -172,7 +172,11 @@ Type the command into the desk's command line by hand first, and edit it in LJ L
 | CDJ-3000 | works: status, metadata, waveforms, cues, loops, exact position |
 | CDJ-2000NXS2 | works: status, metadata, waveforms, cues, position from beats and beat grid |
 | DJM-2000NXS | works as mixer: ON AIR per channel |
-| CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-A9, DJM-V10 | expected to work, not tested |
+| CDJ-3000X | partly, alpha: tempo, BPM, time, play/pause; no titles, waveforms or beat grid yet (most likely because of the OneLibrary format, see [troubleshooting](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#tracks-and-waveforms)) |
+| XDJ-AZ | not tested; probably like the CDJ-3000X (OneLibrary), no titles or waveforms yet. From 1.7.10 LJ Link no longer takes the player number 7 the XDJ-AZ uses itself (alpha, [details](https://skyplayser.github.io/LJ-Link/wiki-pioneer.html#xdj-az)) |
+| OPUS-QUAD | not tested; probably like the CDJ-3000X (OneLibrary), no titles or waveforms yet |
+| DJM-A9 | from 1.7.10 detected, alpha – tempo/master only if the mixer sends them |
+| CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-V10 | expected to work, not tested |
 | Denon Prime 4+ (firmware 5.0.4) | works over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
 | Denon SC6000, Prime 4, Prime Go | expected to work (same protocol), not tested |
 | Serato DJ Pro 3.x (macOS) | works on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
@@ -205,13 +209,16 @@ The goal is to cover every common DJ standard.
 - Denon waveforms come from the Engine library on the device's internal drive or card, downloaded once. They have overview resolution (the detail view is smoothed from it), and covers appear only if the library stores them.
 - Do not run it on the computer that runs rekordbox. Tracks from streaming services have no waveform data.
 - From the mixer, Pro DJ Link only tells us which channels are on air. Fader positions and EQ knobs are **not** transmitted by
-  any DJM, so the blue channel bar shows on air or off and the knobs stay empty. Denon devices do report the fader positions
+  any DJM, so the cyan channel bar shows on air or off and the knobs stay empty. Denon devices do report the fader positions
   (the bar then shows the real level); their EQ knobs are not transmitted. The demo mode simulates both to show the layout.
 - The CDJ-2000NXS2 did not report an active loop in our tests, the CDJ-3000 does. NXS players report scratching only roughly.
 - The player numbers and the mixer channels have to match for ON AIR to be right, and ON AIR also needs sound at the master output.
 - **Known bug:** with a direct cable to the players (no router) and Wi-Fi switched on, players sometimes show up twice or not
   at all. Restarting LJ Link usually solves it; switching Wi-Fi off or using a switch avoids it. A fix is being worked on.
-- The program joins the Pro DJ Link network as a virtual player with its own number, like beat-link does.
+- The program joins the Pro DJ Link network as a virtual player with its own number (7 to 15, one no other device uses), like beat-link does.
+- The interface runs on port 8080. If another program uses it, LJ Link 1.7.10 and newer takes the next free port up to 8089 and
+  shows it on the start page and at the program icon; to choose a port yourself, start it with `--port N` (see
+  [port in use](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#port)).
 - CDJ-2000NXS2 and older send their position only between beats; LJ Link runs them at their pitch, so the waveform moves
   smoothly. The CDJ-3000 and Denon devices report their exact position.
 - Updates need the internet. Without it the program works as before, the check just says it could not reach GitHub.
@@ -240,7 +247,11 @@ use **Report a problem or request a feature** in the program (menu ☰ → Feedb
 happens and leave *Include diagnostic data* ticked. Wishes are welcome there too, with an optional rating of 1 to 5 stars that
 becomes the first line of the report (alpha). The diagnostic data holds the version, network adapters, the devices found and their connection state,
 what each deck receives and the last log lines – no track titles, covers or passwords – and can be checked before sending. Send it
-by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue.
+by email (your mail program opens a mail to fehlermelden@nextphilm.de) or as a GitHub issue. A mail link cannot attach files: if
+the report is too long for it, LJ Link saves it as `LJ-Link-report-….txt` in your downloads folder, and the mail starts with
+*PLEASE ATTACH* and a short summary. Attach that file to the mail yourself before sending.
+
+Do not run rekordbox or ShowKontrol on the same computer as LJ Link: they join Pro DJ Link too and can disturb each other.
 
 ## Live use
 
