@@ -579,3 +579,82 @@ reaches the other program.
 - All ten ports in use: the log says so, and a message window (menu language, with the hint on `--port`) is shown,
   unless Java runs headless. Then LJ Link quits with exit code 1.
 - Not checked on Windows; "another program on 127.0.0.1" and on `[::1]` were reproduced on macOS.
+
+## ADR-040: Input for LJL Link (formerly "LJ Link Sender"), club key and limits (Alpha)
+LJL Link (named "LJ Link Sender" until 14.11.2026) is a small separate app on the DJ's computer that reports deck data (track, length, waveforms, later
+the position) to LJ Link in the booth over the network. This is LJ Link's side of the sender protocol, version 1.
+- **Input**: WebSocket `/sender` (`SenderInbox`). `hello` → `welcome` or `reject` (`key`, `protocol`, `full`, then
+  closed with 1008); `load`, `waveform` (`overview` → `Deck.setWaveform`, `detail` → `Deck.setDetail`, both style
+  `threeband`: 4 bytes per entry, low, mid, high, 0), `position` (passed to `Deck.samplePosition`, Alpha), `unload`,
+  `names`, `ping` → `pong`, `bye`. Deck messages before the welcome, unknown types and broken JSON are ignored. A
+  waveform counts only if its `id` is the deck's current track, `entries * 4` equals the decoded length, and a detail
+  waveform has 150 entries per second (the browser draws only that; `fps` missing is taken as 150).
+- **Open to the network, but only with the club key.** `/sender` is not under `/api/`, so `ControlGuard` does not
+  apply and stays unchanged. A sender is accepted only with the current club key, compared in constant time
+  (`MessageDigest.isEqual`). Everything it sends is read as deck data only; there is no message that controls LJ Link,
+  the players or the light desks.
+- **Club key** (`SenderClub`): 128 random bits (`SecureRandom`) as lowercase hex, created on first use and kept in the
+  settings file (`senderClubKey`). Local API (ControlGuard, this computer only): `GET /api/sender` (club name, key,
+  port, own IPv4 addresses, connected senders), `GET /api/sender/club.json` (what the sender reads: `version`, `club`,
+  `hosts`, `port`, `key`), `POST /api/sender/key` (new key; every connected sender gets `reject key` and is
+  disconnected, so an old `club.json` stops working at once), `POST /api/sender/club` (club name; blank = computer
+  name). The key is never logged, never in a problem report and never sent to `/ws` (tablets).
+- **Limits**: 4 senders (`reject full`), decks 1-4, 2 MB per message after the welcome and 64 KB before it (Jetty
+  `setMaxTextMessageSize` per session, closes with 1009; checked again in `SenderInbox`), names cut to 64 characters,
+  titles to 200, control characters removed. 15 s without any message and the sender is dropped with its decks.
+- **Connections without a hello** (QS round 1: 8 of them kept every real sender out): closed after 3 s, at most 2 per
+  address, at most 8 in all. A new connection always gets a place: the oldest waiting one of the same address, or else
+  the oldest waiting one at all, is closed (1008 `busy`). So a sender that says hello at once always gets in, and one
+  that reconnects quickly is not kept out by its own earlier attempts. Refusals are logged at most once a minute per reason, the rest is
+  counted ("N more refused"), so a flood cannot push the rest out of the log buffer of the problem report.
+- **Decks**: one `Hub.Scope` per sender (`sender-s1` …, kind `sender`). Group and deck name are the DJ software
+  ("Serato DJ Pro"), never the computer's name: it is personal, goes into problem reports and was cut off on the deck. A
+  second sender with the same software gets a number ("Serato DJ Pro 2"), so a DJ handover stays clear. The computer's
+  name is only in the local `/api/sender` list; the log names senders only by id and address. Sender scopes are
+  persistent from creation (`Hub.persistentScope`): "Search", "Demo" and "Stop" (`Hub.reset`) keep them, they go only
+  when the sender goes.
+- **Position** (added after the first real test): `position` may carry `speed` (the sender's measured playing speed);
+  the deck's velocity is set to it (`Deck.samplePositionWithSpeed`), 1.0 without it. The 150 ms estimate of other
+  sources never found a speed with the sender's 4-5 messages a second, so the playhead stepped from message to message
+  (measured: up to 0.6 s off a straight line; now median 1-15 ms, at most 43 ms). Sender decks are `coarsePosition` (0.1 s steps, smoothed
+  like an NXS2). `ms: null` = position unknown (Serato hides the deck): no playhead.
+- **Browser**: while senders are connected and no search shows decks, the sender decks are above the start or search
+  page, not below it. Sender decks show no track number, cover, channel fader or pitch (the sender has none of them);
+  a deck without position says so ("NO POSITION" and a line in the detail waveform) instead of "--:--" and "PAUSE";
+  `titleHidden` shows "Title hidden by the DJ". The text for a deck without position names no single cause (2-deck
+  view, no screen recording permission, calibrating).
+- **Senders do not set the phase** (QS round 1: with a sender connected the start page, the search and "Disconnect"
+  were unreachable). `Hub.phase()` and the state's mode and message leave persistent scopes out; the state carries
+  `senders` (how many are connected). The browser keeps the sender decks below the start, search and error pages
+  (with the zoom/VIEW bar), and does not clear them when the search stops; the server removes them with `deckGone`
+  when the sender goes. The problem report has its own section "LJL Link (Alpha)" (id, address, software, titles
+  allowed or not, connections without hello; no names, titles or key).
+- **names: false** (also the default when the field is missing): title and artist are never stored; the deck reports
+  `titleHidden: true`; the browser shows "Title hidden by the DJ". A
+  `names` message with `on: false` removes the titles of all of the sender's decks at once; `on: true` brings titles
+  with the next `load`.
+- **Bonjour**: TXT of `_ljlink._tcp` also carries `sender=1`, `senderpath=/sender`.
+- Alpha: tested with unit tests, a real Jetty in a test, a simulated sender and a development build of the sender
+  against a test instance; not on Windows.
+
+## ADR-041: Suite chat without a host (Alpha)
+The lighting booth, the DJs and the VJs often have to shout across the floor ("drop in 30 s", "more fog?"). Every
+program of the suite (LJ Link, LJL Link, VJ-Link and further suite programs) in the same network joins one chat room by
+itself – no server, like a walkie-talkie channel. Protocol: `docs/suite-chat.md`.
+- **UDP multicast** 239.255.76.76:47676, TTL 1, on every IPv4 adapter. Presence every 5 s, every message twice (with an
+  id, shown once), a newcomer asks for the history and the others send their last 20 messages again. No host: whoever
+  is in the network is in the room; it works without LJ Link, too.
+- **Switchable** in every program. LJ Link: setting "Suite chat", on by default, kept; off, it neither sends nor reads.
+- **Nickname**: asked when entering the chat. LJ Link keeps it in its settings; LJL Link only in memory (nothing is
+  written to the DJ's Mac).
+- **Only the LJ Link computer** reads and writes the chat in LJ Link (local API `GET/POST /api/chat`, `POST
+  /api/chat/settings`, ControlGuard); a tablet does not see it.
+- **Limits** (every receiver): 500 characters, nickname 24, line breaks become spaces, direction marks and control
+  characters go, 10 messages per peer in 10 s, 200 messages, 50 peers, datagrams up to 8 KB. Text only, never HTML.
+- **Privacy**: never logged, never in a problem report (only on/off and counts). Every device in the network can read
+  along (nothing is encrypted); networks that block multicast (guest Wi-Fi with client isolation) have no chat.
+- Replaces the first draft of this ADR (a chat over the LJL Link connection, switched on by the booth): that one only
+  reached DJs with LJL Link and needed LJ Link as the host.
+- Alpha: unit tests, a live run on one Mac with LJ Link (Java), LJL Link (Swift) and a third test program; not yet
+  between two computers, not on Windows. VJ-Link and LJL Link have the chat too (same protocol, checked together with LJ
+  Link in shared final QS rounds, Nov 2026).

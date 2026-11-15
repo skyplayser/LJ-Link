@@ -46,6 +46,8 @@ final class Deck {
     /** Pitch change in percent (+0.35 = 0.35 % faster). */
     volatile double pitchPercent;
     volatile int trackNumber;
+    /** True when the DJ did not allow track titles (LJL Link with {@code names: false}): no title or artist is kept. */
+    volatile boolean titleHidden;
     /** True for sources that cannot deliver waveforms (yet), so the display says so instead of waiting. */
     volatile boolean noWaveformSource;
     /** "onelibrary" or "missing" when an analysed track has had no metadata for a while (see ProDjLinkSource#metadataHint). */
@@ -305,6 +307,16 @@ final class Deck {
         positionSample++;
     }
 
+    /**
+     * A sample from a source that knows its speed (LJL Link measures it over several seconds of Serato's time
+     * display). Its samples come only about 4 times a second, too far apart for the 150 ms estimate above, which then
+     * never found a speed and the playhead stepped from sample to sample.
+     */
+    synchronized void samplePositionWithSpeed(long ms, double knownVelocity) {
+        samplePosition(ms);
+        velocity = ms < 0 ? 0 : knownVelocity;
+    }
+
     /** One consistent reading of the latest position sample (position, speed, sample count, arrival time). */
     record PositionSnapshot(long ms, double velocity, long sample, long atNanos) {}
 
@@ -363,6 +375,7 @@ final class Deck {
         boolean hide = Privacy.enabled();
         m.put("title", hide ? null : title);
         m.put("artist", hide ? null : artist);
+        m.put("titleHidden", titleHidden);
         m.put("key", key);
         m.put("trackBpm", trackBpm);
         m.put("effectiveBpm", effectiveBpm);

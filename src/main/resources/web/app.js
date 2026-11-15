@@ -18,8 +18,23 @@ let ui = { controller: true, state: { phase: "idle", devices: [], message: "" },
 let searchStartedAt = 0;
 const decks = new Map(); // number -> { data, el, ... }
 
+/** True when LJL Link apps are connected while no search shows decks: their decks stay below the current page. */
+function senderDecksOnly() {
+  return ui.state.phase !== "monitoring" && (ui.state.senders || 0) > 0;
+}
+
 function show(name) {
-  for (const v of views) $("view-" + v).classList.toggle("hidden", v !== name);
+  const senders = senderDecksOnly();
+  // With sender decks the start page would sit under the waveforms: they replace it; a short line below offers the search.
+  const welcomeHidden = senders && name === "welcome";
+  for (const v of views) $("view-" + v).classList.toggle("hidden", (v !== name || welcomeHidden) && !(senders && v === "monitor"));
+  // Only on the computer running LJ Link (known once /api/info answered; a tablet must not see it flash).
+  $("more-devices").classList.toggle("hidden", !welcomeHidden || !ui.info || !ui.controller);
+  // Sender decks are what the booth wants to see: above the start or search page, not below it.
+  const mon = $("view-monitor"), main = mon.parentElement;
+  if (senders && main.firstElementChild !== mon) main.prepend(mon);
+  else if (!senders && main.lastElementChild !== mon) main.append(mon);
+  mon.classList.toggle("first", senders);
 }
 
 function setStatus(kind, text) {
@@ -115,7 +130,8 @@ function render() {
     return;
   }
   // idle
-  setStatus("", "Ready");
+  if (senderDecksOnly()) setStatus("live", "Connected");
+  else setStatus("", "Ready");
   show(ui.manualOpen ? "manual" : "welcome");
 }
 
@@ -216,7 +232,8 @@ function applyPosition(d, msg, recv) {
 function handle(msg) {
   if (msg.type === "state") {
     if (msg.phase === "searching" && ui.state.phase !== "searching") searchStartedAt = Date.now();
-    if (msg.phase !== "monitoring") clearDecks();
+    // Decks of LJL Link apps do not belong to the search: they stay (the server removes them when the sender goes).
+    if (msg.phase !== "monitoring") clearDecks(d => !d.data || d.data.kind !== "sender");
     ui.state = msg;
     applyPrivacy();
     applyVjLink();
@@ -224,7 +241,7 @@ function handle(msg) {
     applyGroups();
   } else if (msg.type === "deck") {
     updateDeck(msg);
-    if (ui.state.phase === "monitoring") $("no-decks").classList.add("hidden");
+    if (ui.state.phase === "monitoring" || senderDecksOnly()) $("no-decks").classList.add("hidden");
   } else if (msg.type === "mixer") {
     ui.mixers = msg.mixers || [];
     if (ui.tab === "mixer") renderMixer();
@@ -865,8 +882,8 @@ function removeDeck(n) {
   if (d) { d.el.remove(); decks.delete(n); }
 }
 
-function clearDecks() {
-  for (const n of [...decks.keys()]) removeDeck(n);
+function clearDecks(which) {
+  for (const [n, d] of [...decks.entries()]) if (!which || which(d)) removeDeck(n);
 }
 
 /** Writes text only when it changed, so the 60 fps loop does not touch the DOM needlessly. */
@@ -906,7 +923,7 @@ function updateDeck(m) {
   setText(d, "dev", d.q(".dev-name"), m.groupName || "");
   d.q(".chip.send").classList.toggle("hidden", !m.sendingBpm);
   d.q(".chip.abl").classList.toggle("hidden", !m.sendingLink);
-  setText(d, "kind", d.q(".box.player small"), m.kind === "denon" || m.kind === "serato" ? "DECK" : m.kind === "link" ? "LINK" : "PLAYER");
+  setText(d, "kind", d.q(".box.player small"), m.kind === "denon" || m.kind === "serato" || m.kind === "sender" ? "DECK" : m.kind === "link" ? "LINK" : "PLAYER");
   if (isNew || d.order !== m.order) { d.order = m.order; sortDecks(); }
   d.el.classList.toggle("hidden", hiddenGroups.has(m.group));
   d.el.classList.toggle("onair", !!m.onAir);
@@ -916,7 +933,10 @@ function updateDeck(m) {
   const shownArtist = isShot() && m.artist ? testArtist(m.deck) : m.artist;
   // No metadata after a while (ProDjLinkSource.metadataHint): a short hint instead of an endless "Loading track …".
   const waiting = m.metaHint === "onelibrary" ? "Not supported" : m.metaHint === "missing" ? "No track data" : "Loading track …";
-  d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || waiting)) : "No track loaded");
+  const sender = m.kind === "sender";
+  // The DJ switched track names off in LJL Link: say so instead of an endless "Loading track …".
+  const missing = sender && m.titleHidden ? "Title hidden by the DJ" : waiting;
+  d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || missing)) : "No track loaded");
   d.q(".deck-artist").textContent = m.hasTrack && !ui.state.privacy ? (shownArtist || "") : "";
   d.q(".remain-main small").textContent = t("REMAIN");
   // The real tempo of the player (two decimals). The steadied tempo that goes to the light desks is in the tooltip.
@@ -924,6 +944,13 @@ function updateDeck(m) {
   d.q(".bpm-val").textContent = m.hasTrack && shownBpm ? shownBpm.toFixed(2) : "--";
   d.q(".bpm-box").title = m.hasTrack && m.stableBpm ? t("Sent to light desks: {bpm} BPM", { bpm: m.stableBpm.toFixed(1) }) : "";
   d.q(".track-no").textContent = m.hasTrack && m.trackNumber ? two(m.trackNumber) : "--";
+  // A sender has no track number and no cover: no empty boxes for them.
+  d.q(".track-no").parentElement.classList.toggle("hidden", sender);
+  d.q(".art").classList.toggle("hidden", sender);
+  // Nor a channel fader or a pitch: the sender reads the file's BPM; the real tempo comes over Ableton Link.
+  d.q(".chan").classList.toggle("hidden", sender && !m.sendingBpm && !m.sendingLink);
+  d.q(".tempo-line").classList.toggle("hidden", sender);
+  d.q(".wave.detail").dataset.nopos = sender ? t("No position: this deck's time cannot be read right now") : "";
   d.q(".pitch").textContent = m.hasTrack ? (m.pitch >= 0 ? "+" : "") + m.pitch.toFixed(2) + "%" : "";
   d.q(".key-box").innerHTML = m.hasTrack && m.key ? "<small>KEY</small>" + m.key.replace(/[<&]/g, "") : "";
   const chips = d.q(".chips");
@@ -932,6 +959,11 @@ function updateDeck(m) {
   if (m.master) addChip("MT", "mt");
   if (m.synced) addChip("SYNC", "sync");
   if (m.hasTrack && !m.playing) addChip("PAUSE", "pause");
+  // Sender deck whose time Serato does not show right now (e.g. decks 3/4 in the 2-deck view); see frame().
+  if (sender && m.hasTrack) {
+    addChip(t("NO POSITION"), "nopos");
+    chips.querySelector(".chip.nopos").title = t("LJL Link cannot read this deck's time in Serato right now: e.g. decks 3 and 4 in the 2-deck view, screen recording not allowed on the DJ's Mac, or the sender is still calibrating. The waveform runs again as soon as the time is readable.");
+  }
 
   const fader = d.q(".fader");
   const level = m.fader != null ? m.fader : (m.onAir ? 1 : 0);
@@ -1298,16 +1330,18 @@ function drawOverview(d, pos) {
 
 function frame(now) {
   try {
-    if (ui.state.phase === "monitoring") {
+    if (ui.state.phase === "monitoring" || senderDecksOnly()) {
       for (const d of decks.values()) {
         if (d.el.classList.contains("hidden")) continue; // a hidden device costs nothing
         const pos = advance(d, now);
         const dur = d.data ? d.data.durationMs : 0;
         const has = d.data && d.data.hasTrack;
         const [mm, ms] = has ? fmtPrecise(pos) : ["", ""];
+        if (d.data && d.data.kind === "sender") d.el.classList.toggle("nopos", has && pos < 0);
       setText(d, "elapsed", d.q(".elapsed"), mm);
       setText(d, "elapsedMs", d.q(".elapsed-ms"), ms);
-      const [rm, rms] = has && dur > 0 && pos >= 0 ? fmtRemainingPrecise(dur - pos) : ["", ""];
+      // No position yet: a placeholder like the elapsed time's, so the deck keeps its height.
+      const [rm, rms] = has && dur > 0 && pos >= 0 ? fmtRemainingPrecise(dur - pos) : has ? ["--:--", ""] : ["", ""];
       setText(d, "remainVal", d.q(".remain-val"), rm);
       setText(d, "remainMs", d.q(".remain-ms"), rms);
         setText(d, "remaining", d.q(".remaining"), has && dur > 0 && pos >= 0 ? fmtRemaining(dur - pos) : "");
@@ -1465,11 +1499,13 @@ function mixerSection(m) {
 
 function applyTab() {
   const monitoring = ui.state.phase === "monitoring";
+  const senders = senderDecksOnly();
   const mixer = monitoring && ui.tab === "mixer";
   $("decks").classList.toggle("hidden", mixer);
-  $("no-decks").classList.toggle("hidden", mixer || decks.size > 0);
+  // A sender that has just connected has no decks yet: the hint instead of an empty page.
+  $("no-decks").classList.toggle("hidden", mixer || decks.size > 0 || !(monitoring || senders));
   $("mixer-view").classList.toggle("hidden", !mixer);
-  $("toolbar").classList.toggle("hidden", !monitoring || mixer);
+  $("toolbar").classList.toggle("hidden", !(monitoring || senders) || mixer);
   $("tab-waveform").classList.toggle("active", !mixer);
   // Without devices there is nothing to show in these two tabs.
   $("tab-waveform").classList.toggle("hidden", !monitoring);
@@ -1694,6 +1730,7 @@ function startSearch() {
 }
 
 $("btn-auto").onclick = startSearch;
+$("btn-more-auto").onclick = startSearch;
 $("btn-demo").onclick = () => { ui.manualOpen = false; post("/api/demo/start"); };
 $("btn-manual").onclick = openManual;
 $("btn-help-manual").onclick = () => { post("/api/stop").then(openManual); };
@@ -1945,7 +1982,208 @@ $("btn-error-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
-$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); };
+$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); renderChat(); };
+
+/* ---------- Suite chat (Alpha, docs/suite-chat.md) ---------- */
+// LJ Link takes part in the room of all suite programs in the network. Only the browser on this computer reads and
+// writes it (the API is local, ControlGuard); it asks every 1.5 s for messages newer than the last one it has.
+const chat = { on: false, nick: "", where: "", last: 0, msgs: [], peers: [], open: false, unread: 0, title: document.title,
+  busy: false, again: false, shown: "", instance: "", renaming: false, alerts: [] };
+
+/** "DJ David (DJ Booth) · LJL Link" */
+function chatWho(nick, where, app) {
+  return (nick || app || "?") + (where ? " (" + where + ")" : "") + (nick && app ? " · " + app : "");
+}
+
+async function pollChat() {
+  if (!ui.info || !ui.controller) return;
+  // One request at a time, or the same lines came twice; one asked for meanwhile follows at once.
+  if (chat.busy) { chat.again = true; return; }
+  chat.busy = true;
+  let st;
+  try {
+    const r = await fetch("/api/chat?since=" + chat.last, { cache: "no-store" });
+    if (r.ok) st = await r.json();
+  } catch (e) { /* not reachable: next time */ }
+  chat.busy = false;
+  if (chat.again) { chat.again = false; setTimeout(pollChat, 0); }
+  if (!st) return;
+  // LJ Link restarted, or the chat was switched off and on between two polls: read everything anew.
+  if ((chat.instance && st.instance !== chat.instance) || (st.last || 0) < chat.last
+      || (chat.epoch !== undefined && st.epoch !== chat.epoch)) {
+    chat.instance = st.instance || ""; chat.epoch = st.epoch; chat.last = 0; chat.msgs = []; chat.shown = ""; chat.unread = 0;
+    chat.alerts = [];
+    return pollChat();
+  }
+  chat.epoch = st.epoch;
+  const firstLoad = !chat.instance;
+  chat.instance = st.instance || "";
+  chat.on = !!st.enabled;
+  // Switched off: LJ Link forgot the messages, so does this page (switched on again, the history comes anew).
+  if (!chat.on && chat.msgs.length) { chat.msgs = []; chat.shown = ""; chat.alerts = []; }
+  chat.nick = st.nick || "";
+  chat.where = st.where || "";
+  chat.peers = st.peers || [];
+  const fresh = st.messages || [];
+  if (fresh.length) {
+    // The same message (same id) is never listed twice, whatever happened between two polls.
+    const have = new Set(chat.msgs.map((m) => m.id));
+    for (const m of fresh) if (!m.id || !have.has(m.id)) { chat.msgs.push(m); have.add(m.id); }
+    // History from other programs comes later with older times: show in the order they were written.
+    chat.msgs.sort((a, b) => a.at - b.at || a.n - b.n);
+    if (chat.msgs.length > 200) chat.msgs.splice(0, chat.msgs.length - 200);
+    // EMERGENCY from someone else: a pop-up at once (after a reload only the ones of the last 2 minutes).
+    for (const m of fresh) {
+      if (m.urgent && !m.self && (!firstLoad || Date.now() - m.at < 120000)) chat.alerts.push(m);
+    }
+  }
+  // Confirmed elsewhere (the EMERGENCY window of the program icon, or another tab): gone here too.
+  const open = new Set(st.alerts || []);
+  chat.alerts = chat.alerts.filter((m) => open.has(m.n));
+  showAlert();
+  // An EMERGENCY not yet seen in the chat: the chat button blinks yellow until the chat is opened ("OK" on the pop-up
+  // does not stop it). Kept by LJ Link, so the program icon blinks too and a reload keeps it.
+  chat.urgentUnread = !!st.urgentUnread;
+  // Unread as LJ Link counts it (live messages of others only, not the history), the same number as at the program icon.
+  chat.unread = chat.open && document.visibilityState === "visible" ? 0 : (st.unread || 0);
+  // Someone reads along: the number and the blinking at the program icon go away.
+  if ((st.unread || st.urgentUnread) && chat.open && document.visibilityState === "visible") { chat.urgentUnread = false; markChatRead(); }
+  chat.last = Math.max(chat.last, st.last || 0);
+  renderChat(fresh.length > 0);
+  if (chat.wantOpen && chat.on) { chat.wantOpen = false; openChat(true); }
+}
+function markChatRead() {
+  fetch("/api/chat/read", { method: "POST", headers: JSON_HEADERS, body: "{}" }).catch(() => {});
+}
+
+function chatTime(at) {
+  return new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderChat(scroll) {
+  $("chat-setting").classList.toggle("hidden", !ui.controller);
+  $("chat-box").checked = chat.on;
+  const show = ui.controller && chat.on;
+  $("chat-fab").classList.toggle("hidden", !show || chat.open);
+  $("chat-panel").classList.toggle("hidden", !show || !chat.open);
+  $("chat-fab").classList.toggle("unread", chat.unread > 0);
+  $("chat-fab").classList.toggle("urgent", !!chat.urgentUnread && !chat.open);
+  $("chat-unread").classList.toggle("hidden", chat.unread === 0);
+  $("chat-unread").textContent = chat.unread > 9 ? "9+" : String(chat.unread);
+  document.title = (chat.unread ? "(" + chat.unread + ") " : "") + chat.title;
+  if (!show) return;
+  // Entering the chat: first a name (asked once, kept by LJ Link; "Change name" asks again).
+  const asking = !chat.nick || chat.renaming;
+  $("chat-nick-form").classList.toggle("hidden", !asking);
+  $("chat-form").classList.toggle("hidden", asking);
+  $("chat-rename").classList.toggle("hidden", asking);
+  const who = chat.peers.filter((p) => p.nick || p.app).map((p) => chatWho(p.nick, p.where, p.app));
+  $("chat-peers").textContent = who.length ? t("In the room: ") + [t("you")].concat(who).join(", ")
+    : t("Nobody else in the room yet. Suite programs in this network join by themselves.");
+  const list = $("chat-list");
+  const shown = chat.msgs.length + ":" + chat.last + ":" + lang;
+  if (shown === chat.shown && !scroll) return;
+  chat.shown = shown;
+  const nearEnd = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
+  list.replaceChildren();
+  if (!chat.msgs.length) {
+    const e = document.createElement("div");
+    e.className = "chat-empty";
+    e.textContent = t("No messages yet.");
+    list.append(e);
+  }
+  for (const m of chat.msgs) {
+    const el = document.createElement("div");
+    el.className = "chat-msg " + (m.self ? "foh" : "dj") + (m.urgent ? " urgent" : "");
+    const meta = document.createElement("small");
+    meta.textContent = (m.urgent ? "EMERGENCY · " : "") + (m.self ? t("You") : chatWho(m.nick, m.where, m.app)) + " · " + chatTime(m.at);
+    const text = document.createElement("div");
+    text.textContent = m.text; // text only, never HTML
+    el.append(meta, text);
+    list.append(el);
+  }
+  if (scroll || nearEnd) list.scrollTop = list.scrollHeight;
+}
+
+function openChat(open) {
+  chat.open = open;
+  if (open) { chat.unread = 0; chat.urgentUnread = false; markChatRead(); }
+  chat.shown = "";
+  renderChat(true);
+  if (open) (chat.nick && !chat.renaming ? $("chat-input") : $("chat-nick")).focus();
+}
+
+async function chatSettings(body) {
+  try {
+    const r = await fetch("/api/chat/settings", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(body) });
+    // 503: the chat port is used by another program; anything else: the settings could not be saved.
+    if (r.status === 503) $("chat-status").textContent = t("The chat could not be switched on: the network port is in use.");
+    else if (!r.ok) $("chat-status").textContent = t("The chat settings could not be saved.");
+    else $("chat-status").textContent = "";
+  } catch (e) { setStatus("bad", "Program not reachable"); }
+  pollChat();
+}
+
+$("chat-fab").onclick = () => openChat(true);
+$("chat-close").onclick = () => openChat(false);
+$("chat-rename").onclick = () => {
+  chat.renaming = true; $("chat-nick").value = chat.nick; $("chat-where").value = chat.where; renderChat(); $("chat-nick").focus();
+};
+document.addEventListener("visibilitychange", () => { if (chat.open && document.visibilityState === "visible") { chat.unread = 0; markChatRead(); renderChat(); } });
+$("chat-nick-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const nick = $("chat-nick").value.trim();
+  const where = $("chat-where").value.trim();
+  if (!nick) { $("chat-nick").focus(); return; }
+  chat.renaming = false;
+  chat.nick = nick;
+  chat.where = where;
+  await chatSettings({ nick, where });
+  openChat(true);
+};
+/** The oldest EMERGENCY not yet confirmed, at the bottom right with a yellow blinking border, until "OK". */
+function showAlert() {
+  const m = chat.alerts[0];
+  $("chat-alert").classList.toggle("hidden", !m);
+  if (!m) return;
+  $("chat-alert-from").textContent = chatWho(m.nick, m.where, m.app) + " · " + chatTime(m.at);
+  $("chat-alert-text").textContent = m.text; // text only
+  $("chat-alert-more").textContent = chat.alerts.length > 1 ? t("{n} more", { n: chat.alerts.length - 1 }) : "";
+  $("chat-alert-all").classList.toggle("hidden", chat.alerts.length < 2);
+  // Never takes the keyboard focus (docs/suite-chat.md): someone typing must not confirm it unread with Enter or Space.
+}
+$("chat-alert-ok").onclick = () => {
+  const m = chat.alerts.shift();
+  showAlert();
+  // Confirmed for LJ Link as a whole: the window outside the browser closes too.
+  if (m) fetch("/api/chat/ack", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ n: m.n }) }).catch(() => {});
+};
+$("chat-alert-all").onclick = () => {
+  // Only the ones this page has seen: an EMERGENCY that arrived meanwhile stays open.
+  const upTo = Math.max(0, ...chat.alerts.map((m) => m.n));
+  chat.alerts = [];
+  showAlert();
+  fetch("/api/chat/ack", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ all: true, upTo }) }).catch(() => {});
+};
+
+async function sendChat(urgent) {
+  let text = $("chat-input").value.trim();
+  if (urgent && !text) text = t("EMERGENCY – please come at once!");
+  if (!text) return;
+  $("chat-status").textContent = "";
+  try {
+    const r = await fetch("/api/chat", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ text, urgent }) });
+    if (!r.ok) throw new Error(String(r.status));
+    $("chat-input").value = "";
+  } catch (err) {
+    $("chat-status").textContent = t("Not sent: the chat is off.");
+  }
+  pollChat();
+}
+$("chat-form").onsubmit = (e) => { e.preventDefault(); sendChat(false); };
+$("chat-emergency").onclick = () => sendChat(true);
+$("chat-box").onchange = () => chatSettings({ enabled: $("chat-box").checked });
+setInterval(pollChat, 1500);
 $("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
@@ -2078,7 +2316,7 @@ $("manual-range").addEventListener("input", () => setManualBpm($("manual-range")
 $("manual-bpm").addEventListener("input", () => { if ($("manual-bpm").value !== "") setManualBpm($("manual-bpm").value, false); });
 
 function deckLabel(d) {
-  return (d.kind === "denon" ? "Deck " : "Player ") + d.label + (d.name ? " · " + d.name : "");
+  return (d.kind === "denon" || d.kind === "sender" ? "Deck " : "Player ") + d.label + (d.name ? " · " + d.name : "");
 }
 
 async function setBpmSource(value) {
@@ -2146,6 +2384,8 @@ setTimeout(() => {
   if (h.includes("detail")) { settings.view = "detail"; applySettings(); }
   if (h.includes("bpm")) openBpm();
   if (h.includes("report")) { const m = h.match(/stars=([1-5])/); openReport(m ? Number(m[1]) : undefined); }
+  // /#chat: the program icon's "Open suite chat" (only on the computer that runs LJ Link, and only when it is on).
+  if (h.includes("chat")) { chat.wantOpen = true; pollChat(); }
   if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); }
   else if (h.includes("manual")) openManual();
   else { const m = h.match(/info-(\d+)/); if (m) openInfo(Number(m[1])); }

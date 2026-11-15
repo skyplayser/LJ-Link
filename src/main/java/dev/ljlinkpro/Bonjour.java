@@ -10,8 +10,9 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
 /**
- * Announces LJ Link in the local network via mDNS/Bonjour as {@code _ljlink._tcp} (TXT {@code vjlink=1}, {@code path=/vjlink}),
- * so programs like VJ-Link find it on another computer without typing an address. One announcement per network
+ * Announces LJ Link in the local network via mDNS/Bonjour as {@code _ljlink._tcp} (TXT {@code vjlink=1}, {@code path=/vjlink},
+ * and for LJL Link {@code sender=1}, {@code senderpath=/sender}), so programs like VJ-Link find it on another
+ * computer without typing an address. One announcement per network
  * adapter with an IPv4 address. Failures are only logged: everything else works without it.
  */
 final class Bonjour {
@@ -39,14 +40,19 @@ final class Bonjour {
         for (InetAddress addr : addresses()) {
             try {
                 JmDNS dns = JmDNS.create(addr, host);
-                dns.registerService(ServiceInfo.create(TYPE, name, port, 0, 0,
-                        Map.of("vjlink", "1", "path", "/vjlink", "version", String.valueOf(VjLink.VERSION), "app", version)));
+                dns.registerService(ServiceInfo.create(TYPE, name, port, 0, 0, txt(version)));
                 running.add(dns);
                 System.out.println("Bonjour: announced " + TYPE + " on " + addr.getHostAddress() + ":" + port);
             } catch (java.io.IOException | RuntimeException e) {
                 System.err.println("Bonjour on " + addr.getHostAddress() + " failed: " + e);
             }
         }
+    }
+
+    /** The TXT record: VJ-Link ({@code vjlink}, {@code path}) and LJL Link ({@code sender}, {@code senderpath}). */
+    static Map<String, String> txt(String version) {
+        return Map.of("vjlink", "1", "path", "/vjlink", "version", String.valueOf(VjLink.VERSION), "app", version,
+                "sender", "1", "senderpath", "/sender");
     }
 
     private static List<InetAddress> addresses() {

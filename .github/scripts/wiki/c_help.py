@@ -94,8 +94,9 @@ def _():
             [("no sound at the master output", "kein Ton am Master-Ausgang"), ("ON AIR needs audio", "ON AIR braucht Ton")],
         ]),
         SYM("serato", "Serato decks have no playhead", "Serato-Decks haben keinen Playhead", [
-            [("Serato does not reveal the play position", "Serato verrät die Abspielposition nicht"), ("a limit of Serato; track, BPM, key, waveform overview and beat grid come from the file. [Serato](wiki-serato.html)", "eine Grenze von Serato; Track, BPM, Tonart, Waveform-Übersicht und Beatgrid kommen aus der Datei. [Serato](wiki-serato.html)")],
+            [("Serato DJ Pro has no public interface for the play position that LJ Link could use", "Serato DJ Pro bietet für die Abspielposition keine öffentliche Schnittstelle, die LJ Link nutzen könnte"), ("a limit of Serato; track, BPM, key, waveform overview and beat grid come from the file. [Serato](wiki-serato.html)", "eine Grenze von Serato; Track, BPM, Tonart, Waveform-Übersicht und Beatgrid kommen aus der Datei. [Serato](wiki-serato.html)")],
             [("FLAC or M4A file", "FLAC- oder M4A-Datei"), ("not read yet; MP3 and AIFF work", "wird noch nicht gelesen; MP3 und AIFF gehen")],
+            [("with LJL Link (alpha): **NO POSITION** on a deck", "mit LJL Link (Alpha): **KEINE POSITION** an einem Deck"), ("the time cannot be read: decks 3 and 4 in Serato’s 2-deck view, no permission Screen Recording on the DJ’s Mac, or still calibrating. [LJL Link](wiki-serato.html#ljl-link)", "die Zeit ist nicht lesbar: Deck 3 und 4 in Seratos 2-Deck-Ansicht, keine Erlaubnis Bildschirmaufnahme auf dem Mac des DJs, oder es misst noch ein. [LJL Link](wiki-serato.html#ljl-link)")],
         ]),
         H2("Light desk", "Lichtpult"),
         SYM("desk", "The desk does not react", "Das Pult reagiert nicht", [
@@ -162,6 +163,14 @@ def _():
             [("status **Not available in this browser**", "Status **In diesem Browser nicht verfügbar**"), ("set auto-lock on the device to **Never** for the gig (power adapter on, Low Power Mode off)", "automatische Sperre am Gerät für den Gig auf **Nie** stellen (Netzteil dran, Stromsparmodus aus)")],
             [("iPad: music of another app pauses, or LJ Link shows up under Now Playing (possible, not tested yet)", "iPad: Musik einer anderen App pausiert, oder LJ Link erscheint unter „Wird gespielt“ (möglich, noch ungetestet)"),
              ("side effect of the silent video that tries to keep the screen on; if it bothers you, switch the setting off and set auto-lock to **Never** instead", "Nebenwirkung des stillen Videos, das den Bildschirm anhalten soll; stört es, die Einstellung ausschalten und stattdessen die automatische Sperre auf **Nie** stellen")],
+        ]),
+        SYM("chat", "Suite chat (alpha) shows nobody", "Suite-Chat (Alpha) zeigt niemanden", [
+            [("not in the same network", "nicht im selben Netz"), ("all suite programs on the same switch, router or Wi-Fi; the chat does not pass routers", "alle Suite-Programme am selben Switch, Router oder WLAN; der Chat geht nicht über Router")],
+            [("guest Wi-Fi with client isolation, or a network that blocks multicast", "Gäste-WLAN mit Client-Isolation, oder ein Netz, das Multicast sperrt"), ("use another network; there is no chat in such a network", "ein anderes Netz nehmen; in so einem Netz gibt es keinen Chat")],
+            [("macOS: local network not allowed", "macOS: lokales Netzwerk nicht erlaubt"), ("System Settings → Privacy & Security → **Local Network** → LJ Link (and the other suite program) on", "Systemeinstellungen → Datenschutz & Sicherheit → **Lokales Netzwerk** → LJ Link (und das andere Suite-Programm) an")],
+            [("Windows: the firewall blocks UDP 47676", "Windows: Die Firewall sperrt UDP 47676"), ("allow LJ Link for **private networks**, profile **Private** (not tested on Windows yet)", "LJ Link für **private Netzwerke** zulassen, Profil **Privat** (unter Windows noch nicht getestet)")],
+            [("chat switched off here or in the other program", "Chat hier oder im anderen Programm ausgeschaltet"), ("Menu (☰) → **Suite chat – Alpha**; in the other program its own switch", "Menü (☰) → **Suite-Chat – Alpha**; im anderen Programm dessen eigener Schalter")],
+            [("**The chat could not be switched on: the network port is in use.**", "**Der Chat ließ sich nicht einschalten: Der Netzwerk-Port ist belegt.**"), ("another program holds UDP 47676 alone; quit it and switch the chat on again. See [suite chat](wiki-chat.html#network)", "ein anderes Programm belegt UDP 47676 allein; es beenden und den Chat wieder einschalten. Siehe [Suite-Chat](wiki-chat.html#network)")],
         ]),
         SYM("update", "“Check for updates” fails", "„Nach Updates suchen“ schlägt fehl", [
             [("version 1.2.x", "Version 1.2.x"), ("install the newest version by hand once", "die neueste Version einmal von Hand installieren")],
@@ -314,7 +323,7 @@ def _():
         ]),
         H2("Files", "Dateien"),
         TABLE([("File", "Datei"), ("Content", "Inhalt")], [
-            ["<code>~/.ljlinkpro/settings.json</code>", ("privacy mode, language", "Privatsphäre-Modus, Sprache")],
+            ["<code>~/.ljlinkpro/settings.json</code>", ("privacy mode, language; suite chat on or off, chat name and position (never chat texts)", "Privatsphäre-Modus, Sprache; Suite-Chat an oder aus, Name und Position im Chat (nie Chat-Texte)")],
             ["<code>~/.ljlinkpro/link.json</code>", ("light desk link settings", "Einstellungen des Lichtpult-Links")],
         ]),
         P("`~` is your user folder. Deleting the folder resets LJ Link. View settings (zoom, colours) are stored in each browser.", "`~` ist dein Benutzerordner. Den Ordner löschen setzt LJ Link zurück. Anzeige-Einstellungen (Zoom, Farben) speichert jeder Browser selbst."),

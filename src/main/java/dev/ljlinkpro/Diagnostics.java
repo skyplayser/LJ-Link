@@ -32,6 +32,14 @@ final class Diagnostics {
     record Adapter(String name, String displayName, boolean virtual, List<Ipv4> ipv4, int ipv6, int ipv6LinkLocal) {}
 
     static String report(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton) {
+        return report(hub, session, link, ableton, null);
+    }
+
+    /** The suite chat of this program (set by Main), or null; its line names no nickname and no text. */
+    static volatile SuiteChat chat;
+
+    /** {@code senders}: the input for LJL Link apps, or null; its lines name no DJ, no title and no key. */
+    static String report(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton, SenderInbox senders) {
         List<Adapter> adapters = adapters();
         List<String> out = new ArrayList<>();
         out.add("== LJ Link diagnostics ==");
@@ -53,6 +61,17 @@ final class Diagnostics {
         out.add("== Sources ==");
         out.addAll(session.diagnostics());
         out.add("");
+        if (senders != null) {
+            out.add("== LJL Link (Alpha) ==");
+            out.addAll(senders.diagnostics());
+            out.add("");
+        }
+        SuiteChat sc = chat;
+        if (sc != null) {
+            out.add("== Suite chat (Alpha) ==");
+            out.add(sc.diagnostics());
+            out.add("");
+        }
         out.add("== Light desk link ==");
         LinkService.Config c = link.config();
         LinkService.Status st = link.status();

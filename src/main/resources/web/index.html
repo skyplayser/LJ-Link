@@ -67,7 +67,7 @@
         <span class="works-item"><b>Denon DJ</b><small>StageLinQ · Prime, SC6000</small></span>
         <span class="works-item"><b>Light desks</b><small>Tempo to grandMA, taps to Daslight</small></span>
       </div>
-      <div class="works-soon">Serato and Traktor are planned.</div>
+      <div class="works-soon">Serato DJ Pro: on the same computer, or over the network with LJL Link (alpha). Traktor is planned.</div>
     </div>
 
     <p id="port-note" class="hint hidden"></p>
@@ -148,6 +148,10 @@
       <div id="mixer-list"></div>
     </div>
     <p id="no-decks" class="hint hidden">Waiting for player data …</p>
+    <div id="more-devices" class="more-devices hidden">
+      <span>Pioneer or Denon devices in the booth as well?</span>
+      <button id="btn-more-auto" class="secondary">Search automatically</button>
+    </div>
   </section>
 </main>
 <div id="settings" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
@@ -203,6 +207,12 @@
       <div class="label">Privacy mode</div>
       <label class="check"><input type="checkbox" id="privacy-box" disabled> <span id="privacy-text"></span></label>
       <div class="hint">Hides title, artist, album and cover. It can only be changed with the program icon: menu bar (Mac) or taskbar next to the clock (Windows) → click the icon → tick “Privacy mode”. It cannot be changed in the web interface, not even from a tablet.</div>
+    </div>
+
+    <div class="setting hidden" id="chat-setting">
+      <div class="label">Suite chat – Alpha</div>
+      <label class="check"><input type="checkbox" id="chat-box"> <span>Chat with all suite programs in this network</span></label>
+      <div class="hint">LJ Link, LJL Link (the DJs) and VJ-Link in the same network find each other by themselves and share one chat room – no server. Every device in this network can read along, nothing is encrypted. Only on this computer, not on a tablet. Messages are never part of a problem report. Switched off, LJ Link neither sends nor reads chat messages and forgets the ones it had.</div>
     </div>
 
     <div class="setting" id="link-setting">
@@ -347,6 +357,36 @@
     </div>
     <div id="info-body"></div>
   </div>
+</div>
+<button id="chat-fab" class="chat-fab hidden" type="button"><span>Chat</span><b id="chat-unread" class="chat-unread hidden"></b></button>
+<div id="chat-alert" class="chat-alert hidden" role="alertdialog" aria-labelledby="chat-alert-title">
+  <strong id="chat-alert-title">EMERGENCY</strong>
+  <div id="chat-alert-from" class="chat-alert-from"></div>
+  <div id="chat-alert-text" class="chat-alert-text"></div>
+  <div class="chat-alert-row"><span id="chat-alert-more" class="hint"></span><span class="chat-alert-buttons"><button id="chat-alert-all" class="hidden" type="button">Close all</button><button id="chat-alert-ok" class="primary" type="button">OK</button></span></div>
+</div>
+<div id="chat-panel" class="chat-panel hidden" role="dialog" aria-labelledby="chat-title">
+  <div class="chat-head">
+    <strong id="chat-title">Suite chat – Alpha</strong>
+    <button id="chat-rename" class="link hidden" type="button">Change name</button>
+    <button id="chat-close" class="link" type="button">Close</button>
+  </div>
+  <div id="chat-peers" class="chat-peers"></div>
+  <form id="chat-nick-form" class="chat-nick hidden">
+    <label for="chat-nick">Name – What is your name?</label>
+    <input id="chat-nick" maxlength="24" autocomplete="off" placeholder="e.g. DJ David">
+    <label for="chat-where">Position – Where are you?</label>
+    <input id="chat-where" maxlength="24" autocomplete="off" placeholder="e.g. DJ Booth, FOH, Bar">
+    <button class="primary" type="submit">Join chat</button>
+    <div class="hint">Shown with every message, next to “LJ Link”. You can change it later.</div>
+  </form>
+  <div id="chat-list" class="chat-list" aria-live="polite"></div>
+  <form id="chat-form" class="chat-form">
+    <input id="chat-input" maxlength="500" autocomplete="off" placeholder="Message to everyone">
+    <button class="primary" type="submit">Send</button>
+    <button id="chat-emergency" class="chat-emergency" type="button" title="Pop-up at everyone in the room, at once">EMERGENCY</button>
+  </form>
+  <div id="chat-status" class="hint"></div>
 </div>
 <script src="settings-move.js"></script>
 <script src="i18n.js"></script>

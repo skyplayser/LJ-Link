@@ -30,10 +30,11 @@ def compat_note(file):
     en, de, maker = BRANDS[file]
     extra = (" Ableton and Link are trademarks of Ableton AG.", " Ableton und Link sind Marken der Ableton AG.") \
         if maker == "Ableton AG" else ("", "")
-    return el("p", "LJ Link is an independent program that works with %s. It is not a product of, or endorsed by, %s.%s"
-              % (en, maker, extra[0]),
-              "LJ Link ist ein unabhängiges Programm und arbeitet mit %s zusammen. Es ist kein Produkt %s und wird "
-              "vom Hersteller nicht unterstützt.%s" % (de, "der Ableton AG" if maker == "Ableton AG" else "von " + maker, extra[1]),
+    return el("p", "LJ Link is an independent program for use with %s. It is not a product of, not affiliated with and not "
+              "endorsed by %s.%s" % (en, maker, extra[0]),
+              "LJ Link ist ein unabhängiges Programm zur Verwendung mit %s. Es ist kein Produkt %s, nicht mit dem "
+              "Hersteller verbunden und wird von ihm nicht unterstützt.%s"
+              % (de, "der Ableton AG" if maker == "Ableton AG" else "von " + maker, extra[1]),
               cls="small compat")
 
 
@@ -70,7 +71,10 @@ def inline(en, de=None):
     """Text with `code`, **bold**, *italic* and [links](href) in both languages. The specials must appear in the same order."""
     de = en if de is None else de
     te, td = _tokens(en), _tokens(de)
-    if [t[0] for t in te] != [t[0] for t in td] or [t[2] for t in te if t[0] == "a"] != [t[2] for t in td if t[0] == "a"]:
+    # Link targets must be the same in both languages, except external ones (http…), which may point to a German page
+    # of their own; build_site.py then swaps the href through data-de-href.
+    same = lambda a, b: a == b or (a.startswith("http") and b.startswith("http"))
+    if [t[0] for t in te] != [t[0] for t in td] or not all(same(e[2], d[2]) for e, d in zip(te, td) if e[0] == "a"):
         raise ValueError("EN and DE differ in structure:\n  %s\n  %s" % (en, de))
     out = []
     for e, d in zip(te, td):
@@ -86,6 +90,8 @@ def inline(en, de=None):
                        else '<%s data-de="%s">%s</%s>' % (kind, esc(d[1]), esc(e[1]), kind))
         else:
             ext = ' rel="noopener"' if e[2].startswith("http") else ""
+            if d[2] != e[2]:
+                ext += ' data-de-href="%s"' % esc(d[2])
             out.append('<a href="%s"%s>%s</a>' % (esc(e[2]), ext, esc(e[1])) if e[1] == d[1]
                        else '<a href="%s"%s data-de="%s">%s</a>' % (esc(e[2]), ext, esc(d[1]), esc(e[1])))
     return "".join(out)

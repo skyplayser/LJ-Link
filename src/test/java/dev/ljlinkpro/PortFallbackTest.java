@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Issue #3: with the first port in use LJ Link quit, because a Javalin instance cannot be started a second time. Uses
- * ports 8097 and 8098 only (never 8080, where the developer's LJ Link runs).
+ * ports 8197 and 8198 only (never 8080, where the developer's LJ Link runs, nor 8097, where the QS test instance runs).
  */
 class PortFallbackTest {
-    private static final int PORT = 8097;
+    private static final int PORT = 8197;
 
     private static String ping(int port) throws Exception {
         var c = (java.net.HttpURLConnection) java.net.URI.create("http://127.0.0.1:" + port + "/api/ping").toURL().openConnection();
@@ -52,7 +52,7 @@ class PortFallbackTest {
         AtomicInteger made = new AtomicInteger();
         try (ServerSocket other = new ServerSocket()) {
             other.bind(new InetSocketAddress(PORT));
-            // Skip the check, so Jetty itself fails on 8097 and the fallback must build a fresh instance for 8098.
+            // Skip the check, so Jetty itself fails on 8197 and the fallback must build a fresh instance for 8198.
             Main.Started s = Main.start(PORT, () -> app(made), p -> false);
             try {
                 assertEquals(PORT + 1, s.port());

@@ -72,10 +72,30 @@ public final class Main {
         // VJ-Link interface: its own stream for VJ programs, always on (see VjLink).
         VjLink vjLink = new VjLink(hub, Updater.currentVersion());
         vjLink.start();
+        // Input for LJL Link on a DJ's computer (Alpha): only with the club key, deck data only.
+        SenderInbox senders = new SenderInbox(hub);
+        senders.start();
+        // Suite chat (Alpha, docs/suite-chat.md): a room for all suite programs in the network, without a host.
+        SuiteChat.Net chatNet = new SuiteChat.Net();
+        SuiteChat chat = new SuiteChat("LJ Link", chatNet);
+        chat.setProfile(AppSettings.getString(SuiteChat.SETTING_NICK, ""), AppSettings.getString(SuiteChat.SETTING_WHERE, ""),
+                System.nanoTime());
+        Diagnostics.chat = chat;
+        // An EMERGENCY also opens a window of its own (LJ Link often runs only as the program icon), and the icon
+        // shows how many messages are new. Both read the room later on the Swing thread, never inside its lock.
+        chat.setListener(() -> {
+            EmergencyWindow.update(chat);
+            java.awt.EventQueue.invokeLater(() -> Tray.chat(chat.on(), chat.unread(), chat.urgentUnread()));
+        });
+        if (AppSettings.getBoolean(SuiteChat.SETTING_ON, true) && chatNet.start(chat)) {
+            chat.setOn(true, System.nanoTime());
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(chat::stop));
         final int[] boundPort = {port, port};
         Started started;
         try {
-            started = start(port, () -> createApp(hub, session, link, ableton, vjLink, boundPort), Main::portTaken);
+            started = start(port, () -> createApp(hub, session, link, ableton, vjLink, senders, chat, chatNet, boundPort),
+                    Main::portTaken);
         } catch (RuntimeException e) {
             // Without a console nobody would see why LJ Link did not start (issue #3): say it in a window, too.
             System.err.println(noFreePortText(port, port + 9, false) + " (" + e.getMessage() + ")");
@@ -112,7 +132,7 @@ public final class Main {
                 sleepGuard.close();
                 app.stop();
                 System.exit(0);
-            });
+            }, () -> openInBrowser(url + "/#chat"));
             if (installed) {
                 System.out.println("Menu bar / system tray icon: click it to open the web interface, switch privacy mode or quit.");
             }
@@ -178,7 +198,7 @@ public final class Main {
      * @param boundPort [0] the port the server runs on, [1] the port that was asked for
      */
     private static Javalin createApp(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton, VjLink vjLink,
-            int[] boundPort) {
+            SenderInbox senders, SuiteChat chat, SuiteChat.Net chatNet, int[] boundPort) {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/web", Location.CLASSPATH);
             config.showJavalinBanner = false;
@@ -195,6 +215,9 @@ public final class Main {
             ws.onClose(vjLink::removeClient);
             ws.onError(vjLink::removeClient);
         });
+        // LJL Link (Alpha): open to the network, but a sender is only accepted with the club key, and what it sends
+        // is read as deck data only (SenderInbox). Not under /api/, so ControlGuard does not apply to it.
+        app.ws("/sender", ws -> SenderInbox.wire(ws, senders));
 
         // Every /api/ route except the read-only ones for tablets is local: only the browser on this computer may use it,
         // never another web page (CSRF, DNS rebinding). See ControlGuard.
@@ -203,7 +226,7 @@ public final class Main {
 
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
         app.get("/api/diagnostics", ctx -> {
-            ctx.contentType("text/plain; charset=utf-8").result(Diagnostics.report(hub, session, link, ableton));
+            ctx.contentType("text/plain; charset=utf-8").result(Diagnostics.report(hub, session, link, ableton, senders));
         });
         app.get("/api/version", ctx -> {
             String current = Updater.currentVersion();
@@ -332,6 +355,101 @@ public final class Main {
             String lang = "de".equals(ctx.queryParam("lang")) ? "de" : "en";
             AppSettings.set("language", lang);
             Tray.setLanguage(lang);
+        }));
+        // Club key and club.json for LJL Link. Local only (ControlGuard): the key must never reach a tablet.
+        app.get("/api/sender", ctx -> {
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("club", SenderClub.name());
+            m.put("clubSet", SenderClub.nameSet());
+            m.put("key", SenderClub.key());
+            m.put("port", boundPort[0]);
+            m.put("hosts", SenderClub.hosts());
+            m.put("senders", senders.senders());
+            ctx.header("Cache-Control", "no-store").json(m);
+        });
+        app.get("/api/sender/club.json", ctx -> ctx.header("Cache-Control", "no-store")
+                .json(SenderClub.clubJson(SenderClub.name(), SenderClub.hosts(), boundPort[0], SenderClub.key())));
+        // "New key": an older club.json is refused from now on, connected senders are disconnected.
+        app.post("/api/sender/key", ctx -> {
+            String key = SenderClub.renewKey();
+            senders.disconnectAll();
+            System.out.println("Club key for LJL Link apps replaced");
+            ctx.header("Cache-Control", "no-store").json(Map.of("key", key));
+        });
+        // Suite chat (Alpha). Local only like everything under /api/ (ControlGuard): a tablet neither reads nor writes it.
+        // The browser on this computer asks with the last message number it has.
+        app.get("/api/chat", ctx -> {
+            long since = 0;
+            try {
+                since = Long.parseLong(ctx.queryParamAsClass("since", String.class).getOrDefault("0"));
+            } catch (NumberFormatException e) {
+                // from the start
+            }
+            ctx.header("Cache-Control", "no-store").json(chat.state(since));
+        });
+        app.post("/api/chat", ctx -> control(ctx, () -> {
+            try {
+                com.fasterxml.jackson.databind.JsonNode b = Hub.JSON.readTree(ctx.body());
+                // Strict like the network side: text only as a string, urgent only as a real true.
+                String text = b.path("text").isTextual() ? b.path("text").asText() : "";
+                boolean urgent = b.path("urgent").isBoolean() && b.path("urgent").booleanValue();
+                if (!chat.post(text, urgent, System.nanoTime())) {
+                    ctx.status(409);
+                }
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
+        }));
+        // "OK" on an EMERGENCY in the browser: {"n": number}, or "Close all": {"all": true}; the window outside the
+        // browser closes too.
+        app.post("/api/chat/ack", ctx -> control(ctx, () -> {
+            try {
+                com.fasterxml.jackson.databind.JsonNode b = Hub.JSON.readTree(ctx.body());
+                if (b.path("all").asBoolean(false)) {
+                    // Up to the newest one the browser showed; without "upTo" (older pages) all of them.
+                    chat.ackAll(b.path("upTo").canConvertToLong() ? b.path("upTo").asLong() : Long.MAX_VALUE);
+                    return;
+                }
+                com.fasterxml.jackson.databind.JsonNode n = b.path("n");
+                if (!n.canConvertToLong()) {
+                    ctx.status(400);
+                    return;
+                }
+                chat.ack(n.asLong());
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
+        }));
+        // The browser shows the chat: the number at the program icon goes away.
+        app.post("/api/chat/read", ctx -> control(ctx, chat::read));
+        // {"enabled": bool} and/or {"nick": "…", "where": "…"}; all are kept.
+        app.post("/api/chat/settings", ctx -> control(ctx, () -> {
+            try {
+                com.fasterxml.jackson.databind.JsonNode b = Hub.JSON.readTree(ctx.body());
+                if (b.path("nick").isTextual()) {
+                    chat.setProfile(b.path("nick").asText(), b.path("where").asText(chat.where()), System.nanoTime());
+                    AppSettings.set(SuiteChat.SETTING_NICK, chat.nick());
+                    AppSettings.set(SuiteChat.SETTING_WHERE, chat.where());
+                }
+                if (b.path("enabled").isBoolean()) {
+                    boolean on = b.path("enabled").asBoolean();
+                    AppSettings.set(SuiteChat.SETTING_ON, on);
+                    if (on && !chatNet.start(chat)) {
+                        ctx.status(503);
+                        return;
+                    }
+                    chat.setOn(on, System.nanoTime());
+                }
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
+        }));
+        app.post("/api/sender/club", ctx -> control(ctx, () -> {
+            try {
+                SenderClub.setName(Hub.JSON.readTree(ctx.body()).path("club").asText(""));
+            } catch (java.io.IOException e) {
+                ctx.status(400);
+            }
         }));
         app.get("/api/check", ctx -> {
             ctx.json(NetworkCheck.check(ctx.queryParam("ip")));

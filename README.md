@@ -47,6 +47,11 @@ when a tablet loads the page; GitHub sees its IP address and the program version
 - **A red LIVE frame** around the deck that is on air, so you never light the wrong track.
 - **A Mixer tab** with one strip per channel, and a click on any player opens everything the interface reports about it.
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
+- **Suite chat (alpha, new in 1.7.11):** one chat room for LJ Link and the other suite programs in the same network, for example
+  VJ-Link, without a server, with an *EMERGENCY* button that shows a pop-up at everyone else at once. Only on the computer running
+  LJ Link, not on a tablet. Every device in the network can read along (nothing is encrypted); chat texts never leave the local network
+  and are never logged. On by default, *Settings → Suite chat – Alpha* switches it off. Not tested between two computers or on
+  Windows yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-chat.html)).
 - **Every maker in one view:** CDJs, XDJs and Denon controllers are found together and shown side by side. Two DJs with their own controller (say an XDJ-XZ and a Prime 4+)? Both appear. A device that joins later is added automatically, one that leaves disappears, and in the settings you can tick devices on or off, which helps with several floors on one network.
 - **Denon / Engine DJ** (Prime 4, Prime 4+, Prime Go, SC6000) over StageLinQ: title, artist, tempo and pitch, play state, master, exact position, the real **fader positions** of the mixer, and the waveform with beat grid, bar starts, hot cues and loops read from the device's library. Passive: it never changes anything on the device.
 - **Light desk link:** sends the tempo to grandMA2 and grandMA2 onPC (Telnet), grandMA3 and grandMA3 onPC (OSC) and any OSC program that reads a number ; Daslight over Ableton Link (recommended) or an OSC tap on every beat for its BPM Tap button (both work with Daslight); and, as an untested alpha, OSC taps for ChamSys MagicQ. *Search for the desk* finds a grandMA2
@@ -180,6 +185,7 @@ Type the command into the desk's command line by hand first, and edit it in LJ L
 | Denon Prime 4+ (firmware 5.0.4) | works over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
 | Denon SC6000, Prime 4, Prime Go | expected to work (same protocol), not tested |
 | Serato DJ Pro 3.x (macOS) | works on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
+| Serato DJ Pro with [LJL Link](https://github.com/skyplayser/LJL-Link) | **alpha, not tested in a club**: over the network from the DJ's Mac – track, length, BPM, key, waveforms, position; needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer ([details](https://skyplayser.github.io/LJ-Link/wiki-serato.html#ljl-link)) |
 
 “Works” means it ran with LJ Link in our own setups; there is no formal test protocol. Please tell us your setup with the
 [*Hardware report*](https://github.com/skyplayser/LJ-Link/issues/new?template=hardware-report.yml) issue template – reports
@@ -196,6 +202,7 @@ of what works and what does not help everyone.
 | Wolfmix / OS2L (beats and tempo) | **beta**: tried on a Wolfmix W1; Ableton Link works better there; the OS2L beat fix of 1.7.3 and the steadier tempo of 1.7.4 are not yet tried on the Wolfmix |
 | dot2, MIDI clock out | planned |
 | Serato DJ Pro (on the same computer) | track, BPM, key, waveform overview, beat grid, cues; no play position |
+| Serato DJ Pro over the network ([LJL Link](https://github.com/skyplayser/LJL-Link) on the DJ's Mac) | **alpha**, from LJ Link 1.7.11: track, length, BPM, key, waveforms and position; not tested in a real club yet |
 | Ableton Link (tempo from Serato, Traktor, rekordbox, Live …) | built in, not yet tried with a real session |
 | Ableton Link out (lead the session with the deck's tempo, beats and bars) | works with Daslight; checked against Ableton's Link library |
 | Traktor | planned |
@@ -205,7 +212,8 @@ The goal is to cover every common DJ standard.
 ## Good to know
 
 - **Search finds everything:** one press of *Search automatically* looks for Pro DJ Link and Denon StageLinQ devices, Serato DJ Pro on this computer and an Ableton Link session at the same time, and keeps looking while it runs.
-- **Serato DJ Pro** has no live interface. LJ Link follows Serato's own log to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato does not reveal the play position, so these decks have no playhead.
+- **Serato DJ Pro** has no public interface that LJ Link could use for decks, waveforms and position. LJ Link follows Serato's own log file to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato DJ Pro has no public interface for the play position that LJ Link could use, so these decks have no playhead (with LJL Link they get one).
+- **[LJL Link](https://github.com/skyplayser/LJL-Link) (alpha)** is a separate small app for the DJ's Mac with Serato DJ Pro. Started from the club's USB stick, it finds LJ Link in the booth (addresses and club key from `club.json` on the stick, or Bonjour) and sends track, length, BPM, key, waveforms and the position read from Serato's time display. Track names go out only if the DJ allows it. It does not control Serato and never touches controllers or MIDI; macOS asks for *Local Network* and *Screen Recording* (only to read Serato's time display). Needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer. For now the stick is prepared by hand: on the computer running LJ Link open `http://127.0.0.1:8080/api/sender/club.json` (8080 is the standard port; this address works only on that computer) and save it as `club.json` next to `LJL Link.app` (preliminary, alpha; an interface follows later). Not notarized ([how to open it anyway](https://github.com/skyplayser/LJL-Link#install)) and not tested in a real club yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-serato.html#ljl-link)). LJL Link is not a product of, not affiliated with and not endorsed by Serato.
 - Denon waveforms come from the Engine library on the device's internal drive or card, downloaded once. They have overview resolution (the detail view is smoothed from it), and covers appear only if the library stores them.
 - Do not run it on the computer that runs rekordbox. Tracks from streaming services have no waveform data.
 - From the mixer, Pro DJ Link only tells us which channels are on air. Fader positions and EQ knobs are **not** transmitted by

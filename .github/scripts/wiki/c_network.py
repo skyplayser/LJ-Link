@@ -248,6 +248,7 @@ def _():
             [("ChamSys MagicQ (OSC taps)", "ChamSys MagicQ (OSC-Taps)"), ("UDP, as set on the desk (e.g. 8000)", "UDP, wie am Pult eingestellt (z. B. 8000)"), ("out", "raus")],
             [("Wolfmix / OS2L", "Wolfmix / OS2L"), ("TCP 5000 (WTOOLS default)", "TCP 5000 (Vorgabe von WTOOLS)"), ("out", "raus")],
             [("Web interface (browser, tablet)", "Weboberfläche (Browser, Tablet)"), ("TCP 8080; if in use the next free port up to 8089 (1.7.10 and newer); change with `--port`", "TCP 8080; wenn belegt der nächste freie Port bis 8089 (ab 1.7.10); änderbar mit `--port`"), ("in", "rein")],
+            [("[Suite chat](wiki-chat.html) (alpha, can be switched off)", "[Suite-Chat](wiki-chat.html) (Alpha, abschaltbar)"), ("UDP 47676, multicast 239.255.76.76, TTL 1", "UDP 47676, Multicast 239.255.76.76, TTL 1"), ("in and out", "rein und raus")],
             [("Update check", "Update-Prüfung"), ("HTTPS to github.com", "HTTPS zu github.com"), ("out", "raus")],
         ]),
         H2("Programs that take the same ports", "Programme, die dieselben Ports belegen"),

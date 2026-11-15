@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Test;
 /**
  * QS round 2, R2-1: another web page sent the browser to {@code http://127.0.0.1:PORT/#import-settings=…} and planted
  * settings (hidden decks, screen may sleep). Now 127.0.0.1 imports only after the server accepted the one-time token
- * LJ Link put into the address it opened. Port 8097 only.
+ * LJ Link put into the address it opened. Port 8197 only (8097 is the QS test instance, 8080 the developer's LJ Link).
  */
 class SettingsMoveTest {
-    private static final int PORT = 8097;
+    private static final int PORT = 8197;
     private static final String SELF = "http://127.0.0.1:" + PORT;
     private final HttpClient http = HttpClient.newHttpClient();
 

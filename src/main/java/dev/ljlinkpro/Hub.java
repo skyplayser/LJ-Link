@@ -72,6 +72,10 @@ final class Hub {
         /** True when every deck is its own device (CDJs); otherwise the whole scope is one device (a Denon controller). */
         final boolean groupPerDeck;
         volatile String groupName;
+        /** True for a source that lives on its own, outside "Search" and "Stop" (an LJL Link app, see SenderInbox):
+         * {@link Hub#reset} keeps it and its decks, and it does not count for {@link Hub#phase}; it goes away only with
+         * {@link #close}. Set when created ({@link Hub#persistentScope}). */
+        final boolean persistent;
         volatile DeckSource source;
         volatile String phase = "searching";
         volatile String mode = "live";
@@ -81,8 +85,9 @@ final class Hub {
         volatile Map<String, Object> mixerBase = Map.of("present", false);
         private final Map<Integer, Deck> own = new ConcurrentHashMap<>();
 
-        private Scope(String key, String kind, boolean groupPerDeck, String groupName) {
+        private Scope(String key, String kind, boolean groupPerDeck, String groupName, boolean persistent) {
             this.key = key;
+            this.persistent = persistent;
             this.kind = kind;
             this.groupPerDeck = groupPerDeck;
             this.groupName = groupName;
@@ -174,7 +179,15 @@ final class Hub {
 
     /** Creates (or returns) the scope with this key. */
     Scope scope(String key, String kind, boolean groupPerDeck, String groupName) {
-        return scopes.computeIfAbsent(key, k -> new Scope(k, kind, groupPerDeck, groupName));
+        return scopes.computeIfAbsent(key, k -> new Scope(k, kind, groupPerDeck, groupName, false));
+    }
+
+    /**
+     * Creates (or returns) a persistent scope: one that {@link #reset} keeps and that does not count for the phase of
+     * the search (an LJL Link app). Persistent from the start, so a reset running at the same time cannot remove it.
+     */
+    Scope persistentScope(String key, String kind, boolean groupPerDeck, String groupName) {
+        return scopes.computeIfAbsent(key, k -> new Scope(k, kind, groupPerDeck, groupName, true));
     }
 
     Deck deckById(int number) {
@@ -281,23 +294,36 @@ final class Hub {
         return lastPosition.size() + lastSent.size();
     }
 
-    /** Removes everything: all scopes and decks (the sources were stopped). */
+    /**
+     * Removes all scopes and decks of the stopped sources. Persistent scopes (connected LJL Link apps) stay with their
+     * decks: they do not belong to the search and leave only when the sender goes.
+     */
     void reset() {
-        for (Integer n : decks.keySet()) {
-            broadcastDeckGone(n);
+        for (Deck d : new ArrayList<>(decks.values())) {
+            if (d.scope != null && d.scope.persistent) {
+                continue;
+            }
+            decks.remove(d.number);
+            lastSent.remove(d.number);
+            lastPosition.remove(d.number);
+            broadcastDeckGone(d.number);
         }
-        decks.clear();
-        scopes.clear();
-        lastSent.clear();
-        lastPosition.clear();
+        scopes.values().removeIf(sc -> !sc.persistent);
         broadcastState();
     }
 
-    /** The overall phase: monitoring as soon as anything is connected, else searching, else an error, else idle. */
+    /**
+     * The phase of the search: monitoring as soon as anything is connected, else searching, else an error, else idle.
+     * Persistent scopes (LJL Link apps) do not count: they do not belong to the search, and with them the start page,
+     * the search and "Disconnect" must work as without them; the browser shows their decks next to it ({@code senders}).
+     */
     String phase() {
         boolean searching = false;
         boolean error = false;
         for (Scope sc : scopes.values()) {
+            if (sc.persistent) {
+                continue;
+            }
             switch (sc.phase) {
                 case "monitoring" -> {
                     return "monitoring";
@@ -429,7 +455,12 @@ final class Hub {
         String message = "";
         List<Map<String, Object>> list = new ArrayList<>();
         java.util.Map<String, Map<String, Object>> groups = new java.util.TreeMap<>();
+        int senders = 0;
         for (Scope sc : sortedScopes()) {
+            if (sc.persistent) {
+                senders++;
+                continue; // not part of the search: neither its mode nor its message
+            }
             if (mode.isEmpty() || "searching".equals(sc.phase) && message.isEmpty()) {
                 mode = sc.mode;
             }
@@ -449,6 +480,8 @@ final class Hub {
         m.put("mode", mode);
         m.put("message", message);
         m.put("privacy", Privacy.enabled());
+        // Connected LJL Link apps: their decks are shown also on the start, search and error pages.
+        m.put("senders", senders);
         m.put("devices", list);
         // Problems of one source while another one works (for example Pioneer fails while a Denon is shown).
         List<String> warnings = new ArrayList<>();
