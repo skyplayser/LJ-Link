@@ -73,7 +73,7 @@ td, th { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--li
 tr:last-child td { border-bottom: 0; }
 th { color: var(--muted); font-weight: 600; font-size: 14px; }
 .ok { color: #34d399; } .part { color: #fbbf24; } .plan { color: var(--muted); } .no { color: #f87171; }
-code { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: .92em; }
+code { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: .92em; overflow-wrap: anywhere; }
 
 .dl { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 .dl .card { display: flex; flex-direction: column; gap: 10px; }
@@ -167,6 +167,25 @@ pre { background: var(--panel); border: 1px solid var(--line); border-radius: 10
 .rel-part.fix h3 { color: var(--accent-2); }
 .rel-part .none { font-style: italic; margin: 4px 0 0; }
 .rel-more { margin-top: 48px; }
+/* LJL Link: nav entry with its icon, the banner above the hero and the section on the home page */
+header.top nav a.nav-ljl { display: inline-flex; align-items: center; gap: 7px; }
+header.top nav a.nav-ljl img { width: 20px; height: 20px; border-radius: 5px; flex: 0 0 auto; }
+.announce { text-align: center; padding: 28px 0 0; }
+.announce .btn { border-color: #7c2d12; background: #231208; color: #fdba74; justify-content: center; text-align: left; max-width: 100%; }
+.announce .btn:hover { border-color: var(--orange); }
+.announce .btn img { width: 22px; height: 22px; border-radius: 6px; flex: 0 0 auto; }
+.announce + .hero { padding-top: 36px; }
+#ljllink .eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#ljllink h2 { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+#ljllink h2 img { width: 48px; height: 48px; border-radius: 12px; flex: 0 0 auto; }
+.ljl-hero { margin: 0 0 22px; }
+.ljl-hero img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); cursor: zoom-in; }
+.ljl-cta { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 520px) {
+  .announce { padding-top: 20px; }
+  .announce .btn { padding: 11px 16px; font-size: 15px; }
+  .ljl-cta .btn { flex: 1 1 100%; justify-content: center; }
+}
 /* Wiki docs layout */
 .docs-page .dwrap { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
 .brand-sub { color: var(--muted); font-weight: 500; border-left: 1px solid var(--line); padding-left: 10px; margin-left: 2px; }

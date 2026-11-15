@@ -24,7 +24,11 @@ from PIL import Image
 
 BASE = "https://skyplayser.github.io/LJ-Link/"
 REPO = "https://github.com/skyplayser/LJ-Link"
-NO_WEBP = {"logo", "logo-wordmark-dark", "logo-wordmark-light", "og"}  # used by other sites and apps as PNG
+NO_WEBP = {"logo", "logo-wordmark-dark", "logo-wordmark-light", "og", "ljl-link-icon"}  # PNG for other sites, the nav icon
+# Pictures that are no article images (the logos, the small LJL Link icon in the navigation), and pictures that are no
+# screenshots of LJ Link itself (the pictures of LJL Link, a separate app).
+NO_IMAGE = lambda name: name.endswith("logo.png") or name.endswith("ljl-link-icon.png")
+NOT_SHOTS = lambda name: NO_IMAGE(name) or name.rsplit("/", 1)[-1].startswith("ljl-")
 WIDTHS = (1400, 2800)
 
 
@@ -81,8 +85,9 @@ def text(fragment):
 
 def structured_data(page, lang, url, home):
     meta = lambda prop: html.unescape(re.search(r'<meta (?:name|property)="%s" content="([^"]*)"' % prop, page)[1])
-    shots = [BASE + p for p in dict.fromkeys(re.findall(r'<img [^>]*?src="(?:\.\./)?(images/[^"]+\.png)"', page))
-             if not p.endswith("logo.png")]
+    pics = list(dict.fromkeys(re.findall(r'<img [^>]*?src="(?:\.\./)?(images/[^"]+\.png)"', page)))
+    shots = [BASE + p for p in pics if not NOT_SHOTS(p)]  # screenshots of LJ Link for the app
+    images = [BASE + p for p in pics if not NO_IMAGE(p)]  # any picture for an article
     author = {"@type": "Organization", "name": "NEXTPHILM", "url": "https://github.com/skyplayser"}
     app = {"@type": "SoftwareApplication", "@id": BASE + "#app", "name": "LJ Link", "url": BASE,
            "applicationCategory": "MultimediaApplication", "operatingSystem": "macOS, Windows",
@@ -105,7 +110,7 @@ def structured_data(page, lang, url, home):
     else:  # a guide: an article about the app, below the home page
         headline = text(re.search(r"<h1>(.*?)</h1>", page, re.S)[1].split('class="kicker"')[-1].split("</span>", 1)[-1])
         graph.append({"@type": "TechArticle", "@id": url + "#article", "headline": headline,
-                      "description": meta("description"), "url": url, "inLanguage": lang, "image": shots[:3],
+                      "description": meta("description"), "url": url, "inLanguage": lang, "image": images[:3],
                       "author": author, "publisher": author, "about": app, "isPartOf": {"@id": BASE + "#website"},
                       "dateModified": datetime.date.today().isoformat()})
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
@@ -131,7 +136,7 @@ def sitemap(site, pages):
         for sub in ("", "de/"):
             imgs = "".join("\n    <image:image><image:loc>%simages/%s%s</image:loc></image:image>"
                            % (BASE, sub if (site / "images" / sub / f).exists() else "", f)
-                           for f in dict.fromkeys(re.findall(r'src="images/([\w-]+\.png)"', source)) if f != "logo.png")
+                           for f in dict.fromkeys(re.findall(r'src="images/([\w-]+\.png)"', source)) if f not in ("logo.png", "ljl-link-icon.png"))
             urls.append("  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>%s%s\n  </url>"
                         % (BASE + sub + path, today, alt, imgs))
     (site / "sitemap.xml").write_text(

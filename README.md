@@ -13,6 +13,7 @@
   <a href="https://skyplayser.github.io/LJ-Link/">Website</a> &nbsp;·&nbsp;
   <a href="https://github.com/skyplayser/LJ-Link/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
+  <a href="https://github.com/skyplayser/LJL-Link">LJL Link (Serato)</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
   <a href="https://discord.gg/N6DMca4Bjk">Discord</a> &nbsp;·&nbsp;
   <a href="CONTRIBUTING.md">Contribute</a>
@@ -38,17 +39,51 @@ when a tablet loads the page; GitHub sees its IP address and the program version
 *Check for updates* in the menu of the program icon still works (see
 [Privacy](https://skyplayser.github.io/LJ-Link/datenschutz.html)).
 
+## New: Serato DJ Pro with LJL Link (alpha)
+
+<p align="center">
+  <a href="https://github.com/skyplayser/LJL-Link"><img src="https://raw.githubusercontent.com/skyplayser/LJL-Link/main/docs/images/hero.png" alt="Illustration with demo tracks: the LJL Link window on the DJ's Mac with two Serato decks and the suite chat, an EMERGENCY pop-up, and the same decks with three-band waveforms in LJ Link in the lighting booth"></a>
+  <br><sub>Illustration with demo tracks. EMERGENCY is not a safety system.</sub>
+</p>
+
+<img src="https://raw.githubusercontent.com/skyplayser/LJL-Link/main/docs/images/ljl-link-icon.png" width="56" align="left" alt="LJL Link logo">
+
+Serato DJ Pro has no public interface that LJ Link could use for decks, waveforms and position. **[LJL Link – LJ LAN Link](https://github.com/skyplayser/LJL-Link)**
+is a separate small Mac app for users of Serato DJ Pro that brings the DJ's decks into LJ Link in the booth, next to every other player.
+
+<br clear="left">
+
+- **Who it's for:** DJs with Serato DJ Pro, and the lighting team that wants to light to their music.
+- **How it works:** it runs from the club's USB stick, nothing to install. It passively reads Serato's log file, the loaded
+  track and the time display in Serato's window, and sends deck, length, BPM, key, waveform and position to LJ Link. It never
+  controls Serato and never touches controllers or MIDI. Track names only go out with the DJ's OK.
+- **Booth chat:** LJL Link, LJ Link and VJ-Link in the same network share one chat room, without a server, with an
+  *EMERGENCY* button that shows a pop-up at everyone. The chat is not encrypted: every device in the network can read along.
+  EMERGENCY is not an alarm or safety system.
+
+> [!WARNING]
+> **Alpha:** tested locally on one Mac with Serato DJ Pro 5.0, not yet in a club. Needs macOS 14 or newer on the DJ's Mac and
+> LJ Link 1.7.11 or newer in the booth. LJL Link is an independent project for users of Serato DJ Pro, not affiliated with Serato.
+
+**[Download LJL Link](https://github.com/skyplayser/LJL-Link/releases/latest)** &nbsp;·&nbsp;
+[Website](https://skyplayser.github.io/LJL-Link/) &nbsp;·&nbsp;
+[Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)
+
 ## What you get
 
 - **All decks in one view:** cover, title, elapsed and remaining time down to the millisecond, tempo and pitch, BPM, key, master,
   sync and the model of each player.
+- **Serato DJ Pro via LJL Link (alpha, new in 1.7.11):** the DJ starts [LJL Link](https://github.com/skyplayser/LJL-Link) from
+  the club's USB stick on the Mac with Serato DJ Pro, and LJ Link in the booth gets track, length, BPM, key, three-band waveforms
+  and position. Without LJL Link, LJ Link reads Serato DJ Pro only on the same computer, without play position. Not tested in a
+  club yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)).
 - **Waveforms like on the player:** a scrolling detail waveform and the whole-track overview, with hot cues A to H, memory cues,
   orange loops and the beat grid with bar starts in red.
 - **A red LIVE frame** around the deck that is on air, so you never light the wrong track.
 - **A Mixer tab** with one strip per channel, and a click on any player opens everything the interface reports about it.
 - **Privacy mode** for streams and shared screens, switched only from the program icon.
 - **Suite chat (alpha, new in 1.7.11):** one chat room for LJ Link and the other suite programs in the same network, for example
-  VJ-Link, without a server, with an *EMERGENCY* button that shows a pop-up at everyone else at once. Only on the computer running
+  VJ-Link and LJL Link, without a server, with an *EMERGENCY* button that shows a pop-up at everyone else at once. Only on the computer running
   LJ Link, not on a tablet. Every device in the network can read along (nothing is encrypted); chat texts never leave the local network
   and are never logged. On by default, *Settings → Suite chat – Alpha* switches it off. Not tested between two computers or on
   Windows yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-chat.html)).
@@ -185,7 +220,7 @@ Type the command into the desk's command line by hand first, and edit it in LJ L
 | Denon Prime 4+ (firmware 5.0.4) | works over StageLinQ: title, artist, tempo, play state, master, position, channel faders, waveform, beat grid, cues (loops not yet verified) |
 | Denon SC6000, Prime 4, Prime Go | expected to work (same protocol), not tested |
 | Serato DJ Pro 3.x (macOS) | works on the same computer: loaded tracks, BPM, key, waveform overview, beat grid; MP3 and AIFF |
-| Serato DJ Pro with [LJL Link](https://github.com/skyplayser/LJL-Link) | **alpha, not tested in a club**: over the network from the DJ's Mac – track, length, BPM, key, waveforms, position; needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer ([details](https://skyplayser.github.io/LJ-Link/wiki-serato.html#ljl-link)) |
+| Serato DJ Pro with [LJL Link](https://github.com/skyplayser/LJL-Link) | **alpha, not tested in a club**: over the network from the DJ's Mac – track, length, BPM, key, waveforms, position; needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer ([details](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)) |
 
 “Works” means it ran with LJ Link in our own setups; there is no formal test protocol. Please tell us your setup with the
 [*Hardware report*](https://github.com/skyplayser/LJ-Link/issues/new?template=hardware-report.yml) issue template – reports
@@ -213,7 +248,7 @@ The goal is to cover every common DJ standard.
 
 - **Search finds everything:** one press of *Search automatically* looks for Pro DJ Link and Denon StageLinQ devices, Serato DJ Pro on this computer and an Ableton Link session at the same time, and keeps looking while it runs.
 - **Serato DJ Pro** has no public interface that LJ Link could use for decks, waveforms and position. LJ Link follows Serato's own log file to see which file is on which deck and reads title, BPM, key, waveform overview, beat grid and cues from the tags Serato writes into MP3 and AIFF files. Serato DJ Pro has no public interface for the play position that LJ Link could use, so these decks have no playhead (with LJL Link they get one).
-- **[LJL Link](https://github.com/skyplayser/LJL-Link) (alpha)** is a separate small app for the DJ's Mac with Serato DJ Pro. Started from the club's USB stick, it finds LJ Link in the booth (addresses and club key from `club.json` on the stick, or Bonjour) and sends track, length, BPM, key, waveforms and the position read from Serato's time display. Track names go out only if the DJ allows it. It does not control Serato and never touches controllers or MIDI; macOS asks for *Local Network* and *Screen Recording* (only to read Serato's time display). Needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer. For now the stick is prepared by hand: on the computer running LJ Link open `http://127.0.0.1:8080/api/sender/club.json` (8080 is the standard port; this address works only on that computer) and save it as `club.json` next to `LJL Link.app` (preliminary, alpha; an interface follows later). Not notarized ([how to open it anyway](https://github.com/skyplayser/LJL-Link#install)) and not tested in a real club yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-serato.html#ljl-link)). LJL Link is not a product of, not affiliated with and not endorsed by Serato.
+- **[LJL Link](https://github.com/skyplayser/LJL-Link) (alpha)** is a separate small app for the DJ's Mac with Serato DJ Pro. Started from the club's USB stick, it finds LJ Link in the booth (addresses and club key from `club.json` on the stick, or Bonjour) and sends track, length, BPM, key, waveforms and the position read from Serato's time display. Track names go out only if the DJ allows it. It does not control Serato and never touches controllers or MIDI; macOS asks for *Local Network* and *Screen Recording* (only to read Serato's time display). Needs macOS 14 or newer; tested with Serato DJ Pro 5.0; needs LJ Link 1.7.11 or newer. For now the stick is prepared by hand: on the computer running LJ Link open `http://127.0.0.1:8080/api/sender/club.json` (8080 is the standard port; this address works only on that computer) and save it as `club.json` next to `LJL Link.app` (preliminary, alpha; an interface follows later). Not notarized ([how to open it anyway](https://github.com/skyplayser/LJL-Link#install)) and not tested in a real club yet ([wiki](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)). LJL Link is not a product of, not affiliated with and not endorsed by Serato.
 - Denon waveforms come from the Engine library on the device's internal drive or card, downloaded once. They have overview resolution (the detail view is smoothed from it), and covers appear only if the library stores them.
 - Do not run it on the computer that runs rekordbox. Tracks from streaming services have no waveform data.
 - From the mixer, Pro DJ Link only tells us which channels are on air. Fader positions and EQ knobs are **not** transmitted by
@@ -266,7 +301,18 @@ Do not run rekordbox or ShowKontrol on the same computer as LJ Link: they join P
 **LJ Link is free and comes without warranty.** Software, network and devices can fail. Test your setup before the show and
 keep a fallback ready, for example tap tempo on the desk.
 
-## Try also: VJ-Link
+## The suite: LJL Link and VJ-Link
+
+<a href="https://github.com/skyplayser/LJL-Link"><img src="https://raw.githubusercontent.com/skyplayser/LJL-Link/main/docs/images/ljl-link-icon.png" width="56" align="left" alt="LJL Link logo"></a>
+
+**[LJL Link](https://github.com/skyplayser/LJL-Link)** (LJ LAN Link) brings Serato DJ Pro into the booth: a small Mac app that the
+DJ starts from the club's USB stick. It sends track, length, BPM, key, waveforms and position to LJ Link, track names only with
+the DJ's OK, and joins the suite chat. Free for macOS 14 or newer, now as an alpha, not tested in a club yet
+([website](https://skyplayser.github.io/LJL-Link/), [download](https://github.com/skyplayser/LJL-Link/releases/latest),
+[wiki](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)). An independent project for users of Serato DJ Pro, not
+affiliated with Serato.
+
+<br clear="left">
 
 <a href="https://github.com/skyplayser/VJ-LINK"><img src="https://raw.githubusercontent.com/skyplayser/VJ-LINK/main/docs/images/logo.png" width="56" align="left" alt="VJ-Link logo"></a>
 

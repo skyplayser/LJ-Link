@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import wikilib
-import c_start, c_network, c_sources, c_desks, c_cases, c_help  # noqa: registers the pages in order
+import c_start, c_network, c_sources, c_ljl, c_desks, c_cases, c_help  # noqa: registers the pages in order
 
 site = Path(sys.argv[1])
 guide = (site / "pioneer-bpm-grandma.html").read_text(encoding="utf-8")

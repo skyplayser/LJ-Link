@@ -5,6 +5,38 @@ Drops und Übergänge rechtzeitig erkennen.
 
 ![Übersicht](images/de/waveform.png)
 
+## Neu: Serato DJ Pro mit LJL Link (Alpha)
+
+<p align="center">
+  <a href="https://github.com/skyplayser/LJL-Link"><img src="images/de/ljl-hero.png" alt="Illustration mit Demo-Tracks: das Fenster von LJL Link auf dem Mac des DJs mit zwei Serato-Decks und dem Suite-Chat, ein EMERGENCY-Popup und dieselben Decks mit Waveforms in drei Bändern in LJ Link in der Lichtbooth"></a>
+  <br><sub>Illustration mit Demo-Tracks. EMERGENCY ist keine Alarm- oder Sicherheitstechnik.</sub>
+</p>
+
+<img src="images/ljl-link-icon.png" width="56" align="left" alt="Logo von LJL Link">
+
+Serato DJ Pro bietet keine öffentliche Schnittstelle, die LJ Link für Decks, Waveforms und Position nutzen könnte.
+**[LJL Link – LJ LAN Link](https://github.com/skyplayser/LJL-Link)** ist eine eigene kleine Mac-App für Nutzer von Serato DJ Pro,
+die die Decks des DJs zu LJ Link in die Booth bringt, neben alle anderen Player.
+
+<br clear="left">
+
+- **Für wen:** DJs mit Serato DJ Pro und die Lichttechnik, die zu ihrer Musik leuchten will.
+- **So geht's:** LJL Link läuft vom USB-Stick des Clubs, installiert wird nichts. Es liest passiv Seratos Logdatei, den
+  geladenen Track und die Zeitanzeige im Serato-Fenster und schickt Deck, Länge, BPM, Tonart, Waveform und Position an LJ Link.
+  Es steuert Serato nicht und greift nicht auf Controller oder MIDI zu. Tracknamen gehen nur mit OK des DJs raus.
+- **Booth-Chat:** LJL Link, LJ Link und VJ-Link im selben Netzwerk teilen sich einen Chatraum, ohne Server, mit einem
+  *EMERGENCY*-Knopf, der bei allen ein Popup zeigt. Der Chat ist unverschlüsselt: Jedes Gerät im Netzwerk kann mitlesen.
+  EMERGENCY ist keine Alarm- oder Sicherheitstechnik.
+
+> [!WARNING]
+> **Alpha:** an einem Mac lokal getestet mit Serato DJ Pro 5.0, noch nicht im Club. Braucht macOS 14 oder neuer auf dem Mac
+> des DJs und LJ Link 1.7.11 oder neuer in der Booth. LJL Link ist ein unabhängiges Projekt für Nutzer von Serato DJ Pro, nicht
+> mit Serato verbunden.
+
+**[LJL Link herunterladen](https://github.com/skyplayser/LJL-Link/releases/latest)** &nbsp;·&nbsp;
+[Website](https://skyplayser.github.io/LJL-Link/de/) &nbsp;·&nbsp;
+[Anleitung im Wiki](https://skyplayser.github.io/LJ-Link/de/wiki-ljl-link.html)
+
 ## Inhalt
 
 1. [Was du brauchst](#was-du-brauchst)
@@ -24,6 +56,8 @@ Drops und Übergänge rechtzeitig erkennen.
 - DJ-Player und Mixer von Pioneer DJ mit **Pro DJ Link** (zum Beispiel CDJ-3000, CDJ-2000NXS2, DJM-2000NXS).
 - Netzwerkkabel und einen **Netzwerk-Switch** (oder die Link-Anschlüsse des Mixers).
 - Tracks von einem **rekordbox-USB-Stick oder einer SD-Karte**, in rekordbox analysiert und exportiert.
+- Spielt der DJ mit **Serato DJ Pro** auf dem Mac: [LJL Link](https://skyplayser.github.io/LJ-Link/de/wiki-ljl-link.html)
+  (Alpha) auf dem USB-Stick des Clubs, siehe [oben](#neu-serato-dj-pro-mit-ljl-link-alpha).
 
 ## Installieren
 

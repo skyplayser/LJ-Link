@@ -347,6 +347,7 @@ def _head(file, title, desc):
     <button class="menu-btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav id="nav">
       <a href="./#features" data-de="Funktionen">Features</a>
+      <a class="nav-ljl" href="./#ljllink"><img src="images/ljl-link-icon.png" alt="" width="18" height="18"><span>LJL Link</span></a>
       <a href="./#download">Download</a>
       <a href="wiki.html">Wiki</a>
       <a href="wiki-troubleshooting.html" data-de="Hilfe">Help</a>
