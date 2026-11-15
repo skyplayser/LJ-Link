@@ -21,6 +21,8 @@
 
 <p align="center">
   <a href="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/releases"><img src="https://img.shields.io/github/downloads/skyplayser/LJ-Link/total?label=downloads" alt="Downloads"></a>
+  <a href="https://github.com/skyplayser/LJL-Link/releases"><img src="https://img.shields.io/github/downloads/skyplayser/LJL-Link/total?label=LJL%20Link%20downloads" alt="LJL Link downloads"></a>
 </p>
 
 ![LJ Link showing three players](docs/images/waveform.png)
@@ -67,7 +69,8 @@ is a separate small Mac app for users of Serato DJ Pro that brings the DJ's deck
 
 **[Download LJL Link](https://github.com/skyplayser/LJL-Link/releases/latest)** &nbsp;·&nbsp;
 [Website](https://skyplayser.github.io/LJL-Link/) &nbsp;·&nbsp;
-[Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)
+[Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html) &nbsp;·&nbsp;
+[![LJL Link downloads](https://img.shields.io/github/downloads/skyplayser/LJL-Link/total?label=downloads)](https://github.com/skyplayser/LJL-Link/releases)
 
 ## What you get
 
