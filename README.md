@@ -20,9 +20,16 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/releases/latest"><img src="https://img.shields.io/github/v/release/skyplayser/LJ-Link?label=release" alt="Latest release"></a>
   <a href="https://github.com/skyplayser/LJ-Link/releases"><img src="https://img.shields.io/github/downloads/skyplayser/LJ-Link/total?label=downloads" alt="Downloads"></a>
-  <a href="https://github.com/skyplayser/LJL-Link/releases"><img src="https://img.shields.io/github/downloads/skyplayser/LJL-Link/total?label=LJL%20Link%20downloads" alt="LJL Link downloads"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml"><img src="https://github.com/skyplayser/LJ-Link/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/skyplayser/LJ-Link" alt="License: EPL-2.0"></a>
+  <br>
+  <a href="#install"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue" alt="Platform: macOS and Windows"></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/Java-21-orange" alt="Java 21"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/commits/main"><img src="https://img.shields.io/github/last-commit/skyplayser/LJ-Link" alt="Last commit"></a>
+  <a href="https://github.com/skyplayser/LJ-Link/stargazers"><img src="https://img.shields.io/github/stars/skyplayser/LJ-Link?style=flat" alt="GitHub stars"></a>
+  <a href="https://discord.gg/N6DMca4Bjk"><img src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&amp;logoColor=white" alt="Discord"></a>
 </p>
 
 ![LJ Link showing three players](docs/images/waveform.png)
@@ -69,8 +76,7 @@ is a separate small Mac app for users of Serato DJ Pro that brings the DJ's deck
 
 **[Download LJL Link](https://github.com/skyplayser/LJL-Link/releases/latest)** &nbsp;·&nbsp;
 [Website](https://skyplayser.github.io/LJL-Link/) &nbsp;·&nbsp;
-[Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html) &nbsp;·&nbsp;
-[![LJL Link downloads](https://img.shields.io/github/downloads/skyplayser/LJL-Link/total?label=downloads)](https://github.com/skyplayser/LJL-Link/releases)
+[Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)
 
 ## What you get
 
