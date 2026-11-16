@@ -239,6 +239,7 @@ function handle(msg) {
     applyVjLink();
     render();
     applyGroups();
+    introHook.firstState();
   } else if (msg.type === "deck") {
     updateDeck(msg);
     if (ui.state.phase === "monitoring" || senderDecksOnly()) $("no-decks").classList.add("hidden");
@@ -255,7 +256,7 @@ function handle(msg) {
 
 /* ---------- Settings (kept in this browser only) ---------- */
 
-const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true };
+const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true, intro: true, hideLauncherHint: false };
 let settings = { ...DEFAULTS };
 try {
   // Only the known keys with the type of their default: nothing else (e.g. "__proto__") gets into the settings.
@@ -266,6 +267,75 @@ try {
     }
   }
 } catch (e) { /* storage unavailable: use defaults */ }
+
+/* ---------- Start animation of the Link-Suite (intro/start.js plays it) ---------- */
+
+// Decided here, before the first frame, so the covering layer #lsi never flashes when it is not shown: off in the
+// settings, any deep link (#chat, #report, #settings, #shot … open a window for a task), automated browsers, or already
+// shown in this tab. intro/start.js then also skips it when this program start was already greeted in this browser
+// (/api/info "started"), so new windows from the program icon do not play it again.
+// Until start.js takes over, a key or a click removes the layer, and it never stays longer than 3.5 s (module missing,
+// not loaded or failed): the page must always become usable.
+const introHook = (() => {
+  let seen = false;
+  try { seen = sessionStorage.getItem("linksuite-intro:lj") === "1"; sessionStorage.setItem("linksuite-intro:lj", "1"); }
+  catch (e) { /* private mode: show it */ }
+  const layer = $("lsi");
+  const enabled = !!layer && settings.intro !== false && !seen && !location.hash.replace("#", "") && !navigator.webdriver;
+  let claimed = false, finish;
+  // Settled when nothing of the animation covers the page any more (played, skipped, off or removed).
+  const done = new Promise((r) => { finish = r; });
+  addEventListener("linksuite-intro-done", () => finish(), { once: true });
+  const drop = () => { if (!claimed && layer) { layer.remove(); finish(); } };
+  // A tap: hide the layer at once but keep it until the click that follows, so on touch screens that click does not
+  // land on whatever lies underneath (tabs, menu, chat).
+  let tapped = false;
+  const tap = () => {
+    if (claimed || !layer) return;
+    tapped = true;
+    layer.style.opacity = "0";
+    layer.addEventListener("click", drop, { once: true });
+    // Also a long press: wait for the finger to lift, then a little for its click.
+    const lifted = () => setTimeout(drop, 400);
+    layer.addEventListener("pointerup", lifted, { once: true });
+    layer.addEventListener("pointercancel", lifted, { once: true });
+    setTimeout(drop, 5000);
+  };
+  if (!enabled) { layer?.remove(); finish(); }
+  else {
+    layer.addEventListener("pointerdown", tap);
+    addEventListener("keydown", drop);
+    setTimeout(drop, 3500);
+  }
+  let gotState = false, gotInfo = false, resolve;
+  // Resolved once the first state is drawn (start page or decks) and /api/info answered, at the latest after 1.2 s.
+  const ready = new Promise((r) => { resolve = r; setTimeout(r, 1200); });
+  return {
+    enabled, ready, done, info: null,
+    /** start.js removed the layer without playing (already greeted, or an error). */
+    finished: () => finish(),
+    firstState() { gotState = true; if (gotInfo) resolve(); },
+    gotInfo(info) { this.info = info; gotInfo = true; if (gotState) resolve(); },
+    /** start.js takes over the layer; false when it was already removed (key, click, time limit). */
+    claim() {
+      if (!layer || !layer.isConnected || tapped) return false;
+      claimed = true;
+      layer.removeEventListener("pointerdown", tap);
+      removeEventListener("keydown", drop);
+      // The animation takes 2.5 s: after 4 s nothing of it may block the page, whatever happened inside the module.
+      setTimeout(() => { layer.remove(); document.documentElement.classList.remove("lsi-run"); finish(); }, 4000);
+      return true;
+    },
+    text: (k) => t({ skip: "Skip:", key: "any key", or: "or click" }[k]),
+  };
+})();
+window.ljlinkIntro = introHook;
+// For the modules (intro/, suite/): settings of this browser and the language.
+window.ljlinkUi = {
+  setting: (k) => settings[k],
+  set(k, v) { settings[k] = v; saveSettings(); },
+  lang: () => lang,
+};
 
 function saveSettings() {
   try { localStorage.setItem("ljlinkpro.settings", JSON.stringify(settings)); } catch (e) { /* ignore */ }
@@ -284,6 +354,7 @@ function applySettings() {
   for (const b of $("seg-theme").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.theme));
   for (const d of decks.values()) d.cache = null;
   $("awake-box").checked = settings.keepAwake !== false;
+  $("intro-box").checked = settings.intro !== false;
 }
 
 /* ---------- Keep the screen awake (ADR-022) ---------- */
@@ -2205,6 +2276,7 @@ async function loadQuitNote() {
 }
 $("quit-note-box").onchange = () => { post("/api/quit-note", { on: $("quit-note-box").checked }).then(loadQuitNote); };
 $("awake-box").onchange = () => { settings.keepAwake = $("awake-box").checked; saveSettings(); updateAwake(true); };
+$("intro-box").onchange = () => { settings.intro = $("intro-box").checked; saveSettings(); };
 // #awake-hint needs no handler of its own: the tap on it is caught by onAwakeTap.
 const ZOOM_STEPS = [4, 6, 8, 12, 16, 24, 32, 40];
 function stepZoom(dir) {
@@ -2362,6 +2434,7 @@ fetch("/api/info").then((r) => r.json()).then((info) => {
   ui.info = info;
   renderPortNote();
   render();
+  introHook.gotInfo(info);
   // The program icon menu follows the language chosen on this computer.
   if (info.controller) post("/api/language?lang=" + lang);
 }).catch(() => {});

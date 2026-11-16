@@ -12,6 +12,12 @@ import java.util.Map;
 
 /** Starts the local web server, opens the browser and wires the HTTP/WebSocket API. */
 public final class Main {
+    /** When this program started (ms); /api/info reports it so the web page can tell program starts apart. */
+    static final long STARTED_AT = System.currentTimeMillis();
+    /** The Link-Suite page that offers the launcher for each system (opened from the start page's hint card). */
+    static final String LAUNCHER_PAGE = "https://skyplayser.github.io/Link-Suite/";
+    private static volatile boolean launcherChecked;
+
     private Main() {}
 
     /** Open the interface as an app window (no tabs, no address bar) when Chrome or Edge is installed. */
@@ -264,7 +270,9 @@ public final class Main {
                 "urls", NetworkCheck.lanUrls(boundPort[0]),
                 "port", boundPort[0],
                 "portWanted", boundPort[1],
-                "adapters", NetworkCheck.adapters())));
+                "adapters", NetworkCheck.adapters(),
+                // Changes with every program start: the web page plays the start animation once per start.
+                "started", STARTED_AT)));
         app.get("/api/deck/{n}/waveform", ctx -> {
             byte[] data = hub.waveform(Integer.parseInt(ctx.pathParam("n")));
             if (data == null) {
@@ -351,6 +359,17 @@ public final class Main {
         app.post("/api/demo/start", ctx -> control(ctx, session::startDemo));
         app.post("/api/stop", ctx -> control(ctx, session::stop));
         // The language of the program icon menu follows the language chosen in the interface on this computer.
+        // Link-Suite launcher: is it installed on this computer? Local only (ControlGuard), never for tablets. A quick check
+        // of the usual places on every call (the start page asks again when its window gets the focus); the first call
+        // may also ask Spotlight or the registry. Nothing goes to the network; the page gets no path.
+        app.get("/api/suite/launcher", ctx -> {
+            boolean first = !launcherChecked;
+            launcherChecked = true;
+            ctx.contentType("application/json").header("Cache-Control", "no-store")
+                    .result(dev.ljlinkpro.suite.LauncherDetect.detect(dev.ljlinkpro.suite.LauncherDetect.systemEnv(), first).toJson());
+        });
+        // "Get Link-Suite": opens the fixed page in the default browser (never an address from the page).
+        app.post("/api/suite/launcher-page", ctx -> control(ctx, () -> openExternal(LAUNCHER_PAGE)));
         app.post("/api/language", ctx -> control(ctx, () -> {
             String lang = "de".equals(ctx.queryParam("lang")) ? "de" : "en";
             AppSettings.set("language", lang);
@@ -568,6 +587,11 @@ public final class Main {
         if (appWindow && openAppWindow(url)) {
             return;
         }
+        openExternal(url);
+    }
+
+    /** Opens an address in the default browser (not in LJ Link's own window). */
+    private static void openExternal(String url) {
         String os = System.getProperty("os.name", "").toLowerCase();
         List<String> cmd;
         if (os.contains("mac")) {

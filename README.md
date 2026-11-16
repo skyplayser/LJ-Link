@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://skyplayser.github.io/LJ-Link/">Website</a> &nbsp;·&nbsp;
-  <a href="https://skyplayser.github.io/Link-Suite/">Download</a> &nbsp;·&nbsp;
+  <a href="https://github.com/skyplayser/LJ-Link/releases/latest">Download</a> &nbsp;·&nbsp;
   <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
   <a href="https://github.com/skyplayser/LJL-Link">LJL Link (Serato)</a> &nbsp;·&nbsp;
   <a href="docs/anleitung.de.md">Anleitung (Deutsch)</a> &nbsp;·&nbsp;
@@ -74,7 +74,7 @@ is a separate small Mac app for users of Serato DJ Pro that brings the DJ's deck
 > **Alpha:** tested locally on one Mac with Serato DJ Pro 5.0, not yet in a club. Needs macOS 14 or newer on the DJ's Mac and
 > LJ Link 1.7.11 or newer in the booth. LJL Link is an independent project for users of Serato DJ Pro, not affiliated with Serato.
 
-**[Download LJL Link](https://skyplayser.github.io/Link-Suite/)** &nbsp;·&nbsp;
+**[Download LJL Link](https://github.com/skyplayser/LJL-Link/releases/latest)** &nbsp;·&nbsp;
 [Website](https://skyplayser.github.io/LJL-Link/) &nbsp;·&nbsp;
 [Guide (wiki)](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)
 
@@ -130,25 +130,24 @@ is a separate small Mac app for users of Serato DJ Pro that brings the DJ's deck
 
 ## Install
 
-> **New: install and update through the [Link-Suite launcher](https://skyplayser.github.io/Link-Suite/).** Download the launcher ([macOS Apple Silicon](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg) · [macOS Intel](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg) · [Windows](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-windows.exe)), open it and click *Install* next to LJ Link. The launcher downloads LJ Link straight from this repository's releases, checks the file and keeps LJ Link and every other program of the Link-Suite up to date. The single installers of LJ Link stay in this repository's releases.
-
-Download the Link-Suite launcher for your computer and install LJ Link from it. Java is included in LJ Link.
+Download the installer for your computer from the [latest release](https://github.com/skyplayser/LJ-Link/releases/latest).
+Java is included.
 
 | System | File |
 |---|---|
-| macOS, Apple Silicon (M1 and newer) | [`Link-Suite-macos-arm64.dmg`](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg) |
-| macOS, Intel | [`Link-Suite-macos-intel.dmg`](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg) |
-| Windows 10 / 11, 64 bit | [`Link-Suite-windows.exe`](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-windows.exe) |
+| macOS, Apple Silicon (M1 and newer) | `LJ-Link-macos-arm64.dmg` |
+| macOS, Intel | `LJ-Link-macos-intel.dmg` |
+| Windows | `LJ-Link-windows.exe` |
 
 Up to version 1.7.7 the files were called `LJ-Link-PRO-…`; for a while each release also carries copies under the old
 names, so older versions still find their update.
 
-The launcher is not signed yet, so both systems warn once on its first start:
+The installers are not signed yet, so both systems warn once on the first start:
 
-- **macOS** (“Link-Suite” Not Opened): drag Link-Suite to *Applications* and start it once, click *Done*. Open *System Settings →
-  Privacy & Security*, scroll down, click **Open Anyway** next to Link-Suite and confirm with your password, then *Open*. Allow
+- **macOS** (“LJ Link” Not Opened): drag the app to *Applications* and start it once, click *Done*. Open *System Settings →
+  Privacy & Security*, scroll down, click **Open Anyway** next to LJ Link and confirm with your password, then *Open*. Allow
   *Local Network* access when asked. On macOS 14 and older, right-click the app → *Open* also works. Terminal alternative:
-  `xattr -dr com.apple.quarantine "/Applications/Link-Suite.app"`.
+  `xattr -dr com.apple.quarantine "/Applications/LJ Link.app"`.
 - **Windows** (“Windows protected your PC”): click **More info**, then **Run anyway**. When the firewall asks, tick *Private
   networks* and allow access.
 
@@ -318,7 +317,7 @@ keep a fallback ready, for example tap tempo on the desk.
 **[LJL Link](https://github.com/skyplayser/LJL-Link)** (LJ LAN Link) brings Serato DJ Pro into the booth: a small Mac app that the
 DJ starts from the club's USB stick. It sends track, length, BPM, key, waveforms and position to LJ Link, track names only with
 the DJ's OK, and joins the suite chat. Free for macOS 14 or newer, now as an alpha, not tested in a club yet
-([website](https://skyplayser.github.io/LJL-Link/), [download](https://skyplayser.github.io/LJL-Link/#download),
+([website](https://skyplayser.github.io/LJL-Link/), [download](https://github.com/skyplayser/LJL-Link/releases/latest),
 [wiki](https://skyplayser.github.io/LJ-Link/wiki-ljl-link.html)). An independent project for users of Serato DJ Pro, not
 affiliated with Serato.
 

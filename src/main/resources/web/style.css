@@ -462,3 +462,11 @@ button.awake-hint { display: block; width: 100%; box-sizing: border-box; margin:
 @media (prefers-reduced-motion: reduce) { .chat-alert { animation: none; } }
 .chat-msg.urgent { border: 2px solid #FFD60A; }
 .chat-alert button.primary { background: #FFD60A; color: #000; border-color: #FFD60A; }
+
+/* Start animation (intro/): the layer takes the colours of the current theme (#lsi beats the module's light variant). */
+#lsi { --lsi-bg: var(--bg); --lsi-dim: var(--dim); --lsi-line: var(--line); }
+
+/* "Get Link-Suite" card under the three steps (suite/). Focus ring as in the suite (pink), not LJ Link's --accent-text. */
+.launcher-hint { margin-top: 12px; --focus: #FF5C93; }
+:root[data-theme="day"] .launcher-hint { --focus: #CC0045; }
+.launcher-hint:empty { display: none; }

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LJ Link</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="intro/program-intro.css">
+<link rel="stylesheet" href="suite/launcher-hint.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -59,6 +61,9 @@
       <li><b>Search</b><span>One button finds every player, from any maker.</span></li>
       <li><b>Watch</b><span>Here or on a tablet in the same network: every deck, every waveform, live.</span></li>
     </ol>
+
+    <!-- "Get Link-Suite" card (suite/hint.js): only on this computer and only when the launcher is not installed. -->
+    <div id="launcher-hint" class="launcher-hint"></div>
 
     <div class="works">
       <div class="works-title">Works with</div>
@@ -201,6 +206,12 @@
       <div class="hint" id="awake-status"></div>
       <div class="hint hidden" id="awake-fallback">On an iPad or iPhone without HTTPS this is a stopgap. More reliable: in the iPad settings set “Display &amp; Brightness → Auto-Lock: Never” (with the charger connected). Also switch Low Power Mode off: on the iPhone it shortens Auto-Lock to 30 seconds, probably on the iPad too.</div>
       <div class="hint">Stops this device from dimming or locking the screen while LJ Link is shown, like a playing video. On an iPad opened over the network, tap the page once; LJ Link then tries to keep the screen on. On a Mac LJ Link also keeps the computer from falling asleep while a browser shows it.</div>
+    </div>
+
+    <div class="setting" id="intro-setting">
+      <div class="label">Start</div>
+      <label class="check"><input type="checkbox" id="intro-box"> <span>Start animation</span></label>
+      <div class="hint">Shows the Link-Suite animation once when LJ Link opens in this browser (about 2.5 s; any key or a click skips it). With “Reduce motion” switched on in the system it only fades in.</div>
     </div>
 
     <div class="setting" id="privacy-setting">
@@ -388,9 +399,13 @@
   </form>
   <div id="chat-status" class="hint"></div>
 </div>
+<!-- Start animation of the Link-Suite (intro/): covers the page from the first frame, intro/start.js plays or removes it. -->
+<div id="lsi" class="lsi-layer"><div class="lsi-bg"></div></div>
 <script src="settings-move.js"></script>
 <script src="i18n.js"></script>
 <script src="keep-awake-video.js"></script>
 <script src="app.js"></script>
+<script type="module" src="intro/start.js"></script>
+<script type="module" src="suite/hint.js"></script>
 </body>
 </html>

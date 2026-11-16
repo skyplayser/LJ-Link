@@ -1,0 +1,36 @@
+/* Copied unchanged from the Suite-Launcher project, design/launcher-hinweis/ (module 1.0, 16 Nov 2026).
+   Do not edit here: changes belong in the Suite-Launcher, then copy again. */
+/* Link-Suite · Hinweiskarte „Link-Suite laden“ (Baustein 1.0, 16.11.2026). Klassen mit Vorsilbe lsh-.
+   Farben über die Suite-Tokens des Programms (--panel, --line, --text, --dim, --accent, --focus) mit Rückfallwerten.
+   Pink NUR auf dem Knopf, Schrift darauf #141821 (6,09:1). Tag: Programme setzen ihre Tokens, sonst Klasse lsh-light. */
+.lsh{--lsh-panel:var(--panel,#151821);--lsh-raise:var(--raise,#1E222E);--lsh-line:var(--line,#2A2F3D);--lsh-text:var(--text,#DCE1EA);
+  --lsh-dim:var(--dim,#7E879A);--lsh-accent:#FF5C93;--lsh-on-accent:#141821;--lsh-focus:var(--focus,#FF5C93);
+  display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:6px 14px;align-items:center;
+  padding:12px 14px;border:1px solid var(--lsh-line);border-radius:12px;background:var(--lsh-panel);color:var(--lsh-text);
+  font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:left;max-width:100%}
+.lsh.lsh-light,[data-theme=light] .lsh:not(.lsh-dark),[data-theme=day] .lsh:not(.lsh-dark){--lsh-panel:var(--panel,#FFFFFF);--lsh-raise:var(--raise,#F3F4F7);--lsh-line:var(--line,#D9DDE5);
+  --lsh-text:var(--text,#141821);--lsh-dim:var(--dim,#5E677A);--lsh-focus:var(--focus,#CC0045)}
+.lsh-wait{visibility:hidden}
+/* Icon: das echte Suite-Icon (Kachel mit Rand im SVG) – 40 px Kachel ⇒ Bild 50 px mit −5 px Rand */
+.lsh-icon{width:50px;height:50px;margin:-5px;display:block;user-select:none;-webkit-user-drag:none}
+.lsh-txt{display:grid;gap:2px;min-width:0}
+.lsh-title{font-size:13.5px;font-weight:700;color:var(--lsh-text)}
+.lsh-text{margin:0;font-size:12px;color:var(--lsh-dim)}
+.lsh-small{font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:var(--lsh-dim);letter-spacing:.01em}
+.lsh-acts{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.lsh-get{background:var(--lsh-accent);border:1px solid var(--lsh-accent);color:var(--lsh-on-accent);border-radius:6px;padding:7px 14px;
+  font:700 12px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;white-space:nowrap}
+.lsh-get:hover{filter:brightness(1.07)}
+.lsh-get:active{transform:translateY(1px)}
+.lsh-hide{background:none;border:0;padding:3px 6px;color:var(--lsh-dim);font:11.5px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--lsh-line);white-space:nowrap}
+.lsh-hide:hover{color:var(--lsh-text);text-decoration-color:currentColor}
+.lsh-get:focus-visible,.lsh-hide:focus-visible{outline:2px solid var(--lsh-focus);outline-offset:2px}
+/* schmale Spalte (rechte Spalte der Startkarte, LJ-Weboberfläche auf dem Telefon) */
+.lsh.lsh-compact{grid-template-columns:40px minmax(0,1fr)}
+.lsh.lsh-compact .lsh-acts{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
+@container (max-width:420px){.lsh{grid-template-columns:40px minmax(0,1fr)}.lsh-acts{grid-column:1/-1;flex-direction:row;justify-content:space-between}}
+@media (max-width:520px){.lsh{grid-template-columns:40px minmax(0,1fr)}.lsh-acts{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center}}
+@media (prefers-contrast:more){.lsh{border-color:var(--lsh-dim)}.lsh-text,.lsh-small{color:var(--lsh-text)}}
+@media (prefers-reduced-motion:reduce){.lsh-get:active{transform:none}}
+@media print{.lsh{display:none}}

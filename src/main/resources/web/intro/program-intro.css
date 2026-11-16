@@ -1,0 +1,16 @@
+/* Copied unchanged from the Suite-Launcher project, design/intro-programm/program-intro.css (module 1.0, 16 Nov 2026).
+   Do not edit here: changes belong in the Suite-Launcher, then copy again. */
+/* Link-Suite · gemeinsame Startanimation für jedes Programm (Baustein 1.0, 16.11.2026) – Schicht, Fläche, Hinweis.
+   Klassen mit Vorsilbe lsi- (Link-Suite-Intro), damit nichts mit den Programmen kollidiert. Tag/Nacht über Variablen;
+   die Klasse lsi-light setzt der Baustein (Option theme). Programme können die Variablen auf ihre Tokens legen:
+     .lsi-layer{--lsi-bg:var(--bg);--lsi-dim:var(--dim);--lsi-line:var(--line)}  */
+.lsi-layer{--lsi-bg:#0C0E13;--lsi-dim:#7E879A;--lsi-line:#2A2F3D;--lsi-tint-a:rgba(255,59,59,.08);--lsi-tint-b:rgba(34,200,240,.06);
+  position:fixed;inset:0;z-index:2147483000;cursor:pointer;contain:strict;background:none;pointer-events:auto}
+.lsi-layer.lsi-light{--lsi-bg:#EEF0F4;--lsi-dim:#5E677A;--lsi-line:#D9DDE5;--lsi-tint-a:rgba(255,59,59,.06);--lsi-tint-b:rgba(34,200,240,.06)}
+/* Fläche wie der Startbildschirm von VD-Link: ruhig, dunkel bzw. hell, keine Helligkeitssprünge */
+.lsi-bg{position:absolute;inset:0;background:radial-gradient(900px 520px at 15% 0%,var(--lsi-tint-a),transparent 60%),radial-gradient(800px 520px at 90% 100%,var(--lsi-tint-b),transparent 60%),var(--lsi-bg)}
+.lsi-layer img{position:fixed;display:block;margin:0;padding:0;border:0;max-width:none;opacity:0;transform-origin:50% 50%;will-change:transform,opacity;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.lsi-skip{position:fixed;right:18px;bottom:14px;color:var(--lsi-dim);font:11.5px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;opacity:.75}
+.lsi-skip kbd{font:10.5px ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--lsi-line);border-radius:3px;padding:0 4px}
+@media (prefers-reduced-transparency:reduce){.lsi-bg{background:var(--lsi-bg)}}
+@media print{.lsi-layer{display:none!important}}
