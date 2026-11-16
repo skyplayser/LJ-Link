@@ -44,7 +44,7 @@ class IntroWebTest {
         assertTrue(app.contains("setTimeout(drop, 3500)"), "time limit");
         assertTrue(app.contains("layer.addEventListener(\"pointerdown\", tap)") && app.contains("addEventListener(\"keydown\", drop)"));
         assertTrue(app.contains("layer.addEventListener(\"click\", drop, { once: true })"), "a tap must not reach the page underneath");
-        String start = resource("intro/start.js");
+        String start = resource("intro/start.js").replace("\r\n", "\n");   // Windows checks files out with CRLF
         assertTrue(start.contains("if (!hook.claim()) return;"), "takes over only a layer that is still there");
         assertTrue(start.contains("start().catch(abort)") && start.contains("} catch (e) {\n    abort();"), "errors free the page");
         assertTrue(start.contains("once: false"), "once-per-tab mark is kept by app.js");
