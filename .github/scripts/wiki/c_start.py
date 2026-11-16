@@ -97,10 +97,12 @@ def _():
 def _():
     body = SEC(
         H2("Which file", "Welche Datei"),
+        P("LJ Link is installed and updated through the [Link-Suite launcher](https://skyplayser.github.io/Link-Suite/). Download the launcher for your computer, open it and click “Install” next to LJ Link. The single installers stay in the [releases on GitHub](https://github.com/skyplayser/LJ-Link/releases/latest).",
+          "LJ Link wird über den [Link-Suite Launcher](https://skyplayser.github.io/Link-Suite/) installiert und aktualisiert. Lade den Launcher für deinen Rechner, öffne ihn und klicke bei LJ Link auf „Installieren“. Die einzelnen Installer liegen weiter in den [Releases auf GitHub](https://github.com/skyplayser/LJ-Link/releases/latest)."),
         TABLE([("Computer", "Computer"), ("File", "Datei")], [
-            [("Mac with Apple chip (M1 and newer)", "Mac mit Apple-Chip (M1 und neuer)"), "<code>LJ-Link-macos-arm64.dmg</code>"],
-            [("Mac with Intel processor", "Mac mit Intel-Prozessor"), "<code>LJ-Link-macos-intel.dmg</code>"],
-            ["Windows 10 / 11, 64 bit", "<code>LJ-Link-windows.exe</code>"],
+            [("Mac with Apple chip (M1 and newer)", "Mac mit Apple-Chip (M1 und neuer)"), "<a href=\"https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg\"><code>Link-Suite-macos-arm64.dmg</code></a>"],
+            [("Mac with Intel processor", "Mac mit Intel-Prozessor"), "<a href=\"https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg\"><code>Link-Suite-macos-intel.dmg</code></a>"],
+            ["Windows 10 / 11, 64 bit", "<a href=\"https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-windows.exe\"><code>Link-Suite-windows.exe</code></a>"],
         ]),
         P("Up to version 1.7.7 the files were called `LJ-Link-PRO-…`. For a while each release also carries copies under the old names, so older versions still find their update.",
           "Bis Version 1.7.7 hießen die Dateien `LJ-Link-PRO-…`. Eine Zeit lang liegen jedem Release zusätzlich Kopien unter den alten Namen bei, damit ältere Versionen ihr Update weiter finden."),
@@ -137,8 +139,8 @@ def _():
           "Etwa 15 Sekunden nach dem Start (nur wenn das Programm-Symbol angezeigt wird) und beim Laden der Oberfläche, höchstens einmal pro Stunde, prüft LJ Link, ob es eine neue Version gibt, und sagt Bescheid. Es fragt immer nur der Rechner, auf dem LJ Link läuft, auch wenn ein Tablet die Seite lädt. **Nach Updates suchen** im Menü des Symbols lädt und installiert sie: Auf dem Mac wird die App ersetzt und startet neu, unter Windows öffnet sich der Installer. Einstellungen bleiben erhalten. Installiert wird nur ein Download, der zur Prüfsumme passt, die GitHub dafür angibt."),
         P("The automatic check can be switched off: Settings → **Updates** → **Check for updates automatically** (shown only on the computer running LJ Link). **Check for updates** in the icon menu always works.",
           "Die automatische Prüfung lässt sich abschalten: Einstellungen → **Updates** → **Automatisch nach Updates suchen** (nur auf dem Rechner sichtbar, auf dem LJ Link läuft). **Nach Updates suchen** im Menü des Symbols geht immer."),
-        ADM("note", ("Update finds nothing although a newer version exists? Download the newest version once from the [release page](https://github.com/skyplayser/LJ-Link/releases/latest) and install it.",
-                     "Das Update findet nichts, obwohl es eine neuere Version gibt? Die neueste Version einmal von der [Release-Seite](https://github.com/skyplayser/LJ-Link/releases/latest) laden und installieren.")),
+        ADM("note", ("Update finds nothing although a newer version exists? Download the newest version once from the [download page](index.html#download) and install it.",
+                     "Das Update findet nichts, obwohl es eine neuere Version gibt? Die neueste Version einmal von der [Download-Seite](index.html#download) laden und installieren.")),
         ADM("tip", ("The check needs the internet. In a show network without internet it just says it could not reach GitHub; everything else works as usual. Update at home, not at the gig.",
                     "Die Prüfung braucht Internet. In einem Show-Netz ohne Internet meldet sie nur, dass GitHub nicht erreichbar ist; alles andere läuft wie gewohnt. Zu Hause aktualisieren, nicht auf dem Gig.")),
         ADM("note", ("Versions 1.2.x cannot update themselves (“Handshake failed”). Install the newest version once by hand.", "Versionen 1.2.x können sich nicht selbst aktualisieren („Handshake failed“). Die neueste Version einmal von Hand installieren.")),

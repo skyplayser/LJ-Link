@@ -353,7 +353,7 @@ main = f'''<main class="wrap article changelog">
     <h1><span class="kicker" data-de="Änderungen · alle Versionen">Patch notes · every version</span><span data-de="Was ist neu in LJ Link">What's new in LJ Link</span></h1>
     <p class="tag" data-de="Jede Version mit ihren Neuerungen und Fehlerbehebungen, die neueste oben. Aktuell ist LJ Link {latest}.">Every version with what is new and what was fixed, newest at the top. The latest is LJ Link {latest}.</p>
     <div class="cta" style="justify-content:flex-start">
-      <a class="btn primary" href="https://github.com/skyplayser/LJ-Link/releases/latest" data-de="LJ Link {latest} herunterladen">Download LJ Link {latest}</a>
+      <a class="btn primary" href="index.html#download" data-de="LJ Link {latest} herunterladen">Download LJ Link {latest}</a>
       <a class="btn" href="wiki-known-issues.html" data-de="Bekannte Fehler">Known issues</a>
     </div>
     <p class="rel-toc"><span data-de="Zu Version:">Jump to:</span> {" ".join(toc)}</p>

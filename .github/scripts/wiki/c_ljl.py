@@ -33,8 +33,8 @@ def _():
                  ("lj", "vj", "cable", ("tempo, track", "Tempo, Track"))],
                 cap=("Everything stays in the local network: no account, no cloud, no internet connection.",
                      "Alles bleibt im lokalen Netzwerk: kein Konto, keine Cloud, keine Internetverbindung.")),
-        P("Download: [latest release](" + LJL + "/releases/latest) · website: [LJL Link](" + LJL_SITE + ") · source code: [github.com/skyplayser/LJL-Link](" + LJL + ") · [privacy policy of LJL Link](" + LJL_PRIVACY + ")",
-          "Download: [neuestes Release](" + LJL + "/releases/latest) · Website: [LJL Link](" + LJL_SITE + "de/) · Quellcode: [github.com/skyplayser/LJL-Link](" + LJL + ") · [Datenschutzerklärung von LJL Link](" + LJL_PRIVACY + ")"),
+        P("Download: [LJL Link website](" + LJL_SITE + "#download) · website: [LJL Link](" + LJL_SITE + ") · source code: [github.com/skyplayser/LJL-Link](" + LJL + ") · [privacy policy of LJL Link](" + LJL_PRIVACY + ")",
+          "Download: [Website von LJL Link](" + LJL_SITE + "de/#download) · Website: [LJL Link](" + LJL_SITE + "de/) · Quellcode: [github.com/skyplayser/LJL-Link](" + LJL + ") · [Datenschutzerklärung von LJL Link](" + LJL_PRIVACY + ")"),
 
         H2("What you need", "Was du brauchst", id_="requirements"),
         TABLE([("What", "Was"), ("State", "Stand")], [
@@ -63,8 +63,8 @@ def _():
         H2("Preparing the stick (preliminary, alpha)", "Stick vorbereiten (vorläufig, Alpha)", id_="stick"),
         P("For now there is no button for this in LJ Link; an interface to prepare the stick follows later. Until then, on the **computer that runs LJ Link**:",
           "Noch gibt es dafür keinen Knopf in LJ Link; eine Oberfläche zum Vorbereiten des Sticks folgt später. Bis dahin am **Computer mit LJ Link**:"),
-        STEPS(("Download LJL Link from the [latest release](" + LJL + "/releases/latest) and copy **LJL Link.app** onto the USB stick.",
-               "LJL Link aus dem [neuesten Release](" + LJL + "/releases/latest) laden und **LJL Link.app** auf den USB-Stick kopieren."),
+        STEPS(("Download LJL Link from its [website](" + LJL_SITE + "#download) and copy **LJL Link.app** onto the USB stick.",
+               "LJL Link von seiner [Website](" + LJL_SITE + "de/#download) laden und **LJL Link.app** auf den USB-Stick kopieren."),
               ("In a browser on this computer open `http://127.0.0.1:8080/api/sender/club.json`. 8080 is the standard port; if LJ Link uses another one, put that port instead. This address works only on the computer that runs LJ Link, not on a tablet.",
                "In einem Browser auf diesem Computer `http://127.0.0.1:8080/api/sender/club.json` öffnen. 8080 ist der Standard-Port; nutzt LJ Link einen anderen, diesen einsetzen. Die Adresse funktioniert nur auf dem Computer mit LJ Link, nicht auf einem Tablet."),
               ("Save the file as `club.json` on the stick, **next to** LJL Link.app. It holds the club name, the addresses and port of the booth computer and the **club key**.",
