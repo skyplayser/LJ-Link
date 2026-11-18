@@ -223,7 +223,7 @@ Type the command into the desk's command line by hand first, and edit it in LJ L
 | CDJ-2000NXS2 | works: status, metadata, waveforms, cues, position from beats and beat grid |
 | DJM-2000NXS | works as mixer: ON AIR per channel |
 | CDJ-3000X | partly, alpha: tempo, BPM, time, play/pause; no titles, waveforms or beat grid yet (most likely because of the OneLibrary format, see [troubleshooting](https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#tracks-and-waveforms)) |
-| XDJ-AZ | not tested; probably like the CDJ-3000X (OneLibrary), no titles or waveforms yet. From 1.7.10 LJ Link no longer takes the player number 7 the XDJ-AZ uses itself (alpha, [details](https://skyplayser.github.io/LJ-Link/wiki-pioneer.html#xdj-az)) |
+| XDJ-AZ | partly, alpha (user report): with Pro DJ Link switched on in its settings (then 2 decks) titles, BPM, time, waveforms and ON AIR arrive; in 4-deck mode no data so far. From 1.7.10 LJ Link no longer takes the player number 7 the XDJ-AZ uses itself (alpha, [details](https://skyplayser.github.io/LJ-Link/wiki-pioneer.html#xdj-az)) |
 | OPUS-QUAD | not tested; probably like the CDJ-3000X (OneLibrary), no titles or waveforms yet |
 | DJM-A9 | from 1.7.10 detected, alpha – tempo/master only if the mixer sends them |
 | CDJ-2000NXS, XDJ-1000MK2, XDJ-XZ, DJM-900NXS2, DJM-V10 | expected to work, not tested |
