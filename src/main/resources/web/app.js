@@ -99,6 +99,8 @@ function render() {
   const notes = $("notes");
   notes.textContent = (st.notes || []).map(w => t(w)).join(" · ");
   notes.classList.toggle("hidden", !(st.notes || []).length || st.phase !== "monitoring");
+  renderOwnNumber(st);
+  renderXdjAzNoStatus(st);
   // Also outside monitoring: hides the zoom/VIEW toolbar after the demo or a source stops.
   applyTab();
   if (st.phase === "monitoring") {
@@ -133,6 +135,36 @@ function render() {
   if (senderDecksOnly()) setStatus("live", "Connected");
   else setStatus("", "Ready");
   show(ui.manualOpen ? "manual" : "welcome");
+}
+
+/** Grey note while LJ Link itself has one of the deck numbers 1-4 (a mixer assigned it, e.g. an XDJ-AZ, issue #2). */
+function renderOwnNumber(st) {
+  const el = $("own-number");
+  const o = st.ownNumber;
+  if (!o || st.phase !== "monitoring") { el.classList.add("hidden"); el.textContent = ""; return; }
+  el.textContent = o.address && !isShot()
+    ? t("LJ Link uses player number {n}, assigned by the mixer {name} at {address}. Another player with number {n} would collide with LJ Link (Alpha).",
+      { n: o.number, name: o.name || "", address: o.address }).replace("  ", " ")
+    : t("LJ Link uses player number {n}, assigned by a mixer. Another player with number {n} would collide with LJ Link (Alpha).", { n: o.number });
+  el.classList.remove("hidden");
+}
+
+/** Grey note while an XDJ-AZ is announced but sends no deck data (4-deck mode in issue #2); gone as soon as status arrives. */
+function renderXdjAzNoStatus(st) {
+  const el = $("xdjaz-hint");
+  const on = !!st.xdjAzNoStatus && st.phase === "monitoring";
+  el.classList.toggle("hidden", !on);
+  const key = on ? lang : "";
+  if (el.dataset.shown === key) return;
+  el.dataset.shown = key;
+  el.textContent = "";
+  if (!on) return;
+  const a = document.createElement("a");
+  a.href = WIKI_XDJ_AZ;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = t("Help");
+  el.append(t("The XDJ-AZ sends no deck data. In a user report they arrived only with Pro DJ Link switched on (XDJ-AZ settings, Deck tab; then only 2 decks). Alpha."), " ", a);
 }
 
 function renderFound(devices) {
@@ -963,10 +995,11 @@ function setText(d, key, node, text) {
 }
 
 const WIKI_TRACKS = "https://skyplayser.github.io/LJ-Link/wiki-troubleshooting.html#tracks-and-waveforms";
+const WIKI_XDJ_AZ = "https://skyplayser.github.io/LJ-Link/wiki-pioneer.html#xdj-az";
 
 /** The message over an empty waveform, optionally with a link to the help on tracks and waveforms. */
-function setWaveMsg(d, text, link) {
-  const key = text + "|" + (link || "");
+function setWaveMsg(d, text, link, href) {
+  const key = text + "|" + (link || "") + "|" + (href || "");
   if (d.shown.waveMsg === key) return;
   d.shown.waveMsg = key;
   const msg = d.q(".wave-msg");
@@ -977,7 +1010,7 @@ function setWaveMsg(d, text, link) {
   if (link) {
     const a = document.createElement("a");
     a.className = "wave-help";
-    a.href = WIKI_TRACKS;
+    a.href = href || WIKI_TRACKS;
     a.target = "_blank";
     a.rel = "noopener";
     a.textContent = link;
@@ -1003,7 +1036,8 @@ function updateDeck(m) {
   const shownTitle = isShot() && m.title ? testTitle(m.deck) : m.title;
   const shownArtist = isShot() && m.artist ? testArtist(m.deck) : m.artist;
   // No metadata after a while (ProDjLinkSource.metadataHint): a short hint instead of an endless "Loading track …".
-  const waiting = m.metaHint === "onelibrary" ? "Not supported" : m.metaHint === "missing" ? "No track data" : "Loading track …";
+  const waiting = m.metaHint === "onelibrary" ? "Not supported"
+    : m.metaHint === "missing" || m.metaHint === "xdj-az" ? "No track data" : "Loading track …";
   const sender = m.kind === "sender";
   // The DJ switched track names off in LJL Link: say so instead of an endless "Loading track …".
   const missing = sender && m.titleHidden ? "Title hidden by the DJ" : waiting;
@@ -1061,6 +1095,7 @@ function updateDeck(m) {
 
   if (!m.hasTrack || m.hasDetail || m.hasWaveform) setWaveMsg(d, "");
   else if (m.noWaveform) setWaveMsg(d, t("No waveform found for this track"));
+  else if (m.metaHint === "xdj-az") setWaveMsg(d, t("XDJ-AZ: title and waveform are not arriving. In a user report they arrived when the USB stick also had the older rekordbox database (rekordbox had added it automatically; if it is missing, export the stick again). Alpha."), t("Help"), WIKI_XDJ_AZ);
   else if (m.metaHint === "onelibrary") setWaveMsg(d, t("Title and waveform from this player are not supported yet: LJ Link cannot read the newer OneLibrary format of this model (Alpha). BPM, time and beats still work."), t("Help"));
   else if (m.metaHint === "missing") setWaveMsg(d, t("Title and waveform are not arriving from this player."), t("What can I do?"));
   else setWaveMsg(d, t("Waveform loading … (not available for streaming tracks)"));
@@ -2053,7 +2088,7 @@ $("btn-error-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
-$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); renderChat(); };
+$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); renderChat(); pollPairing(); };
 
 /* ---------- Suite chat (Alpha, docs/suite-chat.md) ---------- */
 // LJ Link takes part in the room of all suite programs in the network. Only the browser on this computer reads and
@@ -2255,6 +2290,131 @@ $("chat-form").onsubmit = (e) => { e.preventDefault(); sendChat(false); };
 $("chat-emergency").onclick = () => sendChat(true);
 $("chat-box").onchange = () => chatSettings({ enabled: $("chat-box").checked });
 setInterval(pollChat, 1500);
+/* ---------- LJL Link: approval of DJ Macs without club.json (Alpha) ---------- */
+// A DJ Mac without club.json asks to send its Serato decks; the LJ allows or denies it here. Only the browser on this
+// computer sees the requests and the list (the API is local, ControlGuard); it asks every 1.5 s. Nothing of it goes
+// over /ws, so a tablet never sees the name or the address of a DJ Mac.
+const pairing = { requests: [], approved: [], busy: false, shown: "", listShown: "" };
+
+async function pollPairing() {
+  if (!ui.info || !ui.controller || pairing.busy) return;
+  pairing.busy = true;
+  try {
+    const r = await fetch("/api/sender/pairing", { cache: "no-store" });
+    if (r.ok) {
+      const st = await r.json();
+      pairing.requests = st.requests || [];
+      pairing.approved = st.approved || [];
+    }
+  } catch (e) { /* not reachable: next time */ }
+  pairing.busy = false;
+  renderPairing();
+}
+
+function pairingTime(at) {
+  if (!at) return "–";
+  const d = new Date(at);
+  const today = new Date().toDateString() === d.toDateString();
+  return today ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : d.toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderPairing() {
+  $("ljl-setting").classList.toggle("hidden", !ui.controller);
+  const box = $("pair-requests");
+  const reqs = ui.controller ? pairing.requests : [];
+  box.setAttribute("aria-label", t("Approval requests"));
+  // Rebuilt only when something changed, so a button under the pointer is not replaced every 1.5 s.
+  const key = lang + "|" + reqs.map((q) => q.id + ":" + q.name + ":" + q.address + ":" + Math.ceil(q.left / 10)).join(",");
+  if (key !== pairing.shown) {
+    pairing.shown = key;
+    box.textContent = "";
+    for (const q of reqs) {
+      const row = document.createElement("div");
+      row.className = "pair-request";
+      const text = document.createElement("span");
+      text.className = "pair-text";
+      text.textContent = t("“{name}” ({address}) wants to send Serato decks with LJL Link – Alpha", { name: q.name, address: q.address || "?" });
+      const left = document.createElement("span");
+      left.className = "pair-left";
+      left.textContent = t("{s} s left", { s: Math.max(0, Math.ceil(q.left / 10) * 10) });
+      const buttons = document.createElement("span");
+      buttons.className = "pair-buttons";
+      const allow = document.createElement("button");
+      allow.className = "primary";
+      allow.type = "button";
+      allow.textContent = t("Allow");
+      allow.onclick = () => answerPairing("/api/sender/allow", q.id);
+      const deny = document.createElement("button");
+      deny.className = "secondary";
+      deny.type = "button";
+      deny.textContent = t("Deny");
+      deny.onclick = () => answerPairing("/api/sender/deny", q.id);
+      buttons.append(allow, deny);
+      row.append(text, left, buttons);
+      box.append(row);
+    }
+  }
+  box.classList.toggle("hidden", reqs.length === 0);
+  const listKey = lang + "|" + JSON.stringify(pairing.approved);
+  if (listKey === pairing.listShown) return;
+  pairing.listShown = listKey;
+  const list = $("ljl-list");
+  list.textContent = "";
+  if (!pairing.approved.length) {
+    const none = document.createElement("div");
+    none.className = "hint";
+    none.textContent = t("No DJ Mac approved yet.");
+    list.append(none);
+  }
+  for (const m of pairing.approved) {
+    const item = document.createElement("div");
+    item.className = "ljl-item";
+    const name = document.createElement("span");
+    name.className = "ljl-name";
+    name.textContent = m.name;
+    const seen = document.createElement("small");
+    seen.className = "ljl-seen";
+    seen.textContent = m.connected ? t("Connected now") : t("Last seen: {time}", { time: pairingTime(m.last) });
+    name.append(seen);
+    const remove = document.createElement("button");
+    remove.className = "secondary";
+    remove.type = "button";
+    remove.textContent = t("Remove");
+    remove.onclick = async () => {
+      try {
+        await fetch("/api/sender/approved/remove", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ id: m.id }) });
+      } catch (e) { setStatus("bad", "Program not reachable"); }
+      pollPairing();
+    };
+    item.append(name, remove);
+    list.append(item);
+  }
+}
+
+async function answerPairing(url, id) {
+  $("ljl-status").textContent = "";
+  try {
+    const r = await fetch(url, { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ id }) });
+    if (r.status === 404) $("ljl-status").textContent = t("This request is no longer waiting.");
+    else if (r.ok && url.endsWith("/allow")) {
+      const a = await r.json();
+      if (a.result === "full") $("ljl-status").textContent = t("Approved. LJ Link already has 4 DJ Macs connected; this one gets in as soon as one leaves.");
+    }
+  } catch (e) { setStatus("bad", "Program not reachable"); }
+  pollPairing();
+}
+
+$("ljl-newkey").onclick = async () => {
+  if (!confirm(t("New key? Every club.json made so far stops working, all approved DJ Macs are removed and connected DJ Macs are disconnected. They must ask again or get a new club.json."))) return;
+  try {
+    const r = await fetch("/api/sender/key", { method: "POST", headers: JSON_HEADERS, body: "{}" });
+    $("ljl-status").textContent = r.ok ? t("New key made. Approved DJ Macs removed.") : t("The new key could not be made.");
+  } catch (e) { setStatus("bad", "Program not reachable"); }
+  pollPairing();
+};
+setInterval(pollPairing, 1500);
+
 $("btn-licenses").onclick = () => window.open("legal/index.html", "_blank", "noopener");
 $("btn-settings-close").onclick = () => $("settings").classList.add("hidden");
 $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").classList.add("hidden"); });
@@ -2434,6 +2594,7 @@ fetch("/api/info").then((r) => r.json()).then((info) => {
   ui.info = info;
   renderPortNote();
   render();
+  pollPairing();
   introHook.gotInfo(info);
   // The program icon menu follows the language chosen on this computer.
   if (info.controller) post("/api/language?lang=" + lang);

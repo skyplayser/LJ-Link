@@ -161,6 +161,10 @@ const DE = {
   "ShowKontrol runs on this computer. Both programs at the same time on one computer can disturb each other.": "ShowKontrol läuft auf diesem Computer. Beide Programme gleichzeitig auf einem Computer können sich stören.",
   "Title and waveform from this player are not supported yet: LJ Link cannot read the newer OneLibrary format of this model (Alpha). BPM, time and beats still work.": "Titel und Waveform von diesem Player werden noch nicht unterstützt: LJ Link kann das neuere OneLibrary-Format dieses Modells noch nicht lesen (Alpha). BPM, Zeit und Beats funktionieren trotzdem.",
   "Title and waveform are not arriving from this player.": "Titel und Waveform kommen von diesem Player nicht an.",
+  "XDJ-AZ: title and waveform are not arriving. In a user report they arrived when the USB stick also had the older rekordbox database (rekordbox had added it automatically; if it is missing, export the stick again). Alpha.": "XDJ-AZ: Titel und Waveform kommen nicht an. In einem Nutzerbericht kamen sie an, als auf dem USB-Stick auch die ältere rekordbox-Datenbank lag (rekordbox hatte sie automatisch mit abgelegt; fehlt sie, den Stick neu exportieren). Alpha.",
+  "The XDJ-AZ sends no deck data. In a user report they arrived only with Pro DJ Link switched on (XDJ-AZ settings, Deck tab; then only 2 decks). Alpha.": "Der XDJ-AZ schickt keine Deck-Daten. In einem Nutzerbericht kamen sie nur an, wenn Pro DJ Link eingeschaltet war (Einstellungen des XDJ-AZ, Reiter Deck; dann nur 2 Decks). Alpha.",
+  "LJ Link uses player number {n}, assigned by the mixer {name} at {address}. Another player with number {n} would collide with LJ Link (Alpha).": "LJ Link nutzt die Spielernummer {n}, zugewiesen vom Mixer {name} unter {address}. Ein weiterer Player mit der Nummer {n} käme mit LJ Link in Konflikt (Alpha).",
+  "LJ Link uses player number {n}, assigned by a mixer. Another player with number {n} would collide with LJ Link (Alpha).": "LJ Link nutzt die Spielernummer {n}, zugewiesen von einem Mixer. Ein weiterer Player mit der Nummer {n} käme mit LJ Link in Konflikt (Alpha).",
   "What can I do?": "Was kann ich tun?",
   "Help": "Hilfe",
   "Mixer recognised (Alpha), but it sends no data LJ Link can read (tempo, master). ON AIR per channel comes from the players.": "Mixer erkannt (Alpha), sendet aber keine Daten, die LJ Link lesen kann (Tempo, Master). ON AIR je Kanal kommt von den Playern.",
@@ -374,6 +378,27 @@ const DE = {
   "Raw data (status packet, hex)": "Rohdaten (Statuspaket, hex)", "Packet": "Paket", "Mixer": "Mixer",
   "Section not readable": "Abschnitt nicht lesbar", "Note": "Hinweis",
   "Demo mode: simulated data, no real hardware": "Demo-Modus: simulierte Daten, keine echte Hardware",
+
+  // LJL Link: approval of DJ Macs without club.json (Alpha)
+  "LJL Link (DJ Macs) – Alpha": "LJL Link (DJ-Macs) – Alpha",
+  "A DJ Mac with LJL Link but without club.json asks here to send its Serato decks. You allow it once; from then on LJ Link knows this Mac. Only on this computer, not on a tablet.": "Ein DJ-Mac mit LJL Link, aber ohne club.json, fragt hier, ob er seine Serato-Decks senden darf. Du erlaubst es einmal; danach kennt LJ Link diesen Mac. Nur an diesem Computer, nicht auf einem Tablet.",
+  "Approved DJ Macs": "Freigegebene DJ-Macs",
+  "New key": "Neuer Schlüssel",
+  "New key: every club.json made so far stops working, all approved DJ Macs are removed and must ask again.": "Neuer Schlüssel: Jede bisher erstellte club.json funktioniert nicht mehr, alle freigegebenen DJ-Macs werden entfernt und müssen neu anfragen.",
+  "Approval requests": "Freigabe-Anfragen",
+  "“{name}” ({address}) wants to send Serato decks with LJL Link – Alpha": "„{name}“ ({address}) möchte mit LJL Link Serato-Decks senden – Alpha",
+  "{s} s left": "noch {s} s",
+  "Allow": "Erlauben",
+  "Deny": "Ablehnen",
+  "No DJ Mac approved yet.": "Noch kein DJ-Mac freigegeben.",
+  "Connected now": "Jetzt verbunden",
+  "Last seen: {time}": "Zuletzt gesehen: {time}",
+  "Remove": "Entfernen",
+  "This request is no longer waiting.": "Diese Anfrage wartet nicht mehr.",
+  "Approved. LJ Link already has 4 DJ Macs connected; this one gets in as soon as one leaves.": "Freigegeben. LJ Link hat schon 4 DJ-Macs verbunden; dieser kommt rein, sobald einer geht.",
+  "New key? Every club.json made so far stops working, all approved DJ Macs are removed and connected DJ Macs are disconnected. They must ask again or get a new club.json.": "Neuer Schlüssel? Jede bisher erstellte club.json funktioniert nicht mehr, alle freigegebenen DJ-Macs werden entfernt und verbundene DJ-Macs getrennt. Sie müssen neu anfragen oder eine neue club.json bekommen.",
+  "New key made. Approved DJ Macs removed.": "Neuer Schlüssel erstellt. Freigegebene DJ-Macs entfernt.",
+  "The new key could not be made.": "Der neue Schlüssel konnte nicht erstellt werden.",
 };
 
 let lang = "en";
@@ -416,7 +441,7 @@ function t(text, vars) {
 const norm = (s) => s.replace(/\s+/g, " ").trim();
 const ATTRS = ["title", "placeholder", "aria-label"];
 // Parts of the page whose texts are generated by the program and already translated with t().
-const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, #report-stars, #report-attach, #launcher-hint, script, style";
+const SKIP = "#decks, #info-body, #mixer-view, #found-list, #adapters, #check-result, #link-status, #abl-status, #awake-status, #report-stars, #report-attach, #own-number, #xdjaz-hint, #pair-requests, #ljl-list, #ljl-status, #launcher-hint, script, style";
 
 /** Translates the static texts of the page (text nodes and some attributes), and back to English. */
 function translateStatic() {

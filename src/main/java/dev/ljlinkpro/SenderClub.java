@@ -21,8 +21,11 @@ final class SenderClub {
 
     static final String KEY_SETTING = "senderClubKey";
     static final String NAME_SETTING = "senderClubName";
+    /** The booth id announced by Bonjour ({@code booth=}): LJL Link derives its pseudonym for this LJ Link from it. */
+    static final String BOOTH_SETTING = "senderBoothId";
     static final int MAX_NAME = 64;
     private static final Pattern KEY = Pattern.compile("[0-9a-f]{32}");
+    private static final Pattern BOOTH = Pattern.compile("[0-9a-f]{16}");
     private static final SecureRandom RANDOM = new SecureRandom();
 
     /** The current club key; created and saved when there is none yet (or the saved one is broken). */
@@ -40,6 +43,32 @@ final class SenderClub {
         String k = newKeyValue();
         AppSettings.set(KEY_SETTING, k);
         return k;
+    }
+
+    /**
+     * The booth id (64 random bits as 16 lowercase hex digits), created and saved when there is none yet (or the saved one
+     * is broken). Not secret, it is announced in the network; replaced together with the club key ("New key").
+     */
+    static synchronized String booth() {
+        String b = AppSettings.getString(BOOTH_SETTING, null);
+        if (b == null || !BOOTH.matcher(b).matches()) {
+            b = newBoothValue();
+            AppSettings.set(BOOTH_SETTING, b);
+        }
+        return b;
+    }
+
+    /** Replaces the booth id with a new random one and returns it: every pseudonym of a DJ Mac changes with it. */
+    static synchronized String renewBooth() {
+        String b = newBoothValue();
+        AppSettings.set(BOOTH_SETTING, b);
+        return b;
+    }
+
+    static String newBoothValue() {
+        byte[] b = new byte[8];
+        RANDOM.nextBytes(b);
+        return java.util.HexFormat.of().formatHex(b);
     }
 
     static String newKeyValue() {

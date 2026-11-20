@@ -49,6 +49,12 @@ final class AppSettings {
         return n.isTextual() ? n.asText() : fallback;
     }
 
+    /** The value of {@code key} as JSON text (e.g. a list), or null when it is not set. */
+    static synchronized String getJson(String key) {
+        JsonNode n = read().get(key);
+        return n == null || n.isNull() ? null : n.toString();
+    }
+
     static synchronized void set(String key, Object value) {
         try {
             ObjectNode o = read();

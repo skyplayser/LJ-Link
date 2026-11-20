@@ -98,10 +98,18 @@ public final class Main {
         }
         Runtime.getRuntime().addShutdownHook(new Thread(chat::stop));
         final int[] boundPort = {port, port};
+        // Set once the port is known; "New key" announces the new booth id with it.
+        final Bonjour[] bonjour = {null};
+        Runnable reannounce = () -> {
+            Bonjour b = bonjour[0];
+            if (b != null) {
+                b.reannounce();
+            }
+        };
         Started started;
         try {
-            started = start(port, () -> createApp(hub, session, link, ableton, vjLink, senders, chat, chatNet, boundPort),
-                    Main::portTaken);
+            started = start(port, () -> createApp(hub, session, link, ableton, vjLink, senders, chat, chatNet, boundPort,
+                    reannounce), Main::portTaken);
         } catch (RuntimeException e) {
             // Without a console nobody would see why LJ Link did not start (issue #3): say it in a window, too.
             System.err.println(noFreePortText(port, port + 9, false) + " (" + e.getMessage() + ")");
@@ -121,7 +129,7 @@ public final class Main {
         Javalin app = started.app();
         int bound = started.port();
         boundPort[0] = bound;
-        Bonjour.announce(bound, Updater.currentVersion());
+        bonjour[0] = Bonjour.announce(bound, Updater.currentVersion());
         String url = localUrl(bound);
         if (bound != port) {
             System.out.println("Port " + port + " is in use by another program; LJ Link uses port " + bound + " instead.");
@@ -202,9 +210,10 @@ public final class Main {
      * after a failed start (issue #3).
      *
      * @param boundPort [0] the port the server runs on, [1] the port that was asked for
+     * @param reannounce announces Bonjour again (new booth id after "New key")
      */
     private static Javalin createApp(Hub hub, Session session, LinkService link, AbletonLinkPeer ableton, VjLink vjLink,
-            SenderInbox senders, SuiteChat chat, SuiteChat.Net chatNet, int[] boundPort) {
+            SenderInbox senders, SuiteChat chat, SuiteChat.Net chatNet, int[] boundPort, Runnable reannounce) {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/web", Location.CLASSPATH);
             config.showJavalinBanner = false;
@@ -388,13 +397,9 @@ public final class Main {
         });
         app.get("/api/sender/club.json", ctx -> ctx.header("Cache-Control", "no-store")
                 .json(SenderClub.clubJson(SenderClub.name(), SenderClub.hosts(), boundPort[0], SenderClub.key())));
-        // "New key": an older club.json is refused from now on, connected senders are disconnected.
-        app.post("/api/sender/key", ctx -> {
-            String key = SenderClub.renewKey();
-            senders.disconnectAll();
-            System.out.println("Club key for LJL Link apps replaced");
-            ctx.header("Cache-Control", "no-store").json(Map.of("key", key));
-        });
+        // "New key" and the approval of DJ Macs without club.json (Alpha). Local only (ControlGuard): names and addresses
+        // of the Macs never reach a tablet.
+        SenderPairing.routes(app, senders, reannounce);
         // Suite chat (Alpha). Local only like everything under /api/ (ControlGuard): a tablet neither reads nor writes it.
         // The browser on this computer asks with the last message number it has.
         app.get("/api/chat", ctx -> {

@@ -81,6 +81,8 @@ final class Hub {
         volatile String mode = "live";
         volatile String message = "";
         volatile String note;
+        volatile Map<String, Object> ownNumber;
+        volatile boolean xdjAzNoStatus;
         volatile List<DeviceInfo> devices = List.of();
         volatile Map<String, Object> mixerBase = Map.of("present", false);
         private final Map<Integer, Deck> own = new ConcurrentHashMap<>();
@@ -144,6 +146,27 @@ final class Hub {
 
         void setMixer(Map<String, Object> base) {
             mixerBase = base;
+        }
+
+        /**
+         * LJ Link's own player number when it is one of the deck numbers 1-4 (number, byMixer, mixer address and name),
+         * shown as a grey note in the app; null removes it.
+         */
+        void setOwnNumber(Map<String, Object> info) {
+            Map<String, Object> before = ownNumber;
+            ownNumber = info == null ? null : Map.copyOf(info);
+            if (!java.util.Objects.equals(before, ownNumber)) {
+                broadcastState();
+            }
+        }
+
+        /** An XDJ-AZ is announced but sends no deck data (4-deck mode, issue #2): a grey note in the app while true. */
+        void setXdjAzNoStatus(boolean on) {
+            boolean before = xdjAzNoStatus;
+            xdjAzNoStatus = on;
+            if (before != on) {
+                broadcastState();
+            }
         }
 
         /** A quiet note shown in the app while this source is connected (for example ShowKontrol on the network); null removes it. */
@@ -507,6 +530,18 @@ final class Hub {
             }
         }
         m.put("notes", notes);
+        Map<String, Object> ownNumber = null;
+        for (Scope sc : sortedScopes()) {
+            if (ownNumber == null && sc.ownNumber != null) {
+                ownNumber = sc.ownNumber;
+            }
+        }
+        if (ownNumber != null) {
+            m.put("ownNumber", ownNumber); // only while LJ Link has a deck number 1-4
+        }
+        if (sortedScopes().stream().anyMatch(sc -> sc.xdjAzNoStatus)) {
+            m.put("xdjAzNoStatus", true);
+        }
         List<Map<String, Object>> groupList = new ArrayList<>(groups.values());
         groupList.sort(java.util.Comparator.comparingInt(g -> (Integer) g.get("order")));
         m.put("groups", groupList);

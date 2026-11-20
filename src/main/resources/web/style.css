@@ -470,3 +470,17 @@ button.awake-hint { display: block; width: 100%; box-sizing: border-box; margin:
 .launcher-hint { margin-top: 12px; --focus: #FF5C93; }
 :root[data-theme="day"] .launcher-hint { --focus: #CC0045; }
 .launcher-hint:empty { display: none; }
+
+/* ---- LJL Link approval (Alpha): requests as a bar below the top bar, the approved DJ Macs in the settings ---- */
+.pair-requests { position: sticky; top: 0; z-index: 30; }
+.pair-request { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 8px 16px;
+  background: var(--raise); background: color-mix(in srgb, var(--warn) 16%, var(--panel));
+  border-bottom: 2px solid var(--warn); color: var(--text); }
+.pair-request .pair-text { flex: 1 1 260px; }
+.pair-request .pair-left { color: var(--dim); font: 12px var(--mono); }
+.pair-request .pair-buttons { display: flex; gap: 8px; }
+.sub-label { font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+.ljl-list { display: flex; flex-direction: column; gap: 6px; }
+.ljl-item { display: flex; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.ljl-item .ljl-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.ljl-item .ljl-seen { color: var(--dim); font-size: 12px; display: block; }

@@ -50,7 +50,7 @@ final class Deck {
     volatile boolean titleHidden;
     /** True for sources that cannot deliver waveforms (yet), so the display says so instead of waiting. */
     volatile boolean noWaveformSource;
-    /** "onelibrary" or "missing" when an analysed track has had no metadata for a while (see ProDjLinkSource#metadataHint). */
+    /** "xdj-az", "onelibrary" or "missing" when an analysed track has had no metadata for a while (see ProDjLinkSource#metadataHint). */
     volatile String metaHint;
     /** Channel fader 0..1 and EQ -1..1; null when the source cannot report them (Pro DJ Link only reports ON AIR). */
     volatile Double fader;

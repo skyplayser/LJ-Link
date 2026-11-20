@@ -22,8 +22,11 @@ import java.util.function.Supplier;
  * accepted, and everything it sends is read only as deck data: nothing in LJ Link, on the players or on the light desks
  * can be controlled this way.
  * <ul>
- * <li>{@code hello} → {@code welcome} or {@code reject} (key | protocol | full, then closed); deck messages before the
- * welcome are ignored.</li>
+ * <li>{@code hello} → {@code welcome} or {@code reject} (key | protocol | full | denied | timeout, then closed); deck
+ * messages before the welcome are ignored.</li>
+ * <li>Approval without club.json (Alpha): a hello without a valid key but with a pseudonym ({@code device}) of a Mac the
+ * LJ approved before is welcomed; an unknown one gets {@code pending} and waits for "Allow" or "Deny" in the browser on
+ * this computer ({@link SenderPairing}). Name, pseudonym and address of these Macs are never logged.</li>
  * <li>Each sender gets its own {@link Hub.Scope} ({@code sender-s1} …, kind {@value #KIND}), named after the sender, with
  * decks 1-{@value #MAX_DECKS}; it survives "Search" and "Stop", does not count for the phase of the search, and goes away
  * with the sender.</li>
@@ -60,6 +63,10 @@ final class SenderInbox {
     static final int DETAIL_FPS = 150;
     static final long MAX_LENGTH_MS = 24L * 3600 * 1000;
     static final String DEFAULT_NAME = "LJL Link";
+    /** An approval request without an answer in this time gets {@code reject timeout}. */
+    static final long APPROVAL_TIMEOUT_NANOS = 120_000_000_000L;
+    /** More approval requests than this already waiting: a new one gets {@code reject full}. */
+    static final int MAX_WAITING = 2;
 
     /** Close codes (RFC 6455). */
     static final int CLOSE_NORMAL = 1000;
@@ -90,6 +97,15 @@ final class SenderInbox {
         String groupName;
         String app;
         boolean names;
+        /** The pseudonym from the hello (32 lowercase hex digits), or null. */
+        String device;
+        /** Waiting for the LJ to allow or deny it (sent {@code pending}). */
+        boolean awaiting;
+        long requestedAt;
+        /** The browser's handle of the waiting request ("r1" …). */
+        String requestId;
+        /** Welcomed because the LJ approved this Mac (not with the club key): its address is not logged or shown. */
+        boolean approvedMac;
         Hub.Scope scope;
         /** The track id the sender gave for each deck with a track. */
         final Map<Integer, String> tracks = new HashMap<>();
@@ -111,20 +127,34 @@ final class SenderInbox {
     private final java.util.function.Consumer<String> log;
     /** Guarded by this: per refusal reason, when it was last logged and how many were left out since. */
     private final Map<String, long[]> refusals = new HashMap<>();
+    private final SenderPairing pairing;
+    private int nextRequest = 1;
 
     SenderInbox(Hub hub) {
-        this(hub, SenderClub::key, SenderClub::name, System.out::println);
+        this(hub, SenderClub::key, SenderClub::name, System.out::println, SenderPairing.fromSettings());
     }
 
+    /** For tests: the approved Macs are kept in memory only. */
     SenderInbox(Hub hub, Supplier<String> clubKey, Supplier<String> clubName) {
         this(hub, clubKey, clubName, System.out::println);
     }
 
+    /** For tests: the approved Macs are kept in memory only. */
     SenderInbox(Hub hub, Supplier<String> clubKey, Supplier<String> clubName, java.util.function.Consumer<String> log) {
+        this(hub, clubKey, clubName, log, SenderPairing.inMemory(System::currentTimeMillis));
+    }
+
+    SenderInbox(Hub hub, Supplier<String> clubKey, Supplier<String> clubName, java.util.function.Consumer<String> log,
+            SenderPairing pairing) {
         this.hub = hub;
         this.clubKey = clubKey;
         this.clubName = clubName;
         this.log = log;
+        this.pairing = pairing;
+    }
+
+    SenderPairing pairing() {
+        return pairing;
     }
 
     /** Checks twice a second for senders that went silent and connections without a hello. */
@@ -193,8 +223,8 @@ final class SenderInbox {
         Map.Entry<Object, Conn> oldestFromAddress = null;
         for (Map.Entry<Object, Conn> e : conns.entrySet()) {
             Conn c = e.getValue();
-            if (c.welcomed) {
-                continue;
+            if (c.welcomed || c.awaiting) {
+                continue; // a request waiting for the LJ has its own limit (MAX_WAITING)
             }
             pending++;
             if (c.address.equals(from)) {
@@ -237,8 +267,9 @@ final class SenderInbox {
         }
         long left = r == null ? 0 : r[1];
         refusals.put(reason, new long[] {now, 0});
-        log.accept("LJL Link from " + (address.isEmpty() ? "unknown address" : address) + " refused: " + reason
-                + (left > 0 ? " (" + left + " more refused for this reason in the last minute)" : ""));
+        // address null: a Mac on the approval path, whose address is not logged.
+        log.accept("LJL Link" + (address == null ? "" : " from " + (address.isEmpty() ? "unknown address" : address))
+                + " refused: " + reason + (left > 0 ? " (" + left + " more refused for this reason in the last minute)" : ""));
     }
 
     /** Names the refusals still counted once their minute is over. */
@@ -258,7 +289,17 @@ final class SenderInbox {
         Conn c = conns.remove(handle);
         if (c != null && c.welcomed) {
             log.accept("LJL Link " + c.id + " disconnected");
-            c.scope.close();
+            gone(c);
+        } else if (c != null && c.awaiting) {
+            log.accept("LJL Link: an approval request ended, the Mac disconnected");
+        }
+    }
+
+    /** A welcomed sender goes: its decks go away, an approved Mac's last seen is updated. */
+    private void gone(Conn c) {
+        c.scope.close();
+        if (c.approvedMac) {
+            pairing.seen(c.device, null);
         }
     }
 
@@ -266,7 +307,7 @@ final class SenderInbox {
     private void drop(Object handle, Conn c, int code, String reason) {
         conns.remove(handle);
         if (c.welcomed) {
-            c.scope.close();
+            gone(c);
         }
         try {
             c.peer.close(code, reason);
@@ -282,6 +323,18 @@ final class SenderInbox {
     synchronized void sweep(long now) {
         for (Map.Entry<Object, Conn> e : new ArrayList<>(conns.entrySet())) {
             Conn c = e.getValue();
+            if (c.awaiting) {
+                if (now - c.requestedAt > APPROVAL_TIMEOUT_NANOS) {
+                    // No answer in the booth: the request goes, the sender may try the next place.
+                    log.accept("LJL Link: an approval request got no answer within 120 s");
+                    send(c, reject("timeout"));
+                    drop(e.getKey(), c, CLOSE_POLICY, "timeout");
+                } else if (now - c.lastSeen > TIMEOUT_NANOS) {
+                    log.accept("LJL Link: an approval request ended, the Mac went silent");
+                    drop(e.getKey(), c, CLOSE_GOING_AWAY, "timeout");
+                }
+                continue;
+            }
             if (c.welcomed ? now - c.lastSeen > TIMEOUT_NANOS : now - c.openedAt > HELLO_TIMEOUT_NANOS) {
                 if (c.welcomed) {
                     log.accept("LJL Link " + c.id + " silent for 15 s; its decks are removed");
@@ -289,7 +342,16 @@ final class SenderInbox {
                 drop(e.getKey(), c, CLOSE_GOING_AWAY, "timeout");
             }
         }
+        pairing.sweep(now);
         flushRefusals(now);
+    }
+
+    private static void send(Conn c, String text) {
+        try {
+            c.peer.send(text);
+        } catch (RuntimeException ex) {
+            // closing anyway
+        }
     }
 
     /**
@@ -321,6 +383,7 @@ final class SenderInbox {
             m.put("software", c.software);
             m.put("app", c.app);
             m.put("names", c.names);
+            m.put("approved", c.approvedMac);
             m.put("decks", c.tracks.size());
             out.add(m);
         }
@@ -331,10 +394,14 @@ final class SenderInbox {
     synchronized List<String> diagnostics() {
         List<String> out = new ArrayList<>();
         int pending = 0;
+        int waiting = 0;
         for (Conn c : conns.values()) {
             if (c.welcomed) {
-                out.add("Sender " + c.id + " from " + c.address + ": " + describe(c) + ", titles "
-                        + (c.names ? "allowed" : "hidden by the DJ") + ", decks with a track " + c.tracks.keySet());
+                // An approved Mac only by its id: no address (and never its name or pseudonym).
+                out.add("Sender " + c.id + (c.approvedMac ? " (approved Mac)" : " from " + c.address) + ": " + describe(c)
+                        + ", titles " + (c.names ? "allowed" : "hidden by the DJ") + ", decks with a track " + c.tracks.keySet());
+            } else if (c.awaiting) {
+                waiting++;
             } else {
                 pending++;
             }
@@ -345,6 +412,8 @@ final class SenderInbox {
         if (out.isEmpty()) {
             out.add("No LJL Link connected");
         }
+        // Counts only.
+        out.add("Approved DJ Macs: " + pairing.size() + ", approval requests waiting: " + waiting);
         return out;
     }
 
@@ -372,7 +441,16 @@ final class SenderInbox {
         }
         String type = m.path("type").asText("");
         if (!c.welcomed) {
-            if ("hello".equals(type)) {
+            if (c.awaiting) {
+                // Waiting for the LJ: ping keeps the request alive (15-s rule), bye withdraws it, the rest is ignored.
+                c.lastSeen = now;
+                if ("ping".equals(type)) {
+                    c.peer.send("{\"type\":\"pong\"}");
+                } else if ("bye".equals(type)) {
+                    log.accept("LJL Link: an approval request was withdrawn by the Mac");
+                    drop(handle, c, CLOSE_NORMAL, "bye");
+                }
+            } else if ("hello".equals(type)) {
                 hello(handle, c, m, now);
             }
             return;
@@ -393,29 +471,93 @@ final class SenderInbox {
         }
     }
 
+    /**
+     * The decision on a hello, in the order of the protocol ("Approval without club.json"): protocol → valid key →
+     * approved Mac → 4 senders → refused in the last 10 minutes → more than {@value #MAX_WAITING} requests waiting →
+     * {@code pending}; no key and no pseudonym → {@code reject key}. A wrong key with a pseudonym takes the approval
+     * path. A full LJ Link also refuses a valid key or an approved Mac ({@code full}, as before).
+     */
     private void hello(Object handle, Conn c, JsonNode m, long now) {
         JsonNode protocol = m.path("protocol");
-        String reason = null;
         if (!protocol.isIntegralNumber() || protocol.asInt() != PROTOCOL) {
-            reason = "protocol";
-        } else if (!m.path("key").isTextual() || !SenderClub.matches(clubKey.get(), m.path("key").asText())) {
-            reason = "key";
-        } else if (welcomedCount() >= MAX_SENDERS) {
-            reason = "full";
-        }
-        if (reason != null) {
-            refused(reason, c.address, now);
-            c.peer.send(reject(reason));
-            drop(handle, c, CLOSE_POLICY, reason);
+            refuse(handle, c, "protocol", c.address, now);
             return;
         }
-        c.id = freeId();
+        readHello(c, m);
+        boolean keyOk = m.path("key").isTextual() && SenderClub.matches(clubKey.get(), m.path("key").asText());
+        String device = keyOk ? null : SenderPairing.device(m);
+        if (keyOk) {
+            if (welcomedCount() >= MAX_SENDERS) {
+                refuse(handle, c, "full", c.address, now);
+            } else {
+                welcome(c, now, false);
+            }
+            return;
+        }
+        if (device != null && pairing.isApproved(device)) {
+            c.device = device;
+            if (welcomedCount() >= MAX_SENDERS) {
+                refuse(handle, c, "full", null, now);
+            } else {
+                pairing.seen(device, c.name);
+                welcome(c, now, true);
+            }
+            return;
+        }
+        // Without a valid key and without a device (LJL Link 0.3, old stick): "key" as before, also when full.
+        if (device == null) {
+            refuse(handle, c, "key", c.address, now);
+            return;
+        }
+        if (welcomedCount() >= MAX_SENDERS) {
+            refuse(handle, c, "full", null, now);
+            return;
+        }
+        c.device = device;
+        if (pairing.isDenied(device, now)) {
+            refuse(handle, c, "denied", null, now);
+            return;
+        }
+        // The same Mac asks again (e.g. it reconnected): its older request makes room, it is not shown twice.
+        for (Map.Entry<Object, Conn> e : new ArrayList<>(conns.entrySet())) {
+            Conn o = e.getValue();
+            if (o != c && o.awaiting && device.equals(o.device)) {
+                drop(e.getKey(), o, CLOSE_POLICY, "replaced");
+            }
+        }
+        if (waitingCount() > MAX_WAITING) {
+            refuse(handle, c, "full", null, now);
+            return;
+        }
+        c.awaiting = true;
+        c.requestedAt = now;
+        c.lastSeen = now;
+        c.requestId = "r" + nextRequest++;
+        c.peer.send("{\"type\":\"pending\"}");
+        log.accept("LJL Link: approval request waiting in the booth (" + waitingCount() + " waiting)");
+    }
+
+    /** Sends {@code reject reason}, closes and logs it (without the address when {@code address} is null). */
+    private void refuse(Object handle, Conn c, String reason, String address, long now) {
+        refused(reason, address, now);
+        send(c, reject(reason));
+        drop(handle, c, CLOSE_POLICY, reason);
+    }
+
+    /** Name, software, app and the titles switch from a hello. */
+    private static void readHello(Conn c, JsonNode m) {
         String name = SenderClub.clean(m.path("name").asText(""), MAX_NAME);
         c.name = name.isEmpty() ? DEFAULT_NAME : name;
         c.software = SenderClub.clean(m.path("software").asText(""), MAX_NAME);
         c.app = SenderClub.clean(m.path("app").asText(""), 20);
         // Without a clear "yes" there are no titles.
         c.names = m.path("names").isBoolean() && m.path("names").asBoolean();
+    }
+
+    private void welcome(Conn c, long now, boolean approvedMac) {
+        c.id = freeId();
+        c.awaiting = false;
+        c.approvedMac = approvedMac;
         c.welcomed = true;
         c.lastSeen = now;
         // Shown on every deck of this sender: the DJ software, not the computer's name (personal, and long names were
@@ -433,9 +575,122 @@ final class SenderInbox {
         w.put("sender", c.id);
         c.peer.allowLargeMessages();
         c.peer.send(write(w));
-        // No DJ name in the log: it ends up in problem reports.
-        log.accept("LJL Link " + c.id + " connected from " + c.address + " (" + describe(c) + ", titles "
-                + (c.names ? "allowed" : "hidden") + ")");
+        // No DJ name in the log: it ends up in problem reports. An approved Mac not even with its address.
+        log.accept("LJL Link " + c.id + " connected " + (approvedMac ? "(approved Mac; " : "from " + c.address + " (")
+                + describe(c) + ", titles " + (c.names ? "allowed" : "hidden") + ")");
+    }
+
+    private int waitingCount() {
+        int n = 0;
+        for (Conn c : conns.values()) {
+            if (c.awaiting) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    private Map.Entry<Object, Conn> request(String id) {
+        for (Map.Entry<Object, Conn> e : conns.entrySet()) {
+            if (e.getValue().awaiting && e.getValue().requestId.equals(id)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    /** What became of "Allow". */
+    enum Allowed { WELCOMED, FULL, GONE }
+
+    /**
+     * "Allow": the Mac goes into the list and the waiting connection gets its welcome. If 4 senders are connected by now,
+     * it is approved but gets {@code reject full} (it is let in on its next try once there is room).
+     */
+    synchronized Allowed allow(String requestId, long now) {
+        Map.Entry<Object, Conn> e = requestId == null ? null : request(requestId);
+        if (e == null) {
+            return Allowed.GONE;
+        }
+        Conn c = e.getValue();
+        pairing.approve(c.device, c.name);
+        log.accept("LJL Link: approval request allowed");
+        if (welcomedCount() >= MAX_SENDERS) {
+            c.awaiting = false;
+            refuse(e.getKey(), c, "full", null, now);
+            return Allowed.FULL;
+        }
+        welcome(c, now, true);
+        return Allowed.WELCOMED;
+    }
+
+    /** "Deny": {@code reject denied}, closed, and this Mac is refused without a new request for 10 minutes. */
+    synchronized boolean deny(String requestId, long now) {
+        Map.Entry<Object, Conn> e = requestId == null ? null : request(requestId);
+        if (e == null) {
+            return false;
+        }
+        Conn c = e.getValue();
+        pairing.deny(c.device, now);
+        log.accept("LJL Link: approval request denied");
+        send(c, reject("denied"));
+        drop(e.getKey(), c, CLOSE_POLICY, "denied");
+        return true;
+    }
+
+    /**
+     * "Remove" in the list of approved Macs: the entry goes, and a connection this Mac has through its approval is
+     * closed at once ({@code reject denied}; it may ask again, a new request then appears). Connections with the club key
+     * are not touched. False when there is no such entry.
+     */
+    synchronized boolean removeApproved(String ref) {
+        String device = ref == null ? null : pairing.remove(ref);
+        if (device == null) {
+            return false;
+        }
+        int closed = 0;
+        for (Map.Entry<Object, Conn> e : new ArrayList<>(conns.entrySet())) {
+            Conn c = e.getValue();
+            if (c.welcomed && c.approvedMac && device.equals(c.device)) {
+                send(c, reject("denied"));
+                drop(e.getKey(), c, CLOSE_POLICY, "removed");
+                closed++;
+            }
+        }
+        log.accept("LJL Link: an approved Mac was removed" + (closed > 0 ? ", its connection was closed" : ""));
+        return true;
+    }
+
+    /** "New key": the list of approved Macs is emptied and every sender and request is disconnected. */
+    synchronized void forgetEverything() {
+        pairing.clear();
+        disconnectAll();
+    }
+
+    /**
+     * For the local API only (never a tablet): the waiting requests (handle, name, address, seconds left) and the approved
+     * Macs (reference, name, first and last seen, connected now). No pseudonym.
+     */
+    synchronized Map<String, Object> pairingState(long now) {
+        List<Map<String, Object>> requests = new ArrayList<>();
+        java.util.Set<String> online = new java.util.HashSet<>();
+        for (Conn c : conns.values()) {
+            if (c.awaiting) {
+                Map<String, Object> r = new LinkedHashMap<>();
+                r.put("id", c.requestId);
+                r.put("name", c.name);
+                r.put("address", c.address);
+                r.put("software", c.software);
+                r.put("left", Math.max(0, (APPROVAL_TIMEOUT_NANOS - (now - c.requestedAt)) / 1_000_000_000L));
+                requests.add(r);
+            } else if (c.welcomed && c.approvedMac) {
+                online.add(c.device);
+            }
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("requests", requests);
+        m.put("approved", pairing.list(online));
+        m.put("max", SenderPairing.MAX_APPROVED);
+        return m;
     }
 
     /** "Serato DJ Pro 5.0.0, app 0.1.0"; parts the sender left out are named as unknown or left away. */
@@ -519,7 +774,8 @@ final class SenderInbox {
         // The DJ software, like the local Serato source; the computer's name (personal) is only the group name, which
         // the problem report leaves out.
         d.name = c.software.isEmpty() ? DEFAULT_NAME : c.software;
-        d.address = c.address;
+        // An approved Mac's address does not go to the browsers (tablets); with the club key as before.
+        d.address = c.approvedMac ? "" : c.address;
         d.hasTrack = true;
         // Positions from Serato's display have 0.1 s steps: the browser smooths them like an NXS2's.
         d.coarsePosition = true;

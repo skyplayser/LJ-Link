@@ -27,8 +27,30 @@ final class LogBuffer {
     private static final ArrayDeque<String> LINES = new ArrayDeque<>();
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final Throttle THROTTLE = new Throttle();
+    /** Gets every complete line before throttling (for beat-link facts that are only logged, see ProDjLinkSource#noteLogLine). */
+    private static final List<java.util.function.Consumer<String>> LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     private LogBuffer() {}
+
+    /** Every complete line printed from now on is also handed to this listener (on the printing thread; keep it short). */
+    static void addListener(java.util.function.Consumer<String> listener) {
+        LISTENERS.add(listener);
+    }
+
+    static void removeListener(java.util.function.Consumer<String> listener) {
+        LISTENERS.remove(listener);
+    }
+
+    /** Hands one complete line to every listener; an exception of a listener is swallowed (it must never break the console). */
+    static void notifyListeners(String text) {
+        for (java.util.function.Consumer<String> l : LISTENERS) {
+            try {
+                l.accept(text);
+            } catch (RuntimeException e) {
+                // ignored on purpose
+            }
+        }
+    }
 
     static void install() {
         System.setOut(tee(System.out));
@@ -60,7 +82,7 @@ final class LogBuffer {
         }
     }
 
-    private static PrintStream tee(PrintStream original) {
+    static PrintStream tee(PrintStream original) {
         OutputStream out = new OutputStream() {
             /** The raw bytes of the line being written; it is printed (or held back) once it is complete. */
             private final ByteArrayOutputStream line = new ByteArrayOutputStream();
@@ -93,6 +115,7 @@ final class LogBuffer {
                 if (text.length() > 2000) {
                     text = text.substring(0, 2000);
                 }
+                notifyListeners(text);
                 for (String s : THROTTLE.accept(text, System.currentTimeMillis())) {
                     if (s == text) {
                         original.write(raw, 0, raw.length); // unchanged, with the line end it had

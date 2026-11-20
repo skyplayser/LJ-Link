@@ -658,3 +658,85 @@ itself – no server, like a walkie-talkie channel. Protocol: `docs/suite-chat.m
 - Alpha: unit tests, a live run on one Mac with LJ Link (Java), LJL Link (Swift) and a third test program; not yet
   between two computers, not on Windows. VJ-Link and LJL Link have the chat too (same protocol, checked together with LJ
   Link in shared final QS rounds, Nov 2026).
+
+## ADR-042: Player number assigned by a mixer, XDJ-AZ hint (issue #2, Alpha)
+The reporter's diagnostics in issue #2 (1.7.9 and 1.7.12, XDJ-AZ with Pro DJ Link switched on, 2 decks) show beat-link's log
+"Mixer at address 192.168.1.143 told us to use device number 3" and "Mixer confirmed device assignment."; LJ Link then
+runs as player 3 and titles, BPM, waveform and ON AIR arrive. The diagnostics still said "standard numbers 1-4 not used".
+Checked in the beat-link 8.0.0 sources (`VirtualCdj.claimDeviceNumber`, `handleSpecialAnnouncementPacket`):
+- While claiming a number, a "will assign" packet (0x01) from a mixer is always answered with a request; the number in
+  the following "assign" packet (0x03) replaces the claimed one, also when a fixed number was set with
+  `setDeviceNumber`. There is no setting to decline it. So LJ Link's own choice (7-15, ADR-038) does not prevent it;
+  1.7.12 still got 3 from the XDJ-AZ.
+- With a fixed number the claimed number changes only through a mixer's assignment, and self-assignment without
+  `setUseStandardPlayerNumber(true)` starts at 7. Therefore an own number 1-4, or one that differs from the number LJ
+  Link asked for, means a mixer assigned it.
+- beat-link has no getter for the assigning mixer; it only logs the line above. `LogBuffer` hands every printed line to
+  listeners; `ProDjLinkSource` reads the address and number from that line (reset before each start of the virtual CDJ)
+  and the name from the devices seen at that address.
+- The diagnostics now say "one of the standard numbers 1-4, assigned by the mixer XDJ-AZ at … (LJ Link asked for 8);
+  another player with number 3 would collide with LJ Link" (summary: a NOTE line). The app shows a grey hint above the
+  decks while LJ Link has 1-4 (state field `ownNumber`, only then).
+- Behaviour unchanged on purpose: data arrived exactly in the state with the assigned number; whether it arrives
+  because of the assignment is not known. A real player that later claims the same number gets one defense packet
+  from beat-link (`handleDeviceClaimPacket` defends during the claim, before LJ Link's conflict check can step aside).
+  Not checked on hardware.
+- Deck hint: for the XDJ-AZ the metadata hint is now "xdj-az" instead of "onelibrary". It only appears when the
+  XDJ-AZ sends status (a track is loaded), so its Pro DJ Link mode is already on; the text therefore points to the
+  stick: in the report titles arrived when the stick also had the older rekordbox database (rekordbox wrote it along
+  automatically there). beat-link 8.0.0 reads only `export.pdb` for players (`CrateDigger`; `exportLibrary.db` only in
+  `OpusProvider`). "BPM, time and beats still work" stays for the CDJ-3000X (seen in a user report).
+- No status at all: when an XDJ-AZ announces itself as player 1-4 but none of its players sent a status packet 10 s
+  after LJ Link joined (the 4-deck mode in the report: only beat packets), the app shows a grey note above the decks
+  ("sends no deck data; in a user report they arrived only with Pro DJ Link switched on, Deck tab, then only 2 decks",
+  link `wiki-pioneer.html#xdj-az`), state field `xdjAzNoStatus`, gone as soon as a status arrives; the summary has a
+  NOTE line. Alpha, not checked on hardware.
+- Diagnostics no longer call OneLibrary models "not readable": "OneLibrary model; beat-link 8.0.0 reads only the
+  classic rekordbox database export.pdb on the stick", summary "OneLibrary model (titles arrive)" when they do.
+
+## ADR-043: Approval of LJL Link without club.json (Alpha)
+A DJ who arrives without the club's stick (no `club.json`, so no club key) can still send Serato decks: LJL Link finds
+LJ Link by Bonjour and asks to be let in, the LJ allows it once with a click, and from then on LJ Link knows this Mac.
+Specification: LJL Link `docs/protocol.md`, section "Approval without club.json". Additive, `protocol` stays 1.
+- **Bonjour**: TXT of `_ljlink._tcp` also carries `pair=1` and `booth=<16 hex>`. The booth id (`SenderClub.booth()`,
+  64 random bits from `SecureRandom`, setting `senderBoothId`) is not secret; LJL Link derives its pseudonym for this
+  LJ Link from it. "New key" replaces it together with the club key and Bonjour sends the new TXT at once
+  (`ServiceInfo.setText` on every adapter, `Bonjour.reannounce()`).
+- **hello** may carry `device` (exactly 32 hex digits, upper case is taken as lower case; anything else counts as
+  missing) and may leave out `key`. The decision (`SenderInbox.hello`), in this order: wrong `protocol` → `reject
+  protocol`; valid key → `welcome`; `device` approved → `welcome` (name and last seen updated); 4 senders → `reject
+  full`; `device` present but not approved: refused in the last 10 min → `reject denied`, more than 2 requests already
+  waiting → `reject full`, otherwise `{"type":"pending"}` and a request in the browser; neither key nor device →
+  `reject key`. A wrong key with a `device` takes the approval path ("without a valid key"). A valid key or an approved
+  Mac at a full LJ Link still gets `reject full` (as before). Neither key nor device is checked before "full", so an
+  old sender (LJL Link 0.3) with an outdated stick still hears `key` at a full LJ Link, as before.
+- **Assumptions** (not fixed by the protocol): "more than 2 waiting" is read literally, so at most 3 requests wait at
+  once (`MAX_WAITING = 2`, a fourth gets `full`). A Mac that asks again while its request waits replaces the older
+  request (closed without a message). Waiting requests do not use the places of connections without hello (8 in all,
+  2 per address), so a flood of connections cannot push them out. "Allow" when 4 senders are connected by then: the
+  Mac goes into the list but gets `reject full`; it gets in on its next try. "Remove" sends `reject denied` and closes
+  only connections admitted through the approval (a connection with the club key stays); the Mac is not blocked, it may
+  ask again (a new request appears). Refusals are kept in memory only (at most 256), a restart forgets them.
+- **While waiting**: `ping` → `pong`, any message counts for the 15-s silence rule, `bye` or a closed connection
+  withdraws the request, deck messages and a second hello are ignored, the 64-KB limit before the welcome stays. 120 s
+  without an answer → `reject timeout`, closed.
+- **Approved Macs** (`SenderPairing`): pseudonym, name (cleaned, cut to 64 characters), first and last seen (wall
+  clock), setting `senderApprovedMacs`. At most 32; a new one pushes out the one not seen for the longest time. Last
+  seen is updated on every welcome and when the connection ends. "New key" (`SenderPairing.newKey`): new club key, new
+  booth id, the list and the refusals emptied, every sender and every request gets `reject key`, Bonjour again.
+- **Local API only** (all under `/api/sender/`, so `ControlGuard` keeps them to the browser on this computer):
+  `GET /api/sender/pairing` (requests: handle, name, address, seconds left; approved Macs: a reference that is new with
+  every start, name, first and last seen, connected), `POST /api/sender/allow` / `deny` (`{"id"}`; 404 when the request
+  is gone), `POST /api/sender/approved/remove`, `POST /api/sender/key`. The pseudonym never leaves the server, not even
+  to the local browser. Nothing of this goes over `/ws`: a tablet sees neither the request nor a name, address or the
+  list.
+- **Privacy**: pseudonym, name and address of a Mac on the approval path are never logged (log lines say "approval
+  request waiting", "approved Mac", "refused: denied" without address), never in the problem report (the section "LJL
+  Link (Alpha)" names an approved sender by its id only and adds the counts "Approved DJ Macs: N, approval requests
+  waiting: M"), and its decks carry no address (tablets). The key path logs and shows the address as before.
+- **Browser**: requests appear as an amber bar under the top bar on this computer ("“MacBook von Anna” (192.168.1.34)
+  wants to send Serato decks with LJL Link – Alpha", seconds left, Allow / Deny); not modal. Settings: section "LJL
+  Link (DJ Macs) – Alpha" with the approved Macs (name, last seen or "connected now", Remove) and "New key" with a
+  confirmation that names all effects. Polled every 1.5 s from the local API, only when this browser has control.
+- Alpha: unit tests (decision in every branch, limits, timeout, list, privacy, route guards on a real Jetty) and a
+  simulated sender against a test instance; not yet with LJL Link 0.4 on a second Mac.

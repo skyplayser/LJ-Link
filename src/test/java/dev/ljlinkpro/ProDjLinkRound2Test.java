@@ -87,7 +87,10 @@ class ProDjLinkRound2Test {
         long late = ProDjLinkSource.METADATA_HINT_MS;
         assertNull(ProDjLinkSource.metadataHint("CDJ-3000X", true, false, late - 1), "not too early");
         assertEquals("onelibrary", ProDjLinkSource.metadataHint("CDJ-3000X", true, false, late));
-        assertEquals("onelibrary", ProDjLinkSource.metadataHint("XDJ-AZ", true, false, late));
+        assertEquals("xdj-az", ProDjLinkSource.metadataHint("XDJ-AZ", true, false, late),
+                "the XDJ-AZ points to its Pro DJ Link mode (issue #2)");
+        assertEquals("xdj-az", ProDjLinkSource.metadataHint(" xdj-az ", true, false, late));
+        assertNull(ProDjLinkSource.metadataHint("XDJ-AZ", true, true, late), "the title arrived");
         assertEquals("onelibrary", ProDjLinkSource.metadataHint("OPUS-QUAD", true, false, late));
         assertEquals("missing", ProDjLinkSource.metadataHint("CDJ-3000", true, false, late));
         assertNull(ProDjLinkSource.metadataHint("CDJ-3000X", true, true, late), "the title arrived");

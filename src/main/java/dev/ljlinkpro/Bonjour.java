@@ -11,17 +11,30 @@ import javax.jmdns.ServiceInfo;
 
 /**
  * Announces LJ Link in the local network via mDNS/Bonjour as {@code _ljlink._tcp} (TXT {@code vjlink=1}, {@code path=/vjlink},
- * and for LJL Link {@code sender=1}, {@code senderpath=/sender}), so programs like VJ-Link find it on another
+ * and for LJL Link {@code sender=1}, {@code senderpath=/sender}, {@code pair=1}, {@code booth=<id>}), so programs like
+ * VJ-Link find it on another
  * computer without typing an address. One announcement per network
  * adapter with an IPv4 address. Failures are only logged: everything else works without it.
  */
 final class Bonjour {
     static final String TYPE = "_ljlink._tcp.local.";
     private final List<JmDNS> running = new ArrayList<>();
+    /** The registered services, one per adapter; their TXT is replaced when the booth id changes. */
+    private final List<ServiceInfo> services = new ArrayList<>();
+    private final java.util.function.Supplier<String> booth;
+    private String version = "";
 
-    /** Starts the announcement in the background (JmDNS takes a moment per adapter). */
+    private Bonjour(java.util.function.Supplier<String> booth) {
+        this.booth = booth;
+    }
+
+    /** Starts the announcement in the background (JmDNS takes a moment per adapter); the booth id from the settings. */
     static Bonjour announce(int port, String version) {
-        Bonjour b = new Bonjour();
+        return announce(port, version, SenderClub::booth);
+    }
+
+    static Bonjour announce(int port, String version, java.util.function.Supplier<String> booth) {
+        Bonjour b = new Bonjour(booth);
         Thread t = new Thread(() -> b.start(port, version), "bonjour");
         t.setDaemon(true);
         t.start();
@@ -30,6 +43,7 @@ final class Bonjour {
     }
 
     private synchronized void start(int port, String version) {
+        this.version = version;
         String host;
         try {
             host = InetAddress.getLocalHost().getHostName().replaceFirst("\\..*$", "");
@@ -40,8 +54,10 @@ final class Bonjour {
         for (InetAddress addr : addresses()) {
             try {
                 JmDNS dns = JmDNS.create(addr, host);
-                dns.registerService(ServiceInfo.create(TYPE, name, port, 0, 0, txt(version)));
+                ServiceInfo info = ServiceInfo.create(TYPE, name, port, 0, 0, txt(version, booth.get()));
+                dns.registerService(info);
                 running.add(dns);
+                services.add(info);
                 System.out.println("Bonjour: announced " + TYPE + " on " + addr.getHostAddress() + ":" + port);
             } catch (java.io.IOException | RuntimeException e) {
                 System.err.println("Bonjour on " + addr.getHostAddress() + " failed: " + e);
@@ -49,10 +65,31 @@ final class Bonjour {
         }
     }
 
-    /** The TXT record: VJ-Link ({@code vjlink}, {@code path}) and LJL Link ({@code sender}, {@code senderpath}). */
-    static Map<String, String> txt(String version) {
+    /**
+     * The TXT record: VJ-Link ({@code vjlink}, {@code path}) and LJL Link ({@code sender}, {@code senderpath}; approval
+     * without club.json: {@code pair=1}, {@code booth} = the booth id, see {@link SenderPairing}).
+     */
+    static Map<String, String> txt(String version, String booth) {
         return Map.of("vjlink", "1", "path", "/vjlink", "version", String.valueOf(VjLink.VERSION), "app", version,
-                "sender", "1", "senderpath", "/sender");
+                "sender", "1", "senderpath", "/sender", "pair", "1", "booth", booth);
+    }
+
+    /**
+     * Announces the TXT record again with the current booth id ("New key"), on every adapter. JmDNS sends the changed
+     * record at once ({@link ServiceInfo#setText(Map)}).
+     */
+    synchronized void reannounce() {
+        Map<String, String> txt = txt(version, booth.get());
+        for (ServiceInfo info : services) {
+            try {
+                info.setText(txt);
+            } catch (RuntimeException e) {
+                System.err.println("Bonjour: new TXT record failed: " + e);
+            }
+        }
+        if (!services.isEmpty()) {
+            System.out.println("Bonjour: announced again with a new booth id");
+        }
     }
 
     private static List<InetAddress> addresses() {
@@ -95,6 +132,7 @@ final class Bonjour {
             });
         }
         running.clear();
+        services.clear();
         int open = closeAll(tasks, CLOSE_TIMEOUT_MS);
         if (open > 0) {
             System.err.println("Bonjour: " + open + " announcement(s) still closing, not waiting longer");

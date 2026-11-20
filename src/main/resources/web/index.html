@@ -26,6 +26,8 @@
   <button id="btn-fullscreen" class="ghost" title="Full screen">Full screen</button>
   <button id="btn-settings" class="ghost menu" aria-haspopup="dialog" aria-label="Settings">&#9776;</button>
 </header>
+<!-- Approval requests of LJL Link (Alpha): only on this computer (local API), never on a tablet. Filled by app.js. -->
+<div id="pair-requests" class="pair-requests hidden" role="region" aria-live="polite"></div>
 <button id="awake-hint" class="awake-hint hidden"><span class="awake-icon" aria-hidden="true">&#9788;</span> <span id="awake-hint-first">Tap here once to keep the screen on</span><span id="awake-hint-again" class="hidden">The screen may turn off – tap here to restart keep-awake</span></button>
 
 <div id="toolbar" class="hidden">
@@ -148,6 +150,8 @@
     <div id="lan" class="hint"></div>
     <div id="warnings" class="note warn hidden"></div>
     <div id="notes" class="note hidden"></div>
+    <p id="own-number" class="hint hidden"></p>
+    <p id="xdjaz-hint" class="hint hidden"></p>
     <div id="decks"></div>
     <div id="mixer-view" class="hidden">
       <div id="mixer-list"></div>
@@ -224,6 +228,16 @@
       <div class="label">Suite chat – Alpha</div>
       <label class="check"><input type="checkbox" id="chat-box"> <span>Chat with all suite programs in this network</span></label>
       <div class="hint">LJ Link, LJL Link (the DJs) and VJ-Link in the same network find each other by themselves and share one chat room – no server. Every device in this network can read along, nothing is encrypted. Only on this computer, not on a tablet. Messages are never part of a problem report. Switched off, LJ Link neither sends nor reads chat messages and forgets the ones it had.</div>
+    </div>
+
+    <div class="setting hidden" id="ljl-setting">
+      <div class="label">LJL Link (DJ Macs) – Alpha</div>
+      <div class="hint">A DJ Mac with LJL Link but without club.json asks here to send its Serato decks. You allow it once; from then on LJ Link knows this Mac. Only on this computer, not on a tablet.</div>
+      <div class="sub-label">Approved DJ Macs</div>
+      <div id="ljl-list" class="ljl-list"></div>
+      <div class="row"><button id="ljl-newkey" class="secondary">New key</button></div>
+      <div class="hint">New key: every club.json made so far stops working, all approved DJ Macs are removed and must ask again.</div>
+      <div class="hint" id="ljl-status"></div>
     </div>
 
     <div class="setting" id="link-setting">

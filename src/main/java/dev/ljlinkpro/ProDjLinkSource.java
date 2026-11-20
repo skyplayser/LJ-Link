@@ -249,6 +249,7 @@ final class ProDjLinkSource implements DeckSource {
                 positions.scheduleAtFixedRate(this::pollPositions, 20, 20, TimeUnit.MILLISECONDS);
                 positions.scheduleAtFixedRate(() -> checkMixerData(listening()), 1, 1, TimeUnit.SECONDS);
                 positions.scheduleAtFixedRate(this::checkNumberConflict, 1, 1, TimeUnit.SECONDS);
+                positions.scheduleAtFixedRate(this::checkXdjAzStatus, 1, 1, TimeUnit.SECONDS);
             }
 
             if (lostInARow == 0 && !stopped) {
@@ -335,7 +336,9 @@ final class ProDjLinkSource implements DeckSource {
         }
         int own = chooseOwnNumber(usedNumbers(), seenModels(), conflictNumbers);
         v.setDeviceNumber((byte) own);
+        lastMixerAssignment = null;
         if (v.start()) {
+            noteOwnNumber(v, own);
             return true;
         }
         if (own == 0 || stopped) {
@@ -343,7 +346,148 @@ final class ProDjLinkSource implements DeckSource {
         }
         System.err.println("Player number " + own + " was refused; letting beat-link choose a free number.");
         v.setDeviceNumber((byte) 0);
-        return v.start();
+        lastMixerAssignment = null;
+        if (!v.start()) {
+            return false;
+        }
+        noteOwnNumber(v, 0);
+        return true;
+    }
+
+    /**
+     * A mixer's device number assignment while LJ Link joined, from beat-link's log line "Mixer at address A told us to
+     * use device number N" (VirtualCdj.handleSpecialAnnouncementPacket, beat-link 8.0.0). beat-link only logs it; it has
+     * no getter for it. Reset before every start of the virtual CDJ.
+     */
+    record MixerAssignment(String address, int number) {}
+
+    private static volatile MixerAssignment lastMixerAssignment;
+    private static final java.util.regex.Pattern MIXER_ASSIGNMENT =
+            java.util.regex.Pattern.compile("Mixer at address (\\S+) told us to use device number (\\d+)");
+
+    static {
+        LogBuffer.addListener(ProDjLinkSource::noteLogLine);
+    }
+
+    /** The assignment in one log line, or null. */
+    static MixerAssignment parseMixerAssignment(String line) {
+        if (line == null || !line.contains("told us to use device number")) {
+            return null;
+        }
+        java.util.regex.Matcher m = MIXER_ASSIGNMENT.matcher(line);
+        if (!m.find()) {
+            return null;
+        }
+        try {
+            return new MixerAssignment(m.group(1), Integer.parseInt(m.group(2)));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    static void noteLogLine(String line) {
+        MixerAssignment a = parseMixerAssignment(line);
+        if (a != null) {
+            lastMixerAssignment = a;
+        }
+    }
+
+    /**
+     * How LJ Link got its player number: the number, the one LJ Link asked for (0: beat-link chose, -1: unknown) and the
+     * mixer that assigned it (address and name, null when no assignment was logged for this number).
+     */
+    record OwnNumber(int number, int requested, String mixerAddress, String mixerName) {
+        /** 1-4, the numbers of the decks. */
+        boolean standard() {
+            return number >= 1 && number <= 4;
+        }
+
+        /**
+         * True when a mixer gave LJ Link this number. Checked in the beat-link 8.0.0 sources (VirtualCdj.claimDeviceNumber):
+         * with a number set before start() the number only changes through a mixer's assignment, and self-assignment
+         * without setUseStandardPlayerNumber(true) starts at 7, so 1-4 can only come from a mixer as well.
+         */
+        boolean byMixer() {
+            return mixerAddress != null || requested > 0 && requested != number || standard();
+        }
+    }
+
+    private volatile OwnNumber ownNumber;
+
+    private void noteOwnNumber(VirtualCdj v, int requested) {
+        int number = v.getDeviceNumber();
+        MixerAssignment a = lastMixerAssignment;
+        String address = a != null && a.number() == number ? a.address() : null;
+        ownNumber = new OwnNumber(number, requested, address, address == null ? null : nameAt(address));
+        if (ownNumber.byMixer()) {
+            System.err.println("Own player number " + number + ": " + ownNumberText(ownNumber, false));
+        }
+        publishOwnNumber();
+    }
+
+    /** The name a device at this address announced, a mixer's first (the XDJ-AZ announces players and mixer from one address). */
+    private String nameAt(String address) {
+        String any = null;
+        for (SeenDevice d : seenDevices.values()) {
+            if (address.equals(d.address) && d.name != null) {
+                if (isMixer(d.number, d.name)) {
+                    return d.name.trim();
+                }
+                any = d.name.trim();
+            }
+        }
+        return any;
+    }
+
+    /** The grey note in the app: only while LJ Link has one of the deck numbers 1-4. */
+    private void publishOwnNumber() {
+        OwnNumber o = ownNumber;
+        boolean running;
+        try {
+            running = VirtualCdj.getInstance().isRunning() && o != null && VirtualCdj.getInstance().getDeviceNumber() == o.number();
+        } catch (RuntimeException e) {
+            running = false;
+        }
+        if (!running || stopped || !o.standard()) {
+            hub.setOwnNumber(null);
+            return;
+        }
+        java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+        m.put("number", o.number());
+        m.put("byMixer", o.byMixer());
+        if (o.mixerAddress() != null) {
+            m.put("address", o.mixerAddress());
+        }
+        if (o.mixerName() != null) {
+            m.put("name", o.mixerName());
+        }
+        hub.setOwnNumber(m);
+    }
+
+    /**
+     * The explanation after "own player number N" in the diagnostics, for example "one of the standard numbers 1-4,
+     * assigned by the mixer XDJ-AZ at 192.168.1.143 (LJ Link asked for 8); another player with number 3 would collide
+     * with LJ Link". Short form for the summary.
+     */
+    static String ownNumberText(OwnNumber o, boolean shortForm) {
+        String by = o.mixerAddress() != null
+                ? (shortForm ? "mixer " : "the mixer ") + (o.mixerName() == null ? "" : o.mixerName() + (shortForm ? " " : " at ")) + o.mixerAddress()
+                : "a mixer";
+        String asked = o.requested() > 0 && o.requested() != o.number() ? " (LJ Link asked for " + o.requested() + ")" : "";
+        // The mixer may also just confirm the number LJ Link asked for (issue #2, XDJ-AZ in 4-deck mode).
+        String verb = o.mixerAddress() != null && o.requested() == o.number() ? ", confirmed by " : ", assigned by ";
+        if (o.standard()) {
+            String text = (shortForm ? "1-4" : "one of the standard numbers 1-4") + verb + by + asked;
+            return shortForm ? text : text + "; another player with number " + o.number() + " would collide with LJ Link";
+        }
+        String text = shortForm ? "1-4 not used" : "not one of the standard numbers 1-4";
+        if (o.byMixer()) {
+            return text + verb + by + asked;
+        }
+        if (o.requested() == 0) {
+            return text + ", chosen by beat-link";
+        }
+        return o.requested() > 0 ? text + ", chosen by LJ Link" : text;
     }
 
     /** How long devices are watched (since the first one) before LJ Link chooses its number, as beat-link does. */
@@ -481,6 +625,7 @@ final class ProDjLinkSource implements DeckSource {
                     ownStops.incrementAndGet();
                     v.stop();
                 }
+                hub.setOwnNumber(null);
             }
             String note = join();
             if (note != null && !stopped && lostInARow == 0) {
@@ -505,6 +650,7 @@ final class ProDjLinkSource implements DeckSource {
         }
         lostInARow++;
         lostTotal++;
+        hub.setOwnNumber(null);
         String local = localBeatLinkDevice();
         lostReason = local != null
                 ? "another Pro DJ Link program on this computer (" + local + ")"
@@ -846,6 +992,8 @@ final class ProDjLinkSource implements DeckSource {
             stopBeatLink();
         }
         hub.setNote(null);
+        hub.setOwnNumber(null);
+        hub.setXdjAzNoStatus(false);
     }
 
     /**
@@ -900,7 +1048,9 @@ final class ProDjLinkSource implements DeckSource {
         java.util.List<String> players = new java.util.ArrayList<>();
         new java.util.TreeMap<>(lastStatus).forEach((n, st) -> {
             Deck pd = hub.existingDeck(n);
-            players.add(n + " " + st.getDeviceName().trim() + (oneLibrary(st.getDeviceName()) ? " OneLibrary" : "")
+            boolean titles = pd != null && pd.title != null && !pd.title.isBlank();
+            players.add(n + " " + st.getDeviceName().trim()
+                    + (oneLibrary(st.getDeviceName()) ? titles ? " OneLibrary model (titles arrive)" : " OneLibrary model" : "")
                     + (pd != null && pd.metaHint != null ? " no metadata" : ""));
         });
         if (!players.isEmpty()) {
@@ -914,6 +1064,14 @@ final class ProDjLinkSource implements DeckSource {
         }
         if (numberConflict != null) {
             out.add("WARNING: " + numberConflict);
+        }
+        String own = ownNumberNote();
+        if (own != null) {
+            out.add("NOTE: " + own);
+        }
+        if (xdjAzNoStatus) {
+            out.add("NOTE: XDJ-AZ announced as player but no status packets arrived for " + NO_STATUS_HINT_MS / 1000
+                    + " s (4-deck mode? In issue #2 deck data arrived only with Pro DJ Link switched on in the XDJ-AZ settings)");
         }
         out.addAll(seenDeviceLines(ip -> Diagnostics.adapterFor(ip, adapters), listening, true));
         return out;
@@ -957,7 +1115,7 @@ final class ProDjLinkSource implements DeckSource {
         for (CdjStatus s : lastStatus.values()) {
             Deck pd = hub.existingDeck(s.getDeviceNumber());
             out.add("Player " + s.getDeviceNumber() + " status: model " + s.getDeviceName().trim()
-                    + (oneLibrary(s.getDeviceName()) ? " (OneLibrary, not readable with beat-link 8.0.0)" : "")
+                    + (oneLibrary(s.getDeviceName()) ? " (OneLibrary model; beat-link 8.0.0 reads only the classic rekordbox database export.pdb on the stick)" : "")
                     + ", metadata " + (pd == null ? "-" : pd.title != null && !pd.title.isBlank() ? "yes" : pd.metaHint != null ? "missing (" + pd.metaHint + ")" : "not yet")
                     + ", firmware " + s.getFirmwareVersion() + ", track type " + s.getTrackType()
                     + ", source slot " + s.getTrackSourceSlot() + " of player " + s.getTrackSourcePlayer()
@@ -1037,8 +1195,82 @@ final class ProDjLinkSource implements DeckSource {
         return out;
     }
 
+    /** How long after joining an announced XDJ-AZ may send no status before the app says so. */
+    static final long NO_STATUS_HINT_MS = 10_000;
+
+    static boolean isXdjAz(String model) {
+        return model != null && "XDJ-AZ".equalsIgnoreCase(model.trim());
+    }
+
+    /**
+     * True when an XDJ-AZ announces itself as a player (1-4) but none of its players sent a status packet in the
+     * {@link #NO_STATUS_HINT_MS} since LJ Link joined. Seen in issue #2 in the 4-deck mode (only beat packets arrived);
+     * with Pro DJ Link switched on in the XDJ-AZ settings the status arrived. Alpha, not checked on hardware.
+     */
+    static boolean xdjAzWithoutStatus(long sinceJoinMs, java.util.Collection<SeenDevice> seen, java.util.Set<Integer> withStatus) {
+        if (sinceJoinMs < NO_STATUS_HINT_MS) {
+            return false;
+        }
+        boolean announced = false;
+        for (SeenDevice d : seen) {
+            if (d.present && isXdjAz(d.name) && d.number >= 1 && d.number <= 4) {
+                if (withStatus.contains(d.number)) {
+                    return false;
+                }
+                announced = true;
+            }
+        }
+        return announced;
+    }
+
+    /** Device numbers that sent at least one status packet since the search started. */
+    private java.util.Set<Integer> numbersWithStatus() {
+        java.util.Set<Integer> out = new java.util.HashSet<>();
+        packets.forEach((n, kinds) -> {
+            java.util.concurrent.atomic.LongAdder c = kinds.get("CdjStatus");
+            if (c != null && c.sum() > 0) {
+                out.add(n);
+            }
+        });
+        return out;
+    }
+
+    private volatile boolean xdjAzNoStatus;
+
+    /** Once a second: the grey XDJ-AZ note in the app while an XDJ-AZ sends no deck data (removed as soon as status arrives). */
+    void checkXdjAzStatus() {
+        try {
+            boolean running = VirtualCdj.getInstance().isRunning();
+            long since = running ? System.currentTimeMillis() - joinedAt : 0;
+            xdjAzNoStatus = !stopped && running && xdjAzWithoutStatus(since, seenDevices.values(), numbersWithStatus());
+            hub.setXdjAzNoStatus(xdjAzNoStatus);
+        } catch (RuntimeException e) {
+            // Runs on the position executor: an exception must not cancel the schedule.
+        }
+    }
+
+    /** For the summary while LJ Link has one of the deck numbers 1-4: who assigned it and that a player with it would collide. */
+    private String ownNumberNote() {
+        try {
+            VirtualCdj v = VirtualCdj.getInstance();
+            if (!v.isRunning()) {
+                return null;
+            }
+            OwnNumber o = currentOwnNumber(v.getDeviceNumber());
+            return o.standard() ? "LJ Link has player number " + o.number() + ", " + ownNumberText(o, false) : null;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    /** LJ Link's own number as it was noted at the join, or (unknown origin) the number the virtual CDJ has now. */
+    private OwnNumber currentOwnNumber(int number) {
+        OwnNumber o = ownNumber;
+        return o != null && o.number() == number ? o : new OwnNumber(number, -1, null, null);
+    }
+
     /** LJ Link's own player number and the adapter beat-link chose (the one in the players' network); short for the summary. */
-    private static String virtualCdjLine(boolean shortForm) {
+    private String virtualCdjLine(boolean shortForm) {
         try {
             VirtualCdj v = VirtualCdj.getInstance();
             if (!v.isRunning()) {
@@ -1048,12 +1280,12 @@ final class ProDjLinkSource implements DeckSource {
             for (java.net.NetworkInterface ni : v.getMatchingInterfaces()) {
                 names.add(ni.getName());
             }
+            OwnNumber o = currentOwnNumber(v.getDeviceNumber());
             if (shortForm) {
-                return "Own player number " + v.getDeviceNumber() + (v.getUseStandardPlayerNumber() ? "" : " (1-4 not used)")
+                return "Own player number " + o.number() + " (" + ownNumberText(o, true) + ")"
                         + ", adapter " + (names.isEmpty() ? "?" : String.join("+", names)) + " " + ip(v.getLocalAddress());
             }
-            return "VirtualCdj running: true, own player number " + v.getDeviceNumber()
-                    + " (standard numbers 1-4 " + (v.getUseStandardPlayerNumber() ? "used" : "not used") + ")"
+            return "VirtualCdj running: true, own player number " + o.number() + " (" + ownNumberText(o, false) + ")"
                     + ", adapter " + (names.isEmpty() ? "?" : String.join("+", names))
                     + ", address " + ip(v.getLocalAddress()) + ", broadcast " + (v.getBroadcastAddress() == null ? "?" : ip(v.getBroadcastAddress()));
         } catch (RuntimeException e) {
@@ -1107,12 +1339,17 @@ final class ProDjLinkSource implements DeckSource {
     static final long METADATA_HINT_MS = 30_000;
 
     /**
-     * The hint of a deck whose analysed track has had no metadata for {@link #METADATA_HINT_MS}: "onelibrary" for players
-     * LJ Link cannot read yet, "missing" for the others, null while there is nothing to say.
+     * The hint of a deck whose analysed track has had no metadata for {@link #METADATA_HINT_MS}: "xdj-az" for the XDJ-AZ
+     * (it sends status, so its Pro DJ Link mode is on; in issue #2 titles and waveforms arrived when the stick also had
+     * the older rekordbox database, so the app points to the stick), "onelibrary" for the other players LJ Link cannot
+     * read yet, "missing" for the others, null while there is nothing to say.
      */
     static String metadataHint(String model, boolean analysed, boolean titleKnown, long ageMs) {
         if (!analysed || titleKnown || ageMs < METADATA_HINT_MS) {
             return null;
+        }
+        if (isXdjAz(model)) {
+            return "xdj-az";
         }
         return oneLibrary(model) ? "onelibrary" : "missing";
     }

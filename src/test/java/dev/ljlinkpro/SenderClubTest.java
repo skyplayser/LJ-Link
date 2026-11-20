@@ -56,6 +56,19 @@ class SenderClubTest {
     }
 
     @Test
+    void boothIdIsCreatedOnceKeptAndRenewed() {
+        String booth = SenderClub.booth();
+        assertTrue(booth.matches("[0-9a-f]{16}"), booth);
+        assertEquals(booth, SenderClub.booth());
+        assertEquals(booth, AppSettings.getString(SenderClub.BOOTH_SETTING, null), "saved in the settings file");
+        String fresh = SenderClub.renewBooth();
+        assertNotEquals(booth, fresh);
+        assertEquals(fresh, SenderClub.booth());
+        AppSettings.set(SenderClub.BOOTH_SETTING, "XYZ");
+        assertTrue(SenderClub.booth().matches("[0-9a-f]{16}"), "a broken saved id is replaced");
+    }
+
+    @Test
     void keysAreRandom() {
         assertNotEquals(SenderClub.newKeyValue(), SenderClub.newKeyValue());
     }
@@ -117,7 +130,7 @@ class SenderClubTest {
 
     @Test
     void bonjourAnnouncesTheSender() {
-        Map<String, String> txt = Bonjour.txt("1.0.0");
+        Map<String, String> txt = Bonjour.txt("1.0.0", "0123456789abcdef");
         assertEquals("1", txt.get("sender"));
         assertEquals("/sender", txt.get("senderpath"));
         assertEquals("1", txt.get("vjlink"), "VJ-Link stays as it was");
