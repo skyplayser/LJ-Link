@@ -205,7 +205,7 @@ class SuiteDesignTest {
         for (String rule : List.of(".deck-num { font-size: 20px;", ".box.player b { font-size: 34px; }",
                 ".box.bpm-box b { font-size: 32px;", ".elapsed { font-size: 46px; font-weight: 700;",
                 ".wave.detail { height: 100px; flex: 0 0 100px; }", ".wave.overview { flex: 1; height: 56px; }",
-                "grid-template-columns: 14px 400px minmax(0, 1fr);", "font-weight: 800; letter-spacing: .12em; font-size: 14px;")) {
+                "grid-template-columns: 14px var(--info-w) minmax(0, 1fr);", "--info-w: 400px;", "font-weight: 800; letter-spacing: .12em; font-size: 14px;")) {
             assertTrue(css.contains(rule), rule);
         }
     }

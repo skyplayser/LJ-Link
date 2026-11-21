@@ -32,7 +32,7 @@
 
 <div id="toolbar" class="hidden">
   <!-- Clock bar (ADR-044): time of the LJ Link computer, or Art-Net timecode when switched on. Filled by app.js. -->
-  <div id="clock" class="clock" aria-live="off"><span id="clock-label" class="clock-label"></span><span id="clock-value" class="clock-value">--:--:--</span><canvas id="clock-dots" class="clock-dots" aria-hidden="true"></canvas><span id="clock-note" class="clock-note"></span></div>
+  <div id="clock" class="clock" aria-live="off"><span id="clock-label" class="clock-label"></span><span id="clock-value" class="clock-value">--:--:--</span><canvas id="clock-dots" class="clock-dots" aria-hidden="true"></canvas><span id="clock-note" class="clock-note"></span><span id="clock-grip" class="clock-grip" role="slider" tabindex="0" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="160"></span></div>
   <div class="spacer"></div>
   <div class="zoom-ctl">
     <button id="zoom-out" class="tool" aria-label="Zoom out">&minus;</button>
@@ -190,6 +190,16 @@
         <button data-value="day">Day</button>
         <button data-value="night">Night</button>
       </div>
+      <div class="hint">The display settings (zoom, view, colors, clock, track info) are saved on the LJ Link computer, so they stay after a restart and at any address. A tablet starts with them; what you change on the tablet stays on that tablet.</div>
+    </div>
+
+    <div class="setting">
+      <div class="label">Track info</div>
+      <div class="seg" id="seg-info">
+        <button data-value="compact">Compact</button>
+        <button data-value="wide">Expanded</button>
+      </div>
+      <div class="hint">Expanded: wider area for player, title and BPM, larger title. Drag the line between info and waveform to set the width yourself, double-click it for the default. Long titles wrap onto two lines; the full title shows when you hover over it.</div>
     </div>
 
     <div class="setting hidden" id="devices-setting">
@@ -217,7 +227,7 @@
     <div class="setting" id="clock-setting">
       <div class="label">Clock and timecode</div>
       <label class="check"><input type="checkbox" id="clock-box"> <span>Show clock above the waveforms</span></label>
-      <div class="hint">Shows the time of the LJ Link computer (24 h), on tablets too. Saved in this browser.</div>
+      <div class="hint">Shows the time of the LJ Link computer (24 h), on tablets too. Drag the corner at the bottom right of the clock to make it bigger or smaller, double-click it for the default size.</div>
       <div id="tc-row" class="hidden">
         <label class="check"><input type="checkbox" id="tc-box"> <span>Show timecode from the network (Art-Net) – Alpha</span></label>
         <div class="hint">Instead of the time, the clock shows the Art-Net timecode that a light desk or show software sends in the network (UDP port 6454). LJ Link only listens on the port while this is on. Without timecode for 2 seconds the clock shows the time again. Only on this computer.</div>

@@ -20,8 +20,8 @@ import java.util.Set;
  *       preflight, which LJ Link never answers.</li>
  * </ul>
  * Read-only routes for tablets and VJ programs ({@code /ws}, {@code /vjlink}, {@code /api/deck/*}, {@code /api/info},
- * {@code /api/version}, {@code /api/ping}) stay open; everything else under {@code /api/} is local (deny by default, so a
- * new route is protected unless it is added to {@link #isPublic}).
+ * {@code /api/version}, {@code /api/ping}, and reading {@code /api/ui-settings}) stay open; everything else under
+ * {@code /api/} is local (deny by default, so a new route is protected unless it is added to {@link #isPublic}).
  */
 final class ControlGuard {
     private ControlGuard() {}
@@ -46,9 +46,23 @@ final class ControlGuard {
                 || path.startsWith("/api/deck/");
     }
 
-    /** True for the routes this guard protects. */
+    /**
+     * Like {@link #isPublic(String)}, per method: tablets may also read the display settings ({@code GET
+     * /api/ui-settings}, ADR-045), but only this computer may change them.
+     */
+    static boolean isPublic(String method, String path) {
+        boolean read = "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
+        return isPublic(path) || read && path.equals(UiSettings.PATH);
+    }
+
+    /** True for the routes this guard protects (for at least one method). */
     static boolean isGuarded(String path) {
         return path.startsWith("/api/") && !isPublic(path);
+    }
+
+    /** True when this guard protects {@code method} on {@code path}. */
+    static boolean isGuarded(String method, String path) {
+        return path.startsWith("/api/") && !isPublic(method, path);
     }
 
     /**
@@ -100,7 +114,7 @@ final class ControlGuard {
      */
     static void install(io.javalin.Javalin app) {
         app.before(ctx -> {
-            if (!isGuarded(ctx.path())) {
+            if (!isGuarded(ctx.method().name(), ctx.path())) {
                 return;
             }
             Verdict v = check(ctx.method().name(), ctx.req().getRemoteAddr(), ctx.header("Host"), ctx.header("Origin"),

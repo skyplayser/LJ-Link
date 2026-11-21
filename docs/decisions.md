@@ -773,3 +773,30 @@ Specification: LJL Link `docs/protocol.md`, section "Approval without club.json"
   The overview has no beat grid (unchanged).
 - Alpha: unit tests (parser, timeout, clock message, defaults, route guard on Jetty) and a test instance fed with
   Python-generated Art-Net packets on 127.0.0.1; not yet with a real desk (grandMA3, ChamSys) or show software.
+
+## ADR-045: Clock size, track info width and display settings on the LJ Link computer (club feedback, Alpha)
+- **Clock size**: a grip at the bottom right of the clock bar (Pointer Events: mouse, pen, touch; arrow keys) sets the
+  digit height from 20 to 160 px (`clockSize`, default 28; phones keep 21 px at the default). The dot pitch is a whole
+  number of CSS pixels (height / 7), canvas in device pixels, so the dots stay sharp; it is capped at what fits into the
+  toolbar width. The toolbar wraps, so a big clock pushes zoom and view onto a second line. Double-click / double tap
+  (or Enter) on the grip: default size.
+- **Track info width**: a drag line between the info area and the waveform of each deck (`infoWidth`, 0 = default of
+  the mode). The CSS keeps it within 400 px (the compact width) and 60 % of the deck (`clamp()` in `--info-w`); in the
+  stacked layout under 820 px there is no line. Double-click / double tap: default. Settings → "Track info": Compact
+  (400 px) / Expanded (520 px, title 23 px, artist 19 px); choosing a mode drops a dragged width.
+- **Titles**: title and artist wrap onto up to two lines, then "…"; the full text is in the `title` attribute. Privacy
+  mode is unchanged: the element then only holds "Title hidden" (text and tooltip).
+- **Saved on the computer**: the browser storage depends on the origin (127.0.0.1, localhost, port, IP) and can be
+  cleared. The display settings (`zoom`, `mode`, `theme`, `view`, `keepAwake`, `intro`, `clock`, `clockSize`,
+  `infoMode`, `infoWidth`) are also kept in `settings.json` under `ui` (`UiSettings`, only known keys with valid
+  values). `GET /api/ui-settings` is public (tablets read it; display choices only, nothing personal) and says whether
+  the browser has control; `POST` is local (`ControlGuard`, now per method). The browser with control sends every
+  change (300 ms debounce) and starts with the server values; on its first start with this version it hands over its
+  own settings. A tablet starts with the server values, but keys it changed itself (`ljlinkpro.ownSettings`; for old
+  storage: values that differ from the defaults) stay local and win there.
+- **Stay per browser**: language (`ljlinkpro.lang`; the computer's language already goes to the program icon),
+  `hideLauncherHint` and other hint cards, hidden devices (`ljlinkpro.hidden`) and the link preset.
+- Tablets get changed values from the computer on the next load (no live push). The start animation decides before the
+  server answers, so on a new address `intro` takes effect from the second load.
+- Alpha: unit tests (defaults, validation, restart, route guard on Jetty) and a test instance in headless Chrome
+  (drag, reload, restart, other origin, LAN address as tablet); not yet on a real iPad.

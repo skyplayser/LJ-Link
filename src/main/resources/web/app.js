@@ -356,7 +356,13 @@ function updateClock(perf) {
   $("clock-label").textContent = label;
   $("clock-value").textContent = value;
   $("clock-note").textContent = note;
-  drawDotClock($("clock-dots"), value);
+  drawDotClock($("clock-dots"), value, shownClockSize());
+}
+
+/** Digit height of the clock in px (setting clockSize, 20-160); phones keep the smaller default. */
+function shownClockSize() {
+  const s = Number.isInteger(settings.clockSize) && settings.clockSize >= 20 && settings.clockSize <= 160 ? settings.clockSize : DEFAULTS.clockSize;
+  return s === DEFAULTS.clockSize && matchMedia("(max-width: 640px)").matches ? 21 : s;
 }
 
 /** Dot-matrix font for the clock (5 x 7, rows top to bottom; ":" is one column wide), like a stage LED clock. */
@@ -376,19 +382,24 @@ const DOT_FONT = {
   ";": ["0", "0", "1", "0", "0", "1", "1"], // drop-frame timecode
 };
 
-/** Paints the text as square amber dots (only on change, from updateClock); the dot size follows the CSS height. */
-function drawDotClock(cv, text) {
+/**
+ * Paints the text as square amber dots (only on change, from updateClock). The dot pitch is a whole number of CSS
+ * pixels from the wanted digit height ({@code size}, 7 dots), at most what fits into the toolbar, so the dots stay sharp.
+ */
+function drawDotClock(cv, text, size) {
   if (!cv) return;
   const glyphs = [...text].map((ch) => DOT_FONT[ch] || DOT_FONT["-"]);
   const cols = glyphs.reduce((n, g) => n + g[0].length + 1, 0) - 1;
-  const pitch = Math.max(2, Math.round((cv.clientHeight || 28) / 7));
+  const room = (($("toolbar") && $("toolbar").clientWidth) || innerWidth) - 160; // label, note, grip, padding
+  const pitch = Math.max(2, Math.min(Math.round((size || cv.clientHeight || 28) / 7), Math.floor(room / cols)));
   const dpr = window.devicePixelRatio || 1;
   const w = cols * pitch, h = 7 * pitch;
   if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
     cv.width = Math.round(w * dpr);
     cv.height = Math.round(h * dpr);
-    cv.style.width = w + "px";
   }
+  cv.style.width = w + "px";
+  cv.style.height = h + "px";
   const g = cv.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
@@ -405,9 +416,10 @@ function drawDotClock(cv, text) {
   }
 }
 
-/* ---------- Settings (kept in this browser only) ---------- */
+/* ---------- Settings (this browser, display settings also on the LJ Link computer: ADR-045) ---------- */
 
-const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true, intro: true, hideLauncherHint: false, clock: true };
+const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true, intro: true, hideLauncherHint: false,
+  clockSize: 28, infoMode: "compact", infoWidth: 0, clock: true };
 let settings = { ...DEFAULTS };
 try {
   // Only the known keys with the type of their default: nothing else (e.g. "__proto__") gets into the settings.
@@ -488,8 +500,69 @@ window.ljlinkUi = {
   lang: () => lang,
 };
 
+/*
+ * Display settings on the LJ Link computer (ADR-045): the browser's storage depends on the address (127.0.0.1,
+ * localhost, port, IP) and can be cleared. The browser with control sends every change to /api/ui-settings and starts
+ * with the values from there. A tablet starts with them too, but what it changed itself (ljlinkpro.ownSettings) stays
+ * on the tablet and wins there. Language and hint cards stay per browser.
+ */
+const SERVER_KEYS = ["zoom", "mode", "theme", "view", "keepAwake", "intro", "clock", "clockSize", "infoMode", "infoWidth"];
+const pickServer = (o) => Object.fromEntries(SERVER_KEYS.map((k) => [k, o[k]]));
+const sync = { ready: false, controller: false, own: new Set(), pending: new Set(), last: pickServer(settings), timer: 0 };
+try {
+  const own = JSON.parse(localStorage.getItem("ljlinkpro.ownSettings") || "null");
+  // Before this version a browser kept all its settings: what differs from the defaults was chosen here.
+  const keys = Array.isArray(own) ? own : SERVER_KEYS.filter((k) => settings[k] !== DEFAULTS[k]);
+  for (const k of keys) if (SERVER_KEYS.includes(k)) sync.own.add(k);
+} catch (e) { /* storage unavailable */ }
+
+function storeOwn() {
+  try { localStorage.setItem("ljlinkpro.ownSettings", JSON.stringify([...sync.own])); } catch (e) { /* ignore */ }
+}
+
+function pushSettings() {
+  clearTimeout(sync.timer);
+  // Dragging and the zoom slider change a lot: one request after a short pause.
+  sync.timer = setTimeout(() => {
+    fetch("/api/ui-settings", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(pickServer(settings)) }).catch(() => {});
+  }, 300);
+}
+
 function saveSettings() {
   try { localStorage.setItem("ljlinkpro.settings", JSON.stringify(settings)); } catch (e) { /* ignore */ }
+  const changed = SERVER_KEYS.filter((k) => settings[k] !== sync.last[k]);
+  sync.last = pickServer(settings);
+  if (!changed.length) return;
+  if (!sync.ready) { for (const k of changed) sync.pending.add(k); return; }
+  if (sync.controller) pushSettings();
+  else { for (const k of changed) sync.own.add(k); storeOwn(); }
+}
+
+/** Takes the display settings stored on the LJ Link computer (once, at start). */
+function loadServerSettings() {
+  fetch("/api/ui-settings").then((r) => (r.ok ? r.json() : null)).then((res) => {
+    if (!res || !res.settings || typeof res.settings !== "object") return;
+    const srv = res.settings;
+    sync.controller = res.controller === true;
+    let changed = false;
+    for (const k of SERVER_KEYS) {
+      if (!Object.prototype.hasOwnProperty.call(srv, k) || typeof srv[k] !== typeof DEFAULTS[k]) continue;
+      if (sync.pending.has(k) || (!sync.controller && sync.own.has(k))) continue; // chosen here: stays
+      if (settings[k] !== srv[k]) { settings[k] = srv[k]; changed = true; }
+    }
+    sync.ready = true;
+    sync.last = pickServer(settings);
+    try { localStorage.setItem("ljlinkpro.settings", JSON.stringify(settings)); } catch (e) { /* ignore */ }
+    if (sync.controller) {
+      // First start with this version (nothing stored yet) or changed meanwhile: the computer hands its settings over.
+      if (sync.pending.size || SERVER_KEYS.some((k) => !Object.prototype.hasOwnProperty.call(srv, k) && settings[k] !== DEFAULTS[k])) pushSettings();
+    } else {
+      for (const k of sync.pending) sync.own.add(k);
+      storeOwn();
+    }
+    sync.pending.clear();
+    if (changed) applySettings();
+  }).catch(() => { /* older program or not reachable: this browser's settings */ });
 }
 
 let playheadColor = "#fff";
@@ -508,8 +581,114 @@ function applySettings() {
   $("intro-box").checked = settings.intro !== false;
   $("clock-box").checked = settings.clock !== false;
   $("clock").classList.toggle("hidden", settings.clock === false);
+  for (const b of $("seg-info").children) b.setAttribute("aria-pressed", String(b.dataset.value === settings.infoMode));
+  applyInfoWidth();
+  const grip = $("clock-grip");
+  grip.setAttribute("aria-valuenow", String(shownClockSize()));
+  grip.setAttribute("aria-label", t("Clock size"));
+  grip.title = t("Drag to resize the clock, double-click for the default size");
   clock.shown = "";
 }
+
+/* ---------- Clock size and width of the track info (drag handles, club feedback) ---------- */
+
+const INFO_MIN = 400, INFO_WIDE = 520;
+/** Width of the track info in px: dragged (infoWidth) or the default of the mode; the CSS keeps it within 400 px - 60 %. */
+function infoWidth() {
+  if (Number.isInteger(settings.infoWidth) && settings.infoWidth >= INFO_MIN) return settings.infoWidth;
+  return settings.infoMode === "wide" ? INFO_WIDE : INFO_MIN;
+}
+function applyInfoWidth() {
+  const el = $("decks");
+  el.style.setProperty("--info-w", "clamp(" + INFO_MIN + "px, " + infoWidth() + "px, 60%)");
+  el.dataset.info = settings.infoMode === "wide" ? "wide" : "compact";
+  for (const h of el.querySelectorAll(".info-resize")) labelInfoHandle(h);
+}
+function labelInfoHandle(h) {
+  h.setAttribute("aria-label", t("Width of the track info"));
+  h.title = t("Drag to change the width of the track info, double-click for the default");
+}
+
+/**
+ * Mouse, pen and touch (Pointer Events): drag moves, a second tap within 400 ms without moving resets. The drag never
+ * reaches the deck below (no info window opens).
+ */
+function dragHandle(handle, { start, move, end, reset, keys }) {
+  let lastTap = 0;
+  handle.addEventListener("pointerdown", (e) => {
+    if (e.button > 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const now = performance.now();
+    if (now - lastTap < 400) { lastTap = 0; reset(); return; }
+    const x0 = e.clientX, y0 = e.clientY;
+    let moved = false;
+    try { handle.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    const s = start(e);
+    handle.classList.add("dragging");
+    // On the window, not only the handle: the drag goes on when the pointer leaves it (also without pointer capture).
+    const onMove = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 3) moved = true;
+      if (moved) move(ev, ev.clientX - x0, ev.clientY - y0, s);
+    };
+    const onUp = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      removeEventListener("pointermove", onMove);
+      removeEventListener("pointerup", onUp);
+      removeEventListener("pointercancel", onUp);
+      handle.classList.remove("dragging");
+      ui.dragEndAt = performance.now();
+      lastTap = moved ? 0 : performance.now();
+      if (moved) end();
+    };
+    addEventListener("pointermove", onMove);
+    addEventListener("pointerup", onUp);
+    addEventListener("pointercancel", onUp);
+  });
+  handle.addEventListener("dblclick", (e) => { e.preventDefault(); e.stopPropagation(); reset(); });
+  handle.addEventListener("click", (e) => e.stopPropagation());
+  handle.addEventListener("keydown", (e) => {
+    const step = keys[e.key];
+    if (step === undefined) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (step === 0) reset(); else { move(null, 0, 0, null, step); end(); }
+  });
+}
+
+function setClockSize(px) {
+  settings.clockSize = Math.max(20, Math.min(160, Math.round(px)));
+  $("clock-grip").setAttribute("aria-valuenow", String(settings.clockSize));
+  clock.shown = "";
+}
+dragHandle($("clock-grip"), {
+  start: () => shownClockSize(),
+  // Mostly up and down; a sideways pull counts too (the clock is about 5 times as wide as high).
+  move: (e, dx, dy, h0, step) => setClockSize(step ? shownClockSize() + step : h0 + (Math.abs(dy) >= Math.abs(dx / 5) ? dy : dx / 5)),
+  end: () => saveSettings(),
+  reset: () => { setClockSize(DEFAULTS.clockSize); saveSettings(); },
+  keys: { ArrowUp: 4, ArrowRight: 4, ArrowDown: -4, ArrowLeft: -4, Enter: 0 },
+});
+
+function wireInfoHandle(d) {
+  const h = d.q(".info-resize");
+  labelInfoHandle(h);
+  dragHandle(h, {
+    start: () => ({ left: d.q(".deck-side").getBoundingClientRect().left, w: d.q(".deck-side").getBoundingClientRect().width,
+      max: d.el.clientWidth * 0.6 }),
+    move: (e, dx, dy, s, step) => {
+      const max = s ? s.max : d.el.clientWidth * 0.6;
+      const want = step ? d.q(".deck-side").getBoundingClientRect().width + step : s.w + dx;
+      settings.infoWidth = Math.round(Math.max(INFO_MIN, Math.min(max, want)));
+      applyInfoWidth();
+    },
+    end: () => saveSettings(),
+    reset: () => { settings.infoWidth = 0; saveSettings(); applyInfoWidth(); },
+    keys: { ArrowRight: 20, ArrowLeft: -20, Enter: 0 },
+  });
+}
+addEventListener("resize", () => { clock.shown = ""; });
 
 /* ---------- Keep the screen awake (ADR-022) ---------- */
 
@@ -968,6 +1147,7 @@ $("send-demo").onchange = async () => {
 const FRAMES_PER_SECOND = 150; // detail waveform resolution of rekordbox
 const PLAYHEAD_AT = 0.25;      // the playhead sits a quarter in, so more of the future is visible
 const OVERVIEW_TOP = 14;       // CSS px reserved above the overview for cue markers
+const OVERVIEW_BOTTOM = 8;     // CSS px below it, so the position marker reaches beyond the waveform at both ends
 
 function two(n) { return String(n).padStart(2, "0"); }
 
@@ -1034,6 +1214,7 @@ function createDeck(n) {
       <div class="deck-low"><span class="chips"></span><span class="key-box"></span><span class="dev-name"></span></div>
     </div>
     <div class="deck-waves">
+      <div class="info-resize" role="separator" tabindex="0" aria-orientation="vertical"></div>
       <div class="wave detail"><canvas class="c-detail"></canvas><div class="wave-msg"></div></div>
       <div class="over-row"><div class="wave overview"><canvas class="c-over"></canvas></div><div class="remaining"></div></div>
     </div>`;
@@ -1046,6 +1227,7 @@ function createDeck(n) {
   };
   d.cDetail = d.q(".c-detail");
   d.cOver = d.q(".c-over");
+  wireInfoHandle(d);
   decks.set(n, d);
   return d;
 }
@@ -1163,8 +1345,13 @@ function updateDeck(m) {
   const sender = m.kind === "sender";
   // The DJ switched track names off in LJL Link: say so instead of an endless "Loading track …".
   const missing = sender && m.titleHidden ? "Title hidden by the DJ" : waiting;
-  d.q(".deck-title").textContent = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || missing)) : "No track loaded");
-  d.q(".deck-artist").textContent = m.hasTrack && !ui.state.privacy ? (shownArtist || "") : "";
+  // Up to two lines each, then "…"; the whole text in the tooltip (in privacy mode only "Title hidden").
+  const titleText = t(m.hasTrack ? (ui.state.privacy ? "Title hidden" : (shownTitle || missing)) : "No track loaded");
+  const artistText = m.hasTrack && !ui.state.privacy ? (shownArtist || "") : "";
+  d.q(".deck-title").textContent = titleText;
+  d.q(".deck-title").title = titleText;
+  d.q(".deck-artist").textContent = artistText;
+  d.q(".deck-artist").title = artistText;
   d.q(".remain-main small").textContent = t("REMAIN");
   // The real tempo of the player (two decimals). The steadied tempo that goes to the light desks is in the tooltip.
   const shownBpm = m.effectiveBpm || m.stableBpm;
@@ -1527,7 +1714,7 @@ function drawOverview(d, pos) {
   ctx.clearRect(0, 0, w, h);
   if (!d.wave) return;
   const top = Math.round(OVERVIEW_TOP * dpr);
-  const wh = Math.max(2, h - top);
+  const wh = Math.max(2, h - top - Math.round(OVERVIEW_BOTTOM * dpr));
   const layered = d.data.previewStyle === "threeband";
   if (!d.cache || d.cache.width !== w || d.cache.height !== h || d.cache.mode !== settings.mode) {
     const off = document.createElement("canvas");
@@ -1556,7 +1743,8 @@ function drawOverview(d, pos) {
   }
   const dur = d.data.durationMs;
   const px = dur > 0 && pos >= 0 ? Math.round((pos / dur) * w) : 0;
-  ctx.globalAlpha = 0.5;
+  // The part already played is clearly darker (club feedback), so the position reads at a glance.
+  ctx.globalAlpha = 0.22;
   ctx.drawImage(d.cache, 0, 0, px, h, 0, 0, px, h);
   ctx.globalAlpha = 1;
   ctx.drawImage(d.cache, px, 0, w - px, h, px, 0, w - px, h);
@@ -1572,11 +1760,24 @@ function drawOverview(d, pos) {
       drawCueTag(ctx, Math.round((cue.t / dur) * w), 1, cue, Math.round(11 * dpr), dpr);
     }
   }
-  if (dur > 0 && pos >= 0) {
-    ctx.fillStyle = playheadColor;
-    ctx.fillRect(px, top, Math.max(1, dpr), wh);
-  }
+  if (dur > 0 && pos >= 0) drawOverviewPlayhead(ctx, px, h, dpr);
 }
+
+/** Position marker of the whole-track waveform: a red line, 4 px wide with a dark edge, over the full height (above
+ *  and below the waveform itself), with red triangles at the top and bottom edge, so it stays visible on loud tracks and from a distance (club feedback). */
+function drawOverviewPlayhead(ctx, px, h, dpr) {
+  const lw = Math.max(4, Math.round(4 * dpr)), edge = Math.max(1, Math.round(dpr));
+  const tri = Math.round(9 * dpr);
+  ctx.fillStyle = "rgba(0,0,0,0.75)";
+  ctx.fillRect(px - Math.floor(lw / 2) - edge, 0, lw + 2 * edge, h);
+  ctx.fillStyle = OVERVIEW_PLAYHEAD;
+  ctx.fillRect(px - Math.floor(lw / 2), 0, lw, h);
+  ctx.beginPath();
+  ctx.moveTo(px - tri, 0); ctx.lineTo(px + tri, 0); ctx.lineTo(px, tri); ctx.closePath();
+  ctx.moveTo(px - tri, h); ctx.lineTo(px + tri, h); ctx.lineTo(px, h - tri); ctx.closePath();
+  ctx.fill();
+}
+const OVERVIEW_PLAYHEAD = "#ff2d2d";
 
 function frame(now) {
   try { updateClock(now); } catch (e) { console.error(e); }
@@ -1856,6 +2057,7 @@ function closeInfo() {
 
 $("decks").addEventListener("click", (e) => {
   if (e.target.closest("a")) return; // the help link over the waveform
+  if (e.target.closest(".info-resize") || performance.now() - (ui.dragEndAt || 0) < 300) return; // dragged the width
   const el = e.target.closest(".deck");
   if (!el) return;
   const n = Number(el.dataset.deck);
@@ -2567,6 +2769,16 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("setting
 $("zoom").oninput = () => { settings.zoom = Number($("zoom").value); saveSettings(); applySettings(); };
 $("seg-mode").onclick = (e) => { if (e.target.dataset.value) { settings.mode = e.target.dataset.value; saveSettings(); applySettings(); } };
 $("seg-theme").onclick = (e) => { if (e.target.dataset.value) { settings.theme = e.target.dataset.value; saveSettings(); applySettings(); } };
+// Choosing a mode drops a dragged width: the mode's default applies again.
+$("seg-info").onclick = (e) => {
+  if (!e.target.dataset.value) return;
+  settings.infoMode = e.target.dataset.value;
+  settings.infoWidth = 0;
+  // On a tablet the width then belongs to the tablet too (also when it was 0 already).
+  if (sync.ready && !sync.controller) { sync.own.add("infoWidth"); storeOwn(); }
+  saveSettings();
+  applySettings();
+};
 $("update-box").onchange = () => { post("/api/updates", { on: $("update-box").checked }).then(loadVersion); };
 /** "Show note when quitting" (the window of the program icon's Quit); only on the computer that runs LJ Link. */
 async function loadQuitNote() {
@@ -2772,6 +2984,7 @@ setInterval(() => { if (ui.state.phase === "searching") render(); }, 1000);
 $("lang-select").value = lang;
 translateStatic();
 applySettings();
+loadServerSettings();
 updateAwake();
 
 // Deep links such as /#settings, /#manual, /#mixer, /#info-1 or /#day,shot (used for the screenshots in the docs;

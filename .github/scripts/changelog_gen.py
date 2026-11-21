@@ -17,6 +17,17 @@ site = Path(sys.argv[1]) if len(sys.argv) > 1 else sys.exit("usage: changelog_ge
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.15", "22 November 2026", "22. November 2026", [
+   ("Feedback from a club: drag the corner at the bottom right of the clock to make it bigger (up to 160 px digits); double-click or double tap for the default size. Alpha.",
+    "Feedback aus einem Club: Ecke unten rechts an der Uhr ziehen macht sie gr\u00f6\u00dfer (bis 160 px Ziffernh\u00f6he); Doppelklick oder Doppeltipp stellt die Standardgr\u00f6\u00dfe her. Alpha."),
+   ("Track info: drag the line between info and waveform to make it wider; new setting Track info: Compact / Expanded (wider area, larger title). Long titles and artists wrap onto two lines, the full title shows on hover. Alpha.",
+    "Track-Info: Linie zwischen Info und Waveform ziehen macht den Bereich breiter; neue Einstellung Track-Info: Kompakt / Erweitert (breiterer Bereich, gr\u00f6\u00dfere Titelschrift). Lange Titel und Artists brechen auf zwei Zeilen um, der ganze Titel erscheint beim Darauf-Zeigen. Alpha."),
+   ("Display settings (zoom, view, colours, clock, track info) are now saved on the computer running LJ Link: they stay after a restart, a cleared browser and at any address. Tablets start with them and keep their own changes. Not tested on a real iPad yet.",
+    "Anzeige-Einstellungen (Zoom, Ansicht, Farben, Uhr, Track-Info) werden jetzt auf dem Rechner mit LJ Link gespeichert: Sie bleiben nach einem Neustart, nach gel\u00f6schtem Browser-Speicher und unter jeder Adresse erhalten. Tablets starten mit ihnen und behalten ihre eigenen \u00c4nderungen. Noch nicht an einem echten iPad getestet."),
+ ], [
+   ("Whole-track waveform: the part already played is clearly darker, and the position marker is a wide red line with triangles that reaches above and below the waveform.",
+    "Gesamttrack-Waveform: Der bereits abgespielte Teil ist deutlich dunkler, und der Positionsmarker ist eine breite rote Linie mit Dreiecken, die \u00fcber und unter die Waveform reicht."),
+ ]),
  ("1.7.14", "21 November 2026", "21. November 2026", [
    ("Clock above the waveforms, like the LED clock on a stage: amber dot-matrix digits HH:MM:SS (24 h) with the time of the computer running LJ Link, the same on every tablet. On by default; Settings \u2192 Clock and timecode.",
     "Uhrzeit \u00fcber den Waveforms wie eine LED-B\u00fchnenuhr: Punktmatrix-Ziffern in Bernstein, HH:MM:SS (24 h), mit der Zeit des Rechners mit LJ Link, auf jedem Tablet gleich. Standardm\u00e4\u00dfig an; Einstellungen \u2192 Uhrzeit und Timecode."),

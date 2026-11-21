@@ -3,6 +3,8 @@
    the booth, and touch targets of at least 44px on touch screens. Deck numbers, times, BPM, ON AIR and waveforms keep
    their sizes. */
 :root {
+  /* Width of the track info in a deck (app.js sets it on #decks: compact 400 px, expanded 520 px, dragged; at most 60 %). */
+  --info-w: 400px;
   --bg: #0C0E13;
   --panel: #151821;
   --raise: #1E222E;
@@ -75,10 +77,11 @@ html, body {
 .tabs .tab:hover { color: var(--text); }
 .tabs .tab.active { background: var(--raise); color: var(--text); }
 button.ghost.menu { font-size: 16px; padding: 4px 12px; }
-#toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
+/* Wraps: a big clock (drag handle) may push zoom and view onto a second line. */
+#toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
 /* Clock bar (ADR-044): amber dot-matrix digits on a dark field, like a stage LED clock. The text stays in
    #clock-value for screen readers; #clock-dots paints it. */
-.clock { display: inline-flex; align-items: center; gap: 10px; padding: 5px 12px; min-height: 40px; box-sizing: border-box; border-radius: 4px; background: #1c1d20; border: 1px solid var(--line); white-space: nowrap; }
+.clock { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 5px 18px 5px 12px; min-height: 40px; max-width: 100%; box-sizing: border-box; border-radius: 4px; background: #1c1d20; border: 1px solid var(--line); white-space: nowrap; }
 .clock.hidden { display: none; }
 .clock-label { font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #8a8f98; }
 .clock-value { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -86,7 +89,12 @@ button.ghost.menu { font-size: 16px; padding: 4px 12px; }
 .clock.tc .clock-label { color: #f5a623; }
 .clock-note { font: 11px var(--mono); color: #8a8f98; }
 .clock-note:empty { display: none; }
-@media (max-width: 640px) { .clock-dots { height: 21px; } .clock { gap: 6px; padding: 4px 8px; } }
+/* Resize grip at the bottom right (app.js sets the size; double-click or double tap: default). */
+.clock-grip { position: absolute; right: 1px; bottom: 1px; width: 14px; height: 14px; cursor: nwse-resize; touch-action: none; opacity: .55;
+  background: linear-gradient(135deg, transparent 0 50%, #8a8f98 50% 58%, transparent 58% 70%, #8a8f98 70% 78%, transparent 78%); border-radius: 0 0 3px 0; }
+.clock-grip:hover, .clock-grip:focus-visible, .clock-grip.dragging { opacity: 1; }
+.clock-grip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 640px) { .clock { gap: 6px; padding: 4px 18px 4px 8px; } }
 .zoom-ctl { display: flex; align-items: center; gap: 10px; }
 .zoom-text { color: var(--dim); font: 600 12px var(--mono); letter-spacing: .08em; min-width: 92px; text-align: center; }
 button.tool { min-height: 40px; min-width: 48px; font-size: 20px; line-height: 1; padding: 4px 14px; }
@@ -180,7 +188,7 @@ select, input {
 .deck {
   position: relative;
   display: grid;
-  grid-template-columns: 14px 400px minmax(0, 1fr);
+  grid-template-columns: 14px var(--info-w) minmax(0, 1fr);
   background: var(--panel);
   border: 3px solid transparent;
   border-radius: 4px;
@@ -191,7 +199,7 @@ select, input {
 /* All waveforms are drawn at 75 % (as before the suite design); a paused deck is not dimmed further. The opacity sits on
    the drawings, not on the whole area, so the messages over an empty waveform keep their full contrast (4.5:1). The
    background is mixed as before (75 % waveform background over the panel). */
-.deck-waves { display: flex; flex-direction: column; min-width: 0; background: var(--wave-bg); background: color-mix(in srgb, var(--wave-bg) 75%, var(--panel)); }
+.deck-waves { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--wave-bg); background: color-mix(in srgb, var(--wave-bg) 75%, var(--panel)); }
 .deck-waves canvas, .deck-waves .remaining { opacity: .75; }
 .deck.onair { border-color: var(--live); box-shadow: 0 0 0 1px var(--live), 0 0 22px rgba(255, 59, 59, .35); }
 .live-tag {
@@ -216,8 +224,18 @@ select, input {
 .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .art img[hidden] { display: none; }
 .deck-info { min-width: 0; flex: 1; }
-.deck-title { font-size: 19px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.deck-artist { color: var(--dim); font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Long titles and artists wrap onto two lines, then "…" (the whole text is in the tooltip). */
+.deck-title, .deck-artist { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.deck-title { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.deck-artist { color: var(--dim); font-size: 17px; line-height: 1.2; }
+#decks[data-info="wide"] .deck-title { font-size: 23px; }
+#decks[data-info="wide"] .deck-artist { font-size: 19px; }
+/* Drag line between track info and waveform: drag = width, double-click / double tap = default. */
+.info-resize { position: absolute; left: -7px; top: 0; bottom: 0; width: 14px; z-index: 3; cursor: col-resize; touch-action: none; }
+.info-resize::before { content: ""; position: absolute; left: 5px; top: 50%; width: 4px; height: 32px; margin-top: -16px; border-radius: 2px; background: var(--line); }
+.info-resize::after { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: transparent; }
+.info-resize:hover::after, .info-resize:focus-visible::after, .info-resize.dragging::after { background: var(--accent); }
+.info-resize:focus-visible { outline: none; }
 .deck-mid { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
 .time-block { display: flex; flex-direction: column; gap: 4px; }
 .time-main { font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
@@ -267,6 +285,7 @@ select, input {
 @media (max-width: 820px) {
   .deck { grid-template-columns: 10px 1fr; }
   .deck-waves { grid-column: 1 / -1; }
+  .info-resize { display: none; }
   .over-row { margin-left: 14px; }
   .elapsed { font-size: 36px; }
 }
@@ -438,6 +457,12 @@ button.awake-hint { display: block; width: 100%; box-sizing: border-box; margin:
   .vjlink-badge.clickable, a.help-link { display: inline-flex; align-items: center; min-height: 44px; }
   .tabs .tab { font-size: 13px; }
   .steps span { font-size: 14px; }
+  /* Drag handles of the clock and the track info: bigger for fingers. */
+  .clock-grip { width: 24px; height: 24px; }
+  .clock { padding-right: 26px; }
+  .info-resize { left: -12px; width: 24px; }
+  .info-resize::before { left: 10px; }
+  .info-resize::after { left: 11px; }
 }
 
 /* Suite chat (Alpha, docs/suite-chat.md): only on the computer running LJ Link */

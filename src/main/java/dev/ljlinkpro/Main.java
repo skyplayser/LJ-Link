@@ -241,6 +241,7 @@ public final class Main {
         // never another web page (CSRF, DNS rebinding). See ControlGuard.
         ControlGuard.install(app);
         SettingsMove.install(app, SettingsMove::done, SettingsMove::markDone);
+        UiSettings.install(app);
 
         app.get("/api/ping", ctx -> ctx.result("ljlinkpro"));
         app.get("/api/diagnostics", ctx -> {
