@@ -31,6 +31,8 @@
 <button id="awake-hint" class="awake-hint hidden"><span class="awake-icon" aria-hidden="true">&#9788;</span> <span id="awake-hint-first">Tap here once to keep the screen on</span><span id="awake-hint-again" class="hidden">The screen may turn off – tap here to restart keep-awake</span></button>
 
 <div id="toolbar" class="hidden">
+  <!-- Clock bar (ADR-044): time of the LJ Link computer, or Art-Net timecode when switched on. Filled by app.js. -->
+  <div id="clock" class="clock" aria-live="off"><span id="clock-label" class="clock-label"></span><span id="clock-value" class="clock-value">--:--:--</span><canvas id="clock-dots" class="clock-dots" aria-hidden="true"></canvas><span id="clock-note" class="clock-note"></span></div>
   <div class="spacer"></div>
   <div class="zoom-ctl">
     <button id="zoom-out" class="tool" aria-label="Zoom out">&minus;</button>
@@ -210,6 +212,17 @@
       <div class="hint" id="awake-status"></div>
       <div class="hint hidden" id="awake-fallback">On an iPad or iPhone without HTTPS this is a stopgap. More reliable: in the iPad settings set “Display &amp; Brightness → Auto-Lock: Never” (with the charger connected). Also switch Low Power Mode off: on the iPhone it shortens Auto-Lock to 30 seconds, probably on the iPad too.</div>
       <div class="hint">Stops this device from dimming or locking the screen while LJ Link is shown, like a playing video. On an iPad opened over the network, tap the page once; LJ Link then tries to keep the screen on. On a Mac LJ Link also keeps the computer from falling asleep while a browser shows it.</div>
+    </div>
+
+    <div class="setting" id="clock-setting">
+      <div class="label">Clock and timecode</div>
+      <label class="check"><input type="checkbox" id="clock-box"> <span>Show clock above the waveforms</span></label>
+      <div class="hint">Shows the time of the LJ Link computer (24 h), on tablets too. Saved in this browser.</div>
+      <div id="tc-row" class="hidden">
+        <label class="check"><input type="checkbox" id="tc-box"> <span>Show timecode from the network (Art-Net) – Alpha</span></label>
+        <div class="hint">Instead of the time, the clock shows the Art-Net timecode that a light desk or show software sends in the network (UDP port 6454). LJ Link only listens on the port while this is on. Without timecode for 2 seconds the clock shows the time again. Only on this computer.</div>
+        <div class="hint" id="tc-status"></div>
+      </div>
     </div>
 
     <div class="setting" id="intro-setting">

@@ -58,6 +58,10 @@ final class Hub {
     private final Map<String, Object> stateExtras = new ConcurrentHashMap<>();
 
     private volatile String lastMixer = "";
+    /** Art-Net timecode for the clock bar (ADR-044); null in tests. */
+    private volatile ArtNetTimecode timecode;
+    private String lastClockTc = "";
+    private long lastClockNanos;
     private volatile String lastState = "";
 
     /**
@@ -664,6 +668,7 @@ final class Hub {
                     c.offer("mixer", mixer);
                 }
             }
+            clockTick(System.nanoTime(), System.currentTimeMillis());
             for (Deck d : decks.values()) {
                 String base = deckJson(d);
                 String prev = lastSent.get(d.number);
@@ -681,6 +686,42 @@ final class Hub {
         } catch (RuntimeException e) {
             System.err.println("Hub tick failed: " + e);
         }
+    }
+
+    void timecode(ArtNetTimecode tc) {
+        this.timecode = tc;
+    }
+
+    ArtNetTimecode timecode() {
+        return timecode;
+    }
+
+    /**
+     * {@code {"type":"clock","w":wallMs,"z":utcOffsetMin,"tc":{...}}} for the clock bar (ADR-044): the wall clock of this
+     * computer so a tablet shows the same time, and the Art-Net timecode when it is switched on. Sent once a second and
+     * whenever the timecode changed (at most every tick, 100 ms). Returns the message when one is due, else null.
+     */
+    String clockTick(long nowNanos, long wallMs) {
+        ArtNetTimecode tc = timecode;
+        Map<String, Object> view = tc == null ? Map.of("on", false) : tc.view(nowNanos);
+        Map<String, Object> key = new LinkedHashMap<>(view);
+        key.remove("age");
+        String tcKey = key.toString();
+        if (tcKey.equals(lastClockTc) && nowNanos - lastClockNanos < 1_000_000_000L && lastClockNanos != 0) {
+            return null;
+        }
+        lastClockTc = tcKey;
+        lastClockNanos = nowNanos;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("type", "clock");
+        m.put("w", wallMs);
+        m.put("z", java.util.TimeZone.getDefault().getOffset(wallMs) / 60_000);
+        m.put("tc", view);
+        String text = write(m);
+        for (WsClient c : clients.values()) {
+            c.offer("clock", text);
+        }
+        return text;
     }
 
     /**

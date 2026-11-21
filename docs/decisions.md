@@ -740,3 +740,36 @@ Specification: LJL Link `docs/protocol.md`, section "Approval without club.json"
   confirmation that names all effects. Polled every 1.5 s from the local API, only when this browser has control.
 - Alpha: unit tests (decision in every branch, limits, timeout, list, privacy, route guards on a real Jetty) and a
   simulated sender against a test instance; not yet with LJL Link 0.4 on a second Mac.
+
+## ADR-044: Clock bar and Art-Net timecode (timecode Alpha)
+- **Clock bar**: in the toolbar above the waveforms (left of the zoom), so it costs no extra height; shown wherever the
+  toolbar is (deck view on the computer and on tablets, not on the mixer tab). Amber dot-matrix digits `HH:MM:SS`
+  (24 h, 5 x 7 square dots painted on a canvas, `#f5a623` on `#1c1d20`, like a stage LED clock; the text stays in
+  a hidden element for screen readers), small label "Time". On by default; switch "Show clock above the waveforms" in Settings → "Clock and
+  timecode", saved per browser (`clock` in the browser settings, like the other display settings).
+- **Same time everywhere**: the hub sends `{"type":"clock","w":wallMs,"z":utcOffsetMin,"tc":{...}}` once a second (and
+  on every new timecode frame, at most every 100-ms tick). The browser keeps the largest of the last 10 "w - its own
+  clock" (the least delayed sample) and shows the server's time in the server's time zone, so a tablet with a wrong
+  clock or zone shows the time of the LJ Link computer. Before the first message it shows its own time.
+- **Art-Net timecode** (`ArtNetTimecode`, Alpha, default off, setting `artnetTimecode`): ArtTimeCode (OpCode 0x9700)
+  on UDP 6454, fields frames/seconds/minutes/hours/type at bytes 14-18; type 0 = 24, 1 = 25, 2 = 29.97 drop frame,
+  3 = 30 fps. Packets with other ids, op codes, types or out-of-range values are ignored. The port is only open while
+  the switch is on; `SO_REUSEADDR` and, where supported, `SO_REUSEPORT` are set so a desk program on the same computer
+  that also uses them can share it (broadcast reaches both). If the port is taken anyway, the settings say so; nothing
+  crashes. Switching on again retries.
+- While frames arrive the bar shows `HH:MM:SS:FF` (`;` before the frames for drop frame), label "Timecode" (amber) and the
+  rate ("25 fps"). The browser lets frames run on only while the frame changed between the last two messages, for at
+  most 200 ms, and never steps back by up to 5 frames; a held timecode (the desk keeps sending the same frame) shows
+  exactly that frame. Unicast to a port that another program on the same computer also listens on may reach only one
+  of them; broadcast reaches all. 2 s without a frame: back to the time
+  with a grey "no timecode".
+- **Privacy**: the sender's address is not read, kept, logged or sent; the log says "Art-Net timecode received" once
+  per switching on. The `clock` message carries only the frame, rate and age.
+- **Local only**: `GET/POST /api/timecode` (`{"on"}` → `on`, `listening`, `receiving`, `error`) is under `/api/` and not
+  public, so `ControlGuard` keeps tablets and other pages out; the switch is only shown in the browser with control.
+- **Beat grid**: the detail waveform keeps a free band at top and bottom (up to 16 px, at most 16 % of the height; the
+  waveform keeps about 75-80 % of the height at the usual deck size). Beats: a light line through the waveform plus
+  bright ticks in the bands; bars: red, 2 px, fully opaque in the bands, 75 % through the waveform, with a dark edge and a small cap at the edges.
+  The overview has no beat grid (unchanged).
+- Alpha: unit tests (parser, timeout, clock message, defaults, route guard on Jetty) and a test instance fed with
+  Python-generated Art-Net packets on 127.0.0.1; not yet with a real desk (grandMA3, ChamSys) or show software.

@@ -283,12 +283,131 @@ function handle(msg) {
     if (d) applyPosition(d, msg, performance.now());
   } else if (msg.type === "deckGone") {
     removeDeck(msg.deck);
+  } else if (msg.type === "clock") {
+    clock.server(msg, Date.now(), performance.now());
+  }
+}
+
+/* ---------- Clock bar (ADR-044): time of the LJ Link computer, or Art-Net timecode (Alpha) ---------- */
+
+const pad2 = (n) => String(n).padStart(2, "0");
+const clock = {
+  offsets: [], // wall clock of the server minus this browser's, one per clock message (the largest is the least late)
+  zone: null, // UTC offset of the server in minutes
+  tc: null, tcAt: 0, lastFrames: -1, shown: "", running: false, msgFrames: -1,
+  server(msg, nowMs, perf) {
+    if (typeof msg.w === "number") {
+      this.offsets.push(msg.w - nowMs);
+      if (this.offsets.length > 10) this.offsets.shift();
+    }
+    if (typeof msg.z === "number") this.zone = msg.z;
+    this.tc = msg.tc || null;
+    this.tcAt = perf;
+    // Running only when the frame changed since the previous message: a desk that holds its timecode keeps sending
+    // the same frame (the server repeats it once a second), and then the clock must stand still on it.
+    const tc = this.tc;
+    const frames = tc && typeof tc.h === "number" ? ((tc.h * 60 + tc.m) * 60 + tc.s) * (tc.fps || 25) + tc.f : -1;
+    this.running = frames >= 0 && this.msgFrames >= 0 && frames !== this.msgFrames;
+    this.msgFrames = frames;
+  },
+  /** "HH:MM:SS" of the server (its time zone), or of this browser before the first clock message. */
+  time(nowMs) {
+    if (!this.offsets.length || this.zone == null) {
+      const d = new Date(nowMs);
+      return pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds());
+    }
+    const d = new Date(nowMs + Math.max(...this.offsets) + this.zone * 60000);
+    return pad2(d.getUTCHours()) + ":" + pad2(d.getUTCMinutes()) + ":" + pad2(d.getUTCSeconds());
+  },
+  /** The timecode to show now ("HH:MM:SS:FF"), null when none arrives (switched off, or nothing for 2 s). */
+  timecode(perf) {
+    const tc = this.tc;
+    if (!tc || !tc.on || typeof tc.h !== "number") return null;
+    const elapsed = (tc.age || 0) + (perf - this.tcAt);
+    if (elapsed > 2000) return null;
+    const fps = tc.fps || 25;
+    // While it runs, the frames run on between two messages (100 ms apart), for at most 200 ms; a held timecode
+    // shows exactly the frame it sends.
+    let total = ((tc.h * 60 + tc.m) * 60 + tc.s) * fps + tc.f;
+    if (this.running) {
+      total += Math.floor(Math.min(elapsed, 200) * fps / 1000);
+      if (this.lastFrames > total && this.lastFrames - total <= 5) total = this.lastFrames; // never a small step back
+    }
+    this.lastFrames = total;
+    let f = total % fps, rest = Math.floor(total / fps);
+    const sec = rest % 60; rest = Math.floor(rest / 60);
+    const min = rest % 60; const hrs = Math.floor(rest / 60) % 24;
+    if (tc.df && sec === 0 && min % 10 !== 0 && f < 2) f = 2; // drop frame: 00 and 01 do not exist there
+    return pad2(hrs) + ":" + pad2(min) + ":" + pad2(sec) + (tc.df ? ";" : ":") + pad2(f);
+  },
+};
+
+function updateClock(perf) {
+  if (settings.clock === false || $("toolbar").classList.contains("hidden")) return;
+  const tc = clock.timecode(perf);
+  const on = !!(clock.tc && clock.tc.on);
+  const label = tc ? t("Timecode") : t("Time");
+  const note = tc ? t("{s} fps", { s: clock.tc.rate || clock.tc.fps }) : on ? t("no timecode") : "";
+  const value = tc || clock.time(Date.now());
+  const key = label + "|" + value + "|" + note;
+  if (key === clock.shown) return;
+  clock.shown = key;
+  $("clock").classList.toggle("tc", !!tc);
+  $("clock-label").textContent = label;
+  $("clock-value").textContent = value;
+  $("clock-note").textContent = note;
+  drawDotClock($("clock-dots"), value);
+}
+
+/** Dot-matrix font for the clock (5 x 7, rows top to bottom; ":" is one column wide), like a stage LED clock. */
+const DOT_FONT = {
+  "0": ["11111", "10001", "10001", "10001", "10001", "10001", "11111"],
+  "1": ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
+  "2": ["11111", "00001", "00001", "11111", "10000", "10000", "11111"],
+  "3": ["11111", "00001", "00001", "01111", "00001", "00001", "11111"],
+  "4": ["10001", "10001", "10001", "11111", "00001", "00001", "00001"],
+  "5": ["11111", "10000", "10000", "11111", "00001", "00001", "11111"],
+  "6": ["11111", "10000", "10000", "11111", "10001", "10001", "11111"],
+  "7": ["11111", "00001", "00001", "00001", "00001", "00001", "00001"],
+  "8": ["11111", "10001", "10001", "11111", "10001", "10001", "11111"],
+  "9": ["11111", "10001", "10001", "11111", "00001", "00001", "11111"],
+  "-": ["00000", "00000", "00000", "11111", "00000", "00000", "00000"],
+  ":": ["0", "0", "1", "0", "0", "1", "0"],
+  ";": ["0", "0", "1", "0", "0", "1", "1"], // drop-frame timecode
+};
+
+/** Paints the text as square amber dots (only on change, from updateClock); the dot size follows the CSS height. */
+function drawDotClock(cv, text) {
+  if (!cv) return;
+  const glyphs = [...text].map((ch) => DOT_FONT[ch] || DOT_FONT["-"]);
+  const cols = glyphs.reduce((n, g) => n + g[0].length + 1, 0) - 1;
+  const pitch = Math.max(2, Math.round((cv.clientHeight || 28) / 7));
+  const dpr = window.devicePixelRatio || 1;
+  const w = cols * pitch, h = 7 * pitch;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    cv.style.width = w + "px";
+  }
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const dot = pitch - Math.max(1, Math.round(pitch / 5));
+  g.fillStyle = getComputedStyle(cv).color || "#f5a623";
+  let x = 0;
+  for (const rows of glyphs) {
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < rows[r].length; c++) {
+        if (rows[r][c] === "1") g.fillRect(x + c * pitch, r * pitch, dot, dot);
+      }
+    }
+    x += (rows[0].length + 1) * pitch;
   }
 }
 
 /* ---------- Settings (kept in this browser only) ---------- */
 
-const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true, intro: true, hideLauncherHint: false };
+const DEFAULTS = { zoom: 12, mode: "rgb", theme: "night", view: "both", keepAwake: true, intro: true, hideLauncherHint: false, clock: true };
 let settings = { ...DEFAULTS };
 try {
   // Only the known keys with the type of their default: nothing else (e.g. "__proto__") gets into the settings.
@@ -387,6 +506,9 @@ function applySettings() {
   for (const d of decks.values()) d.cache = null;
   $("awake-box").checked = settings.keepAwake !== false;
   $("intro-box").checked = settings.intro !== false;
+  $("clock-box").checked = settings.clock !== false;
+  $("clock").classList.toggle("hidden", settings.clock === false);
+  clock.shown = "";
 }
 
 /* ---------- Keep the screen awake (ADR-022) ---------- */
@@ -1287,6 +1409,10 @@ function drawDetail(d, pos) {
   const msPerPx = framesPerPx * 1000 / FRAMES_PER_SECOND;
   const headX = Math.round(w * PLAYHEAD_AT);
   const mid = h / 2;
+  // The waveform keeps a free band at the top and bottom (ADR-044): the beat grid's ticks sit there, so they stay
+  // visible even over loud, full waveforms.
+  const gridBand = Math.min(16 * dpr, Math.round(h * 0.16));
+  const amp = Math.max(1, mid - gridBand);
   const timeAt = (x) => pos + (x - headX) * msPerPx;
   const xAt = (t) => headX + (t - pos) / msPerPx;
 
@@ -1304,7 +1430,7 @@ function drawDetail(d, pos) {
         if (d.detail[f * 4 + 2] > hi) hi = d.detail[f * 4 + 2];
       }
       for (const [v, color] of [[lo, bands.low], [mi, bands.mid], [hi, bands.high]]) {
-        const bar = (v / 255) * (mid - 2);
+        const bar = (v / 255) * amp;
         ctx.fillStyle = color;
         ctx.fillRect(x, mid - bar, 1, Math.max(1, bar * 2));
       }
@@ -1314,7 +1440,7 @@ function drawDetail(d, pos) {
         const hv = d.detail[f * 4];
         if (hv > bestH) { bestH = hv; best = f; }
       }
-      const bar = (bestH / 255) * (mid - 2);
+      const bar = (bestH / 255) * amp;
       ctx.fillStyle = barColor(d.detail, best * 4);
       ctx.fillRect(x, mid - bar, 1, Math.max(1, bar * 2));
     }
@@ -1338,21 +1464,39 @@ function drawDetail(d, pos) {
     ctx.fillRect(x1, h - Math.max(2, 2 * dpr), x2 - x1, Math.max(2, 2 * dpr));
   }
 
-  // Beat grid: short ticks at top and bottom, longer on the first beat of a bar.
+  // Beat grid (ADR-044), drawn over the waveform: every beat a light grey line through it with ticks in the free bands,
+  // the first beat of a bar red, wider and fully opaque, with a dark edge so it stands out against red waveforms too.
   if (d.beatT && d.beatT.length) {
     const barPx = (60000 / ((d.data.trackBpm || d.data.effectiveBpm || 120))) * 4 / msPerPx;
     const beatPx = barPx / 4;
     if (barPx >= 4) {
+      const one = Math.max(1, dpr);
       let i = firstBeatAtOrAfter(d.beatT, timeAt(0));
       for (; i < d.beatT.length; i++) {
         const x = Math.round(xAt(d.beatT[i]));
         if (x > w) break;
         const down = d.beatB[i] === 1;
         if (!down && beatPx < 4) continue;
-        ctx.fillStyle = down ? "#ff3b30" : "rgba(255,255,255,0.6)";
-        const len = (down ? 14 : 7) * dpr;
-        ctx.fillRect(x, 0, Math.max(1, dpr), len);
-        ctx.fillRect(x, h - len, Math.max(1, dpr), len);
+        if (down) {
+          const bw = Math.max(2, 2 * dpr);
+          const len = Math.max(gridBand, 10 * dpr);
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(x - one, 0, bw + 2 * one, h);
+          ctx.fillStyle = "rgba(255,59,48,0.75)";
+          ctx.fillRect(x, 0, bw, h);
+          ctx.fillStyle = "#ff3b30";
+          ctx.fillRect(x, 0, bw, len);
+          ctx.fillRect(x, h - len, bw, len);
+          ctx.fillRect(x - one, 0, bw + 2 * one, 3 * dpr); // small cap at the edge, as on the players
+          ctx.fillRect(x - one, h - 3 * dpr, bw + 2 * one, 3 * dpr);
+        } else {
+          const len = Math.max(4 * dpr, gridBand * 0.6);
+          ctx.fillStyle = "rgba(255,255,255,0.28)";
+          ctx.fillRect(x, 0, one, h);
+          ctx.fillStyle = "rgba(255,255,255,0.9)";
+          ctx.fillRect(x, 0, one, len);
+          ctx.fillRect(x, h - len, one, len);
+        }
       }
     }
   }
@@ -1435,6 +1579,7 @@ function drawOverview(d, pos) {
 }
 
 function frame(now) {
+  try { updateClock(now); } catch (e) { console.error(e); }
   try {
     if (ui.state.phase === "monitoring" || senderDecksOnly()) {
       for (const d of decks.values()) {
@@ -2088,7 +2233,7 @@ $("btn-error-manual").onclick = () => { post("/api/stop").then(openManual); };
 $("btn-check").onclick = runCheck;
 $("ip").addEventListener("keydown", (e) => { if (e.key === "Enter") runCheck(); });
 $("model").onchange = updateModelNote;
-$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadQuitNote(); renderChat(); pollPairing(); };
+$("btn-settings").onclick = () => { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) { loadQuitNote(); loadTimecode(); } renderChat(); pollPairing(); };
 
 /* ---------- Suite chat (Alpha, docs/suite-chat.md) ---------- */
 // LJ Link takes part in the room of all suite programs in the network. Only the browser on this computer reads and
@@ -2437,6 +2582,29 @@ async function loadQuitNote() {
 $("quit-note-box").onchange = () => { post("/api/quit-note", { on: $("quit-note-box").checked }).then(loadQuitNote); };
 $("awake-box").onchange = () => { settings.keepAwake = $("awake-box").checked; saveSettings(); updateAwake(true); };
 $("intro-box").onchange = () => { settings.intro = $("intro-box").checked; saveSettings(); };
+$("clock-box").onchange = () => { settings.clock = $("clock-box").checked; saveSettings(); applySettings(); };
+
+/** Art-Net timecode switch (Alpha, ADR-044): only on the computer that runs LJ Link (local API). */
+async function loadTimecode() {
+  try {
+    const res = await fetch("/api/timecode", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    showTimecode(await res.json());
+  } catch (e) { $("tc-row").classList.add("hidden"); }
+}
+function showTimecode(s) {
+  $("tc-row").classList.remove("hidden");
+  $("tc-box").checked = !!s.on;
+  $("tc-status").textContent = !s.on ? t("Off – the port is closed")
+    : s.error ? t("UDP port 6454 is in use by another program. Close it or switch its Art-Net input off, then switch this on again.")
+    : s.receiving ? t("Timecode is arriving") : t("Listening on UDP 6454 – no timecode yet");
+}
+$("tc-box").onchange = async () => {
+  try {
+    const res = await fetch("/api/timecode", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ on: $("tc-box").checked }) });
+    if (res.ok) showTimecode(await res.json()); else loadTimecode();
+  } catch (e) { loadTimecode(); }
+};
 // #awake-hint needs no handler of its own: the tap on it is caught by onAwakeTap.
 const ZOOM_STEPS = [4, 6, 8, 12, 16, 24, 32, 40];
 function stepZoom(dir) {
@@ -2620,7 +2788,7 @@ setTimeout(() => {
   if (h.includes("report")) { const m = h.match(/stars=([1-5])/); openReport(m ? Number(m[1]) : undefined); }
   // /#chat: the program icon's "Open suite chat" (only on the computer that runs LJ Link, and only when it is on).
   if (h.includes("chat")) { chat.wantOpen = true; pollChat(); }
-  if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); }
+  if (h.includes("settings")) { $("settings").classList.remove("hidden"); loadLink(); if (ui.controller) loadTimecode(); }
   else if (h.includes("manual")) openManual();
   else { const m = h.match(/info-(\d+)/); if (m) openInfo(Number(m[1])); }
 }, 1500);

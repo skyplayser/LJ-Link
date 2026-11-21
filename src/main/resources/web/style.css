@@ -76,6 +76,17 @@ html, body {
 .tabs .tab.active { background: var(--raise); color: var(--text); }
 button.ghost.menu { font-size: 16px; padding: 4px 12px; }
 #toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
+/* Clock bar (ADR-044): amber dot-matrix digits on a dark field, like a stage LED clock. The text stays in
+   #clock-value for screen readers; #clock-dots paints it. */
+.clock { display: inline-flex; align-items: center; gap: 10px; padding: 5px 12px; min-height: 40px; box-sizing: border-box; border-radius: 4px; background: #1c1d20; border: 1px solid var(--line); white-space: nowrap; }
+.clock.hidden { display: none; }
+.clock-label { font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #8a8f98; }
+.clock-value { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.clock-dots { display: block; height: 28px; color: #f5a623; }
+.clock.tc .clock-label { color: #f5a623; }
+.clock-note { font: 11px var(--mono); color: #8a8f98; }
+.clock-note:empty { display: none; }
+@media (max-width: 640px) { .clock-dots { height: 21px; } .clock { gap: 6px; padding: 4px 8px; } }
 .zoom-ctl { display: flex; align-items: center; gap: 10px; }
 .zoom-text { color: var(--dim); font: 600 12px var(--mono); letter-spacing: .08em; min-width: 92px; text-align: center; }
 button.tool { min-height: 40px; min-width: 48px; font-size: 20px; line-height: 1; padding: 4px 14px; }

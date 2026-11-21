@@ -69,6 +69,9 @@ public final class Main {
         StageLinqLibrary.deleteLeftovers();
 
         Hub hub = new Hub();
+        ArtNetTimecode timecode = new ArtNetTimecode();
+        timecode.apply(ArtNetTimecode.enabledSetting());
+        hub.timecode(timecode);
         Session session = new Session(hub);
         LinkService link = new LinkService(hub);
         AbletonLinkPeer ableton = new AbletonLinkPeer(hub, link);
@@ -400,6 +403,10 @@ public final class Main {
         // "New key" and the approval of DJ Macs without club.json (Alpha). Local only (ControlGuard): names and addresses
         // of the Macs never reach a tablet.
         SenderPairing.routes(app, senders, reannounce);
+        // Art-Net timecode for the clock bar (Alpha, ADR-044). Local only (ControlGuard).
+        if (hub.timecode() != null) {
+            ArtNetTimecode.routes(app, hub.timecode());
+        }
         // Suite chat (Alpha). Local only like everything under /api/ (ControlGuard): a tablet neither reads nor writes it.
         // The browser on this computer asks with the last message number it has.
         app.get("/api/chat", ctx -> {
