@@ -29,6 +29,8 @@ final class LogBuffer {
     private static final Throttle THROTTLE = new Throttle();
     /** Gets every complete line before throttling (for beat-link facts that are only logged, see ProDjLinkSource#noteLogLine). */
     private static final List<java.util.function.Consumer<String>> LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
+    /** Gets every complete line of the error stream (System.err) before throttling (for the suite diagnostics, see SuiteDiagnose). */
+    private static final List<java.util.function.Consumer<String>> ERROR_LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     private LogBuffer() {}
 
@@ -41,9 +43,27 @@ final class LogBuffer {
         LISTENERS.remove(listener);
     }
 
+    /** Every complete line printed to System.err from now on is also handed to this listener (on the printing thread). */
+    static void addErrorListener(java.util.function.Consumer<String> listener) {
+        ERROR_LISTENERS.add(listener);
+    }
+
+    static void removeErrorListener(java.util.function.Consumer<String> listener) {
+        ERROR_LISTENERS.remove(listener);
+    }
+
     /** Hands one complete line to every listener; an exception of a listener is swallowed (it must never break the console). */
     static void notifyListeners(String text) {
-        for (java.util.function.Consumer<String> l : LISTENERS) {
+        notify(LISTENERS, text);
+    }
+
+    /** Hands one complete line of the error stream to every error listener (also swallowing their exceptions). */
+    static void notifyErrorListeners(String text) {
+        notify(ERROR_LISTENERS, text);
+    }
+
+    private static void notify(List<java.util.function.Consumer<String>> listeners, String text) {
+        for (java.util.function.Consumer<String> l : listeners) {
             try {
                 l.accept(text);
             } catch (RuntimeException e) {
@@ -54,7 +74,7 @@ final class LogBuffer {
 
     static void install() {
         System.setOut(tee(System.out));
-        System.setErr(tee(System.err));
+        System.setErr(tee(System.err, true));
     }
 
     /** The last lines, followed by a note for every message that is being counted instead of shown right now. */
@@ -83,6 +103,11 @@ final class LogBuffer {
     }
 
     static PrintStream tee(PrintStream original) {
+        return tee(original, false);
+    }
+
+    /** {@code errors}: this is the error stream, its lines also go to the error listeners. */
+    static PrintStream tee(PrintStream original, boolean errors) {
         OutputStream out = new OutputStream() {
             /** The raw bytes of the line being written; it is printed (or held back) once it is complete. */
             private final ByteArrayOutputStream line = new ByteArrayOutputStream();
@@ -116,6 +141,9 @@ final class LogBuffer {
                     text = text.substring(0, 2000);
                 }
                 notifyListeners(text);
+                if (errors) {
+                    notifyErrorListeners(text);
+                }
                 for (String s : THROTTLE.accept(text, System.currentTimeMillis())) {
                     if (s == text) {
                         original.write(raw, 0, raw.length); // unchanged, with the line end it had

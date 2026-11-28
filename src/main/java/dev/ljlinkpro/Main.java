@@ -143,6 +143,25 @@ public final class Main {
         }
         Runtime.getRuntime().addShutdownHook(new Thread(session::stop));
         Runtime.getRuntime().addShutdownHook(new Thread(sleepGuard::close));
+        // Suite diagnostics (ADR-046): diagnose/lj.json in the Link-Suite data folder for the launcher's help assistant.
+        // Only a file, no port; nothing personal in it. Without a writable folder LJ Link runs on without it.
+        DiagnoseReport report = new DiagnoseReport();
+        report.hub = hub;
+        report.desk = link::config;
+        report.deskStatus = link::status;
+        report.ableton = ableton::status;
+        report.vjLink = vjLink::status;
+        report.senders = senders::senders;
+        report.chatOn = chat::on;
+        report.timecode = timecode::status;
+        report.adapters = Diagnostics::adapters;
+        report.autoUpdate = Updater::autoCheck;
+        report.update = Updater::lastKnown;
+        report.startedAt = STARTED_AT;
+        SuiteDiagnose diagnose = SuiteDiagnose.start(Updater.currentVersion(), report);
+        if (diagnose != null) {
+            Runtime.getRuntime().addShutdownHook(new Thread(diagnose::stop));
+        }
         if (useTray) {
             boolean installed = Tray.install(url, () -> openInBrowser(url), stars -> openInBrowser(url + QuitDialog.reportPath(stars)), () -> {
                 session.stop();

@@ -310,6 +310,11 @@ final class Hub {
         return write(m);
     }
 
+    /** The sources in the order they were created, for the suite diagnostics (SuiteDiagnose). */
+    List<Scope> scopesInOrder() {
+        return sortedScopes();
+    }
+
     private List<Scope> sortedScopes() {
         List<Scope> list = new ArrayList<>(scopes.values());
         list.sort(java.util.Comparator.comparingInt(sc -> sc.order));

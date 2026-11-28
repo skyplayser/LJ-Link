@@ -800,3 +800,40 @@ Specification: LJL Link `docs/protocol.md`, section "Approval without club.json"
   server answers, so on a new address `intro` takes effect from the second load.
 - Alpha: unit tests (defaults, validation, restart, route guard on Jetty) and a test instance in headless Chrome
   (drag, reload, restart, other origin, LAN address as tablet); not yet on a real iPad.
+
+## ADR-046: Suite diagnostics file for the Link-Suite help assistant (Alpha)
+- **What**: LJ Link keeps `diagnose/lj.json` in the Link-Suite data folder (next to `suite.json`) up to date, in the
+  shared format "Suite-Diagnose v1" of the Suite-Launcher (`design/diagnose/SPEC.md`): `suite`, `v`, `id`, `app`,
+  `version`, `at`, `running`, `os`, `arch`, `summary` (at most 20 pairs), `checks` (at most 20), `errors` (the last
+  20), at most 16 KB. The launcher shows it in its help assistant and sends it only when the user ticks the box. No
+  port, no network service: only a file (`SuiteDiagnose`, content from `DiagnoseReport`).
+- **Where**: macOS `~/Library/Application Support/Link-Suite/diagnose/`, Windows `%APPDATA%\Link-Suite\diagnose\`,
+  others `~/.config/Link-Suite/diagnose/`. Everything follows `user.home`: APPDATA and XDG_CONFIG_HOME count only
+  when they lie inside it, so a test instance with its own `-Duser.home` never writes over the file of the running
+  app. `-Dljlinkpro.suiteDir=<dir>` overrides the folder. Only written when the Link-Suite folder already exists (launcher installed); LJ Link never
+  creates it, only `diagnose/` inside it (SPEC 1.2).
+- **When**: at the start, at the end (`running: false`, shutdown hook, with the last state), when something important
+  changes (checked every 2 s by a cheap signature: phase of each source, decks with track and waveform, tempo source,
+  desk type and error, Ableton Link, timecode, LJL Link apps, known update; the tempo itself is not part of it) or a
+  new error arrives, otherwise every 30 s; never twice within 1 s. Atomic: `lj.json.tmp`, then rename. Any write
+  error is swallowed; LJ Link runs on without diagnostics.
+- **Content**: state, sources with state and number of decks, one line per deck (model, source, track yes/no,
+  playing, waveform/detail/beat grid yes/no, BPM measured or exact, to the desk), light desk output (kind, target
+  only as IPv4 or [Rechner], tempo source as deck number, sent count, error), Ableton Link, updates, adapters
+  (names and IPv4, no display names), running time, Java, browsers, VJ-Link and timecode, options; checks per source,
+  notes, waveforms, network, desk, Ableton Link, timecode, update. Keys and values are English, like the problem report.
+- **Never in it** (SPEC.md and the legal review of 28 Nov 2026, M1/M2): track titles, artists, covers, musical keys,
+  names of DJs and LJL Link apps, chat nicknames and texts, club key, desk user and password, adapter display names,
+  source ids. Devices from the network appear only as their model from a fixed list ("CDJ-3000 von XY" becomes
+  "CDJ-3000", anything else "other device"). Device names, titles, artists and LJL Link names seen in this run are
+  kept in memory (at most 128) and replaced in every error text and check ([Gerät], [Titel], [Künstler], [Name]),
+  also where an exception message or a log line carries them. Errors come only from the error stream and only generic: library lines as level and logger, exceptions
+  as class, LJ Link's own messages as the fixed text before the first ": " without quotes and paths, plus the class
+  of an exception; the same entry again counts up ("(3x)"). Every text also goes through a cleaner as a first barrier:
+  the rules of `clean()` in the launcher template `diagnose-writer.ts` v1.1 with its placeholders (first line only,
+  temp and user folders in any case and Windows short names, computer name, `file:` addresses, Windows paths,
+  volumes, shares, e-mail, MAC, IPv6 but not times or timecodes, public IPv4, `.local` names, ids from 32
+  characters); as in template v1.2, an IPv4 inside a longer dotted number (the Java version 21.0.13.0.3) stays.
+- Alpha: unit tests (format, 16 KB, forbidden content, device names, the cases of the launcher's
+  `tests/diagnose.test.ts`, atomic writing, unwritable folder, throttling, path) and a test
+  instance in demo mode; the launcher side (reading, showing) is not yet tested together with LJ Link.

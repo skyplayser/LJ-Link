@@ -17,6 +17,10 @@ site = Path(sys.argv[1]) if len(sys.argv) > 1 else sys.exit("usage: changelog_ge
 E = lambda s: html.escape(s, quote=True)
 
 R = [
+ ("1.7.16", "28 November 2026", "28. November 2026", [
+   ("Suite diagnostics for the Link-Suite help assistant (alpha): if the Link-Suite launcher is installed, LJ Link keeps a small status file in its data folder (diagnose/lj.json): version, system, sources and decks (model, track yes/no, waveform yes/no, BPM), light desk output, updates and the latest warnings as generic entries. No track titles, no names, no chat, no keys, no public addresses. It stays on your computer; the launcher sends it only when you tick Send diagnostics in its help assistant. No network service, no open port. Not yet tested together with the launcher.",
+    "Suite-Diagnose f\u00fcr den Hilfe-Assistenten von Link-Suite (Alpha): Ist der Launcher Link-Suite installiert, h\u00e4lt LJ Link in dessen Datenordner eine kleine Statusdatei aktuell (diagnose/lj.json): Version, System, Quellen und Decks (Modell, Track ja/nein, Waveform ja/nein, BPM), Pult-Ausgang, Updates und die letzten Warnungen als allgemeine Eintr\u00e4ge. Keine Songtitel, keine Namen, kein Chat, keine Schl\u00fcssel, keine \u00f6ffentlichen Adressen. Sie bleibt auf deinem Rechner; der Launcher schickt sie nur mit, wenn du in seinem Hilfe-Assistenten Diagnose mitschicken ankreuzt. Kein Netzwerkdienst, kein offener Port. Noch nicht zusammen mit dem Launcher getestet."),
+ ], []),
  ("1.7.15", "22 November 2026", "22. November 2026", [
    ("Feedback from a club: drag the corner at the bottom right of the clock to make it bigger (up to 160 px digits); double-click or double tap for the default size. Alpha.",
     "Feedback aus einem Club: Ecke unten rechts an der Uhr ziehen macht sie gr\u00f6\u00dfer (bis 160 px Ziffernh\u00f6he); Doppelklick oder Doppeltipp stellt die Standardgr\u00f6\u00dfe her. Alpha."),

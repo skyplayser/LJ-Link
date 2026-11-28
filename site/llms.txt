@@ -18,7 +18,6 @@
 - [LJ Link: BPM from Pioneer CDJs to grandMA](https://skyplayser.github.io/LJ-Link/pioneer-bpm-grandma.html): send the tempo of Pioneer CDJs over Pro DJ Link to a grandMA2 (Telnet) or grandMA3 (OSC) speed master, compared with tap tempo, MIDI clock and Beat Link Trigger. German: https://skyplayser.github.io/LJ-Link/de/pioneer-bpm-grandma.html
 - [Waveforms for the lightjockey](https://skyplayser.github.io/LJ-Link/lightjockey-waveforms.html): CDJ and Denon waveforms live at the light desk, on a laptop or tablet.
 - [LJ Link: Denon StageLinQ for lighting](https://skyplayser.github.io/LJ-Link/denon-stagelinq-lighting.html): Prime 4+, Prime 4, Prime Go and SC6000 with waveforms, faders and BPM to grandMA.
-- [DJ waveforms on an iPad or tablet](https://skyplayser.github.io/LJ-Link/waveforms-ipad-tablet.html): open Denon, Pioneer and Serato waveforms in the browser of an iPad or tablet, no app. German: https://skyplayser.github.io/LJ-Link/de/waveforms-ipad-tablet.html
 
 ## Wiki
 

@@ -152,7 +152,7 @@ The launcher is not signed yet, so both systems warn once on its first start:
 - **Windows** (“Windows protected your PC”): click **More info**, then **Run anyway**. When the firewall asks, tick *Private
   networks* and allow access.
 
-The [website](https://link-suite.de/en/lj-link/#download) shows the steps in detail.
+The [website](https://link-suite.de/en/lj-link/) shows the steps in detail.
 
 After the start you get an icon in the menu bar (macOS) or next to the clock (Windows). Click it to open the web interface,
 switch privacy mode or quit.

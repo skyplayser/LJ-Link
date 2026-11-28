@@ -132,6 +132,11 @@ final class Updater {
         return cached;
     }
 
+    /** The release the last check found, without asking GitHub (null when never checked, offline or checks are off). */
+    static Release lastKnown() {
+        return autoCheck() ? cached : null;
+    }
+
     /** The version of this program, from the jar manifest; "dev" when started from the sources. */
     static String currentVersion() {
         String v = Updater.class.getPackage().getImplementationVersion();
